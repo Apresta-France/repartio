@@ -208,7 +208,7 @@ class ProjectController
 
     private function startFromTemplate(string $key, string $name): void
     {
-        $pack = Content::templates()[$key] ?? null;
+        $pack = Content::template($key);
         if ($pack === null) {
             Session::flashSet('error', 'Ce circuit type est introuvable.');
             redirect('/circuits-types');
@@ -226,7 +226,7 @@ class ProjectController
 
     private function openTemplateForUser(array $user, string $key, string $name, ?array $pack = null): void
     {
-        $pack ??= Content::templates()[$key] ?? null;
+        $pack ??= Content::template($key);
         if ($pack === null) {
             Session::flashSet('error', 'Ce circuit type est introuvable.');
             redirect('/circuits-types');

@@ -9,16 +9,16 @@ $widget = $widget ?? '';
       <p>Le salaire de Julien, les loyers et les allocations restent fixes. Seul le CA de l’AE bouge. Regardez quelle enveloppe se réduit en premier.</p>
     </div>
     <div class="lab-field">
-      <div class="lab-field-top"><span>Chiffre d’affaires AE</span><b data-out="ae">5 000 €</b></div>
-      <input type="range" min="0" max="5000" step="50" value="5000" data-in="ae">
+      <div class="lab-field-top"><span>Chiffre d’affaires AE</span><b data-out="ae">1 800 €</b></div>
+      <input type="range" min="0" max="3000" step="50" value="1800" data-in="ae">
     </div>
     <div class="lab-flow" data-out="flow"></div>
     <div class="lab-kpis">
-      <div><span>Net après URSSAF</span><strong data-out="net">3 660 €</strong></div>
-      <div><span>Épargne Julien</span><strong data-out="save">3 665 €</strong></div>
+      <div><span>Net après URSSAF</span><strong data-out="net">1 420 €</strong></div>
+      <div><span>Épargne Julien</span><strong data-out="save">460 €</strong></div>
       <div><span>Ce qui s’arrête</span><strong data-out="cut">Rien — circuit tenu</strong></div>
     </div>
-    <p class="lab-foot" data-out="note">À 5 000 €, Julien verse 1 800 € vers Factures, 1 695 € vers Quotidien, et tout le reste vers son épargne.</p>
+    <p class="lab-foot" data-out="note">À 1 800 €, Julien verse 1 260 € vers Factures, 1 560 € vers Quotidien, et tout le reste vers son épargne.</p>
   </div>
 
 <?php elseif ($widget === 'tableur'): ?>

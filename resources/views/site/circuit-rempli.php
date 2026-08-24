@@ -3,14 +3,32 @@ $pack = $pack ?? [];
 $stats = $pack['stats'] ?? [];
 $key = (string) ($pack['key'] ?? 'couple-complet');
 $blocks = (int) ($pack['blocks'] ?? 0);
+$packTitle = (string) ($pack['title'] ?? 'Julien et Malorie');
 $user = \App\Core\Auth::user();
 $claimLabel = $user ? 'Ouvrir dans mon builder' : 'Reprendre ce circuit';
+$sumItems = static function (array $nodes, string $id): float {
+    foreach ($nodes as $node) {
+        if (($node['id'] ?? '') !== $id) {
+            continue;
+        }
+        $sum = 0.0;
+        foreach ($node['items'] ?? [] as $item) {
+            $sum += max(0.0, (float) ($item['amount'] ?? 0));
+        }
+        return $sum;
+    }
+    return 0.0;
+};
+$nodes = $pack['payload']['nodes'] ?? [];
+$urssaf = $sumItems($nodes, 'd-urssaf');
+$factures = $sumItems($nodes, 'd-prelev');
+$quotidien = $sumItems($nodes, 'd-quot');
 $steps = [
     [
         'id' => 'vue',
         'n' => '01',
         'title' => 'Le plan entier',
-        'kicker' => '23 blocs, un seul mois type',
+        'kicker' => $blocks . ' blocs, un seul mois type',
         'text' => 'Chaque euro entre à gauche, circule, et arrive quelque part. Le compteur « non affecté » est à zéro : le mois est entièrement décrit.',
         'nodes' => [],
         'month' => null,
@@ -28,7 +46,7 @@ $steps = [
         'id' => 'urssaf',
         'n' => '03',
         'title' => 'L’URSSAF, enfin visible',
-        'kicker' => '1 340 € provisionnés / mois',
+        'kicker' => money($urssaf) . ' provisionnés / mois',
         'text' => 'Dans un tableur, la cotisation disparaît deux mois sur trois. Ici, un fil part chaque mois du compte pro vers un bloc dédié. Le revenu vraiment disponible est celui qui reste après.',
         'nodes' => ['r-ae', 'c-pro', 'd-urssaf', 'c-j'],
         'month' => null,
@@ -37,7 +55,7 @@ $steps = [
         'id' => 'joints',
         'n' => '04',
         'title' => 'Deux joints, plus d’arbitrage',
-        'kicker' => 'Factures 3 254 € · Quotidien 3 128 €',
+        'kicker' => 'Factures ' . money($factures) . ' · Quotidien ' . money($quotidien),
         'text' => 'Le joint Factures ne reçoit que ce que les prélèvements consomment. Le joint Quotidien reçoit une enveloppe fixe. Tant que les deux tiennent, personne ne négocie le dimanche soir.',
         'nodes' => ['c-j', 'c-m', 'c-fact', 'c-quot', 'd-prelev', 'd-quot'],
         'month' => null,
@@ -55,7 +73,7 @@ $steps = [
         'id' => 'enfants',
         'n' => '06',
         'title' => 'Les livrets des enfants',
-        'kicker' => '55 € × 2, depuis les allocations',
+        'kicker' => '40 € × 2, depuis les allocations',
         'text' => 'Un virement fixe par enfant, prélevé sur le compte de Malorie. Petit, régulier, plafonné. Le circuit le traite comme n’importe quel autre livret.',
         'nodes' => ['r-alloc', 'c-m', 'l-kid1', 'l-kid2'],
         'month' => null,
@@ -74,14 +92,14 @@ $steps = [
 <section class="showcase-intro">
   <div class="showcase-intro-copy">
     <span class="eyebrow eyebrow-live">Circuit rempli · étude de cas</span>
-    <h1>Un foyer, <?= e(money($stats['monthly_in'] ?? 12338)) ?>, <em>zéro euro perdu.</em></h1>
+    <h1>Un foyer, <?= e(money($stats['monthly_in'] ?? 0)) ?>, <em>zéro euro perdu.</em></h1>
     <p class="lede">Julien, Malorie, deux enfants. Cinq revenus, deux comptes joints, l’URSSAF provisionnée, six livrets réglementés. Le circuit est réel : vous pouvez le parcourir, lancer la démo, puis le reprendre avec vos chiffres.</p>
     <div class="cta-row">
       <button type="button" class="btn btn-orange" data-showcase-play data-rv="event" data-rv-name="showcase_demo" data-rv-props='{"source":"intro"}'>Lancer la démo</button>
       <form method="post" action="<?= e(url('/app/circuits')) ?>">
         <?= csrf_field() ?>
         <input type="hidden" name="template" value="<?= e($key) ?>">
-        <input type="hidden" name="name" value="<?= e((string) ($pack['title'] ?? 'Famille, 12 338 €')) ?>">
+        <input type="hidden" name="name" value="<?= e($packTitle) ?>">
         <button type="submit" class="btn btn-ghost" data-rv="event" data-rv-name="showcase_claim" data-rv-props='{"source":"intro"}'><?= e($claimLabel) ?></button>
       </form>
     </div>
@@ -125,7 +143,7 @@ $steps = [
 
   <div class="showcase-board">
     <div class="showcase-toolbar">
-      <span class="chip">famille-12338 · 60 mois</span>
+      <span class="chip">julien-malorie · 60 mois</span>
       <span class="chip is-ok">non affecté · <?= e(money($stats['unassigned'] ?? 0)) ?></span>
       <span class="chip">épargné · <b class="mono" data-stat="saved"><?= e(money($stats['monthly_saved'] ?? 0)) ?></b></span>
       <span class="chip" style="margin-left:auto;" data-horizon-label>Dans 5 ans</span>
@@ -168,7 +186,7 @@ $steps = [
   </div>
   <div class="split cols-3">
     <?php foreach ([
-      ['Le fil qu’on n’osait pas tracer', 'Poser l’URSSAF comme une dépense mensuelle a fait perdre 1 340 € de « revenu disponible » — et gagné un chiffre enfin vrai.'],
+      ['Le fil qu’on n’osait pas tracer', 'Poser l’URSSAF comme une dépense mensuelle a fait perdre ' . money($urssaf) . ' de « revenu disponible » — et gagné un chiffre enfin vrai.'],
       ['Deux enveloppes, zéro réunion', 'Séparer factures et quotidien supprime l’arbitrage. Chaque joint a un job. S’il déborde, on le voit avant la fin du mois.'],
       ['Le plafond arrive plus tôt', 'Le mois type est propre. La projection montre quand chaque livret sature. C’est là que le circuit demande une destination de surplus.'],
     ] as $card): ?>
@@ -188,7 +206,7 @@ $steps = [
     <form method="post" action="<?= e(url('/app/circuits')) ?>" style="align-self:flex-start;">
       <?= csrf_field() ?>
       <input type="hidden" name="template" value="<?= e($key) ?>">
-      <input type="hidden" name="name" value="<?= e((string) ($pack['title'] ?? 'Famille, 12 338 €')) ?>">
+      <input type="hidden" name="name" value="<?= e($packTitle) ?>">
       <button type="submit" class="btn btn-orange" data-rv="event" data-rv-name="showcase_claim" data-rv-props='{"source":"band"}'><?= e($claimLabel) ?></button>
     </form>
   </div>

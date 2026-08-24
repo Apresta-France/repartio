@@ -40,15 +40,15 @@
         'depense' => 'oklch(0.55 0.16 25)',
     ];
     $nodes = [
-        [20, 60, 'revenu', 'Revenu', 'Salaire', [['Par mois', '1 500 €']], 400],
-        [20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '5 000 €']], 1100],
-        [20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '2 000 €']], 1800],
-        [320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '8 500 €'], ['Reste', '0 €']], 2600],
-        [320, 320, 'repartiteur', 'Répartiteur', 'Répartiteur épargne', [['Reçoit', '3 665 €'], ['Ventilé', '100 %']], 6200],
-        [630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '3 254 €']], 4800],
-        [630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '1 466 €'], ['Dans 60 mois', '22 950 €']], 7600],
-        [630, 350, 'livret', 'Livret', 'LDDS', [['Reçoit', '1 100 €'], ['Dans 60 mois', '12 000 €']], 8800],
-        [630, 520, 'livret', 'Livret', 'LEP', [['Reçoit', '1 100 €'], ['Dans 60 mois', '10 000 €']], 10000],
+        [20, 60, 'revenu', 'Revenu', 'Salaire', [['Par mois', '1 320 €']], 400],
+        [20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '1 800 €']], 1100],
+        [20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '540 €']], 1800],
+        [320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '3 280 €'], ['Reste', '0 €']], 2600],
+        [320, 320, 'repartiteur', 'Répartiteur', 'Répartiteur épargne', [['Reçoit', '1 000 €'], ['Ventilé', '100 %']], 6200],
+        [630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '2 280 €']], 4800],
+        [630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '400 €'], ['Dans 60 mois', '22 950 €']], 7600],
+        [630, 350, 'livret', 'Livret', 'LDDS', [['Reçoit', '300 €'], ['Dans 60 mois', '12 000 €']], 8800],
+        [630, 520, 'livret', 'Livret', 'LEP', [['Reçoit', '300 €'], ['Dans 60 mois', '10 000 €']], 10000],
     ];
     $wires = [
         ['M 252 111 C 308 111, 264 171, 320 171', $C['revenu'], 3400],
@@ -61,14 +61,14 @@
         ['M 552 371 C 608 371, 574 571, 630 571', $C['repartiteur'], 10600],
     ];
     $flows = [
-        [386, 132, '1 500 €', 3600],
-        [386, 202, '3 660 €', 4000],
-        [386, 272, '2 000 €', 4400],
-        [591, 122, '3 254 €', 5700],
-        [591, 262, '3 665 €', 7100],
-        [591, 292, '1 466 €', 8500],
-        [591, 386, '1 100 €', 9700],
-        [591, 462, '1 100 €', 10900],
+        [386, 132, '1 320 €', 3600],
+        [386, 202, '1 420 €', 4000],
+        [386, 272, '540 €', 4400],
+        [591, 122, '2 280 €', 5700],
+        [591, 262, '1 000 €', 7100],
+        [591, 292, '400 €', 8500],
+        [591, 386, '300 €', 9700],
+        [591, 462, '300 €', 10900],
     ];
     ?>
     <div class="auth-side-copy">

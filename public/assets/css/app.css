@@ -478,6 +478,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder-time-tip strong { font-size: 10.5px; }
 .builder-time-tip span { font-size: 11px; color: var(--teal-ink); font-weight: 650; }
 .builder-time-tip em { font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+.builder-time-tip em.is-yield { color: var(--teal-ink); }
 .builder-time-empty { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 0 12px; text-align: center; font-size: 11.5px; color: var(--faint); pointer-events: none; }
 .builder-time-empty[hidden] { display: none; }
 .builder-time-gauge { position: relative; --pct: 100%; padding-bottom: 11px; }
@@ -497,7 +498,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .node { position: absolute; width: 244px; border-radius: 11px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px oklch(0.26 0.07 265 / 0.06); overflow: visible; z-index: 2; cursor: grab; user-select: none; -webkit-user-select: none; }
 .node-inner { overflow: hidden; border-radius: 11px; }
 .node.is-full { background: oklch(0.98 0.03 50); border-color: oklch(0.82 0.10 50); }
-.node.is-pending { background: oklch(0.985 0.016 85); border-style: dashed; border-width: 1.5px; border-color: oklch(0.74 0.09 75); box-shadow: none; }
+.node.is-pending { background: oklch(0.975 0.012 250); border-style: dashed; border-width: 1.5px; border-color: oklch(0.70 0.04 265); box-shadow: none; }
 .node.is-pending .node-title { color: var(--muted); }
 .node.is-pending .node-stat b { color: var(--faint); font-weight: 400; }
 .node.is-selected { border-color: var(--orange); box-shadow: 0 0 0 2px oklch(0.68 0.18 38 / 0.28); }
@@ -541,7 +542,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .node-stat b.is-proj, .prop-stat b.is-proj { color: var(--teal-ink); font-weight: 700; }
 .node-chip { align-self: flex-start; margin-top: 6px; padding: 3px 8px; border-radius: 6px; background: var(--chip); font-family: var(--mono); font-size: 10px; color: var(--muted); }
 .node-chip.is-full { background: oklch(0.96 0.05 50); color: oklch(0.46 0.12 45); font-weight: 600; }
-.node-chip.is-pending { background: oklch(0.95 0.05 80); color: oklch(0.42 0.09 70); font-weight: 600; }
+.node-chip.is-pending { background: oklch(0.93 0.025 250); color: oklch(0.38 0.06 265); font-weight: 600; }
 .node-chip.is-bad { background: oklch(0.96 0.03 25); color: var(--red); font-weight: 600; }
 .port { position: absolute; width: 12px; height: 12px; border-radius: 50%; top: 46px; background: var(--paper); z-index: 3; cursor: crosshair; }
 .port::after { content: ''; position: absolute; inset: -10px; }
@@ -567,6 +568,26 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .prop-stats { display: flex; flex-direction: column; }
 .prop-stat { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; color: var(--muted); }
+.prop-interest { display: flex; flex-direction: column; gap: 8px; }
+.prop-interest-lead { margin: 0; }
+.prop-interest-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.prop-interest-kpis > div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line-soft); }
+.prop-interest-kpis span { font-size: 11px; font-weight: 600; color: var(--muted); }
+.prop-interest-kpis b { font-size: 14px; font-weight: 650; color: var(--ink); }
+.prop-interest-kpis b.is-proj { color: var(--teal-ink); }
+.prop-interest-mix { display: flex; height: 6px; border-radius: 99px; overflow: hidden; background: var(--chip); }
+.prop-interest-mix i { display: block; height: 100%; }
+.prop-interest-mix .is-put { background: oklch(0.78 0.03 255); }
+.prop-interest-mix .is-yield { background: var(--teal); }
+.prop-interest-mix-legend { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--muted); }
+.prop-interest-years { display: flex; flex-direction: column; max-height: 280px; overflow: auto; }
+.prop-interest-year { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line-soft); }
+.prop-interest-year-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--muted); }
+.prop-interest-year-top b { font-weight: 650; color: var(--ink); }
+.prop-interest-year-sub { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--muted); }
+.prop-interest-year-sub span:first-child { color: var(--teal-ink); font-weight: 550; }
+.prop-interest-year.is-now { background: oklch(0.96 0.03 195); margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 8px; border-top-color: transparent; }
+.prop-interest-year.is-now + .prop-interest-year { border-top-color: transparent; }
 .prop-stat.is-line { padding: 5px 0; font-size: 12.5px; }
 .prop-stat b { font-family: var(--mono); font-weight: 500; color: var(--ink); }
 .prop-links { display: flex; flex-direction: column; gap: 8px; }

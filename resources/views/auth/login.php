@@ -35,7 +35,7 @@
     <div style="position:relative;margin-top:auto;max-width:460px;">
       <span class="eyebrow" style="color:oklch(0.75 0.12 192);">Votre circuit, hier soir</span>
       <div class="kv" style="margin-top:16px;background:oklch(0.34 0.07 265);border-color:oklch(0.34 0.07 265);">
-        <?php foreach ([['Entrées du mois','12 338 €'],['Épargné','5 234 €'],['Non affecté','0 €'],['Patrimoine à 60 mois','105 615 €']] as $r): ?>
+        <?php foreach ([['Entrées du mois','6 280 €'],['Épargné','860 €'],['Non affecté','0 €'],['Patrimoine à 60 mois','55 786 €']] as $r): ?>
           <div style="background:oklch(0.27 0.075 265);color:#fff;"><span><?= e($r[0]) ?></span><strong class="mono" style="margin-left:auto;"><?= e($r[1]) ?></strong></div>
         <?php endforeach; ?>
       </div>

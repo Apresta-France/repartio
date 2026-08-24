@@ -498,18 +498,28 @@
     graph.forEach((n) => {
       if (n.kind !== 'livret') return;
       let b = Math.max(0, n.start);
+      const start = b;
       const cap = n.cap > 0 ? n.cap : Infinity;
       const add = kept[n.id] || 0;
       const balances = [b];
+      const interests = [0];
+      const deposits = [0];
+      let cumInterest = 0;
+      let cumDeposit = 0;
       let when = null;
       if (Number.isFinite(cap) && b >= cap - 0.5) when = 0;
       let firstDeposit = add;
       for (let m = 1; m <= state.horizon; m += 1) {
-        b += b * (Math.max(0, n.rate) / 100) / 12;
+        const interest = b * (Math.max(0, n.rate) / 100) / 12;
+        cumInterest += interest;
+        b += interest;
         const deposit = Number.isFinite(cap) ? Math.min(add, Math.max(0, cap - b)) : add;
         if (m === 1) firstDeposit = deposit;
+        cumDeposit += deposit;
         b += deposit;
         balances.push(b);
+        interests.push(cumInterest);
+        deposits.push(cumDeposit);
         if (when === null && Number.isFinite(cap) && b >= cap - 0.5) when = m;
       }
       deposited[n.id] = firstDeposit;
@@ -523,7 +533,11 @@
         color: chartColorOf(n, usedColors),
         cap: n.cap > 0 ? n.cap : 0,
         add,
+        start,
+        rate: Math.max(0, n.rate || 0),
         balances,
+        interests,
+        deposits,
         full: when,
       });
     });
@@ -618,10 +632,134 @@
     return series.total[currentMonth()] ?? (C.proj || 0);
   }
 
+  function livretOf(C, id) {
+    return (C?.series?.livrets || []).find((l) => l.id === id) || null;
+  }
+
   function livretAt(C, id, month) {
-    const liv = (C?.series?.livrets || []).find((l) => l.id === id);
+    const liv = livretOf(C, id);
     if (!liv) return C?.fin?.[id] || 0;
     return liv.balances[month] ?? (liv.balances[liv.balances.length - 1] || 0);
+  }
+
+  function livretInterestAt(C, id, month) {
+    const liv = livretOf(C, id);
+    if (!liv || !liv.interests) return 0;
+    return liv.interests[month] ?? (liv.interests[liv.interests.length - 1] || 0);
+  }
+
+  function livretYearRows(liv) {
+    const horizon = (liv?.balances?.length || 1) - 1;
+    const rows = [];
+    if (!liv || horizon < 1) return rows;
+    let prev = 0;
+    let year = 1;
+    while ((year - 1) * 12 < horizon) {
+      const month = Math.min(year * 12, horizon);
+      const months = month - (year - 1) * 12;
+      const cum = liv.interests?.[month] || 0;
+      rows.push({
+        year,
+        month,
+        months,
+        label: months === 12
+          ? 'An ' + year
+          : (year === 1 && horizon < 12 ? months + ' mois' : 'An ' + year + ' · ' + months + ' mois'),
+        produced: cum - prev,
+        cum,
+        put: (liv.start || 0) + (liv.deposits?.[month] || 0),
+        balance: liv.balances[month] || 0,
+      });
+      prev = cum;
+      year += 1;
+    }
+    return rows;
+  }
+
+  function livretInterestHtml(n, C) {
+    if (n.kind !== 'livret' || !(n.rate > 0)) return '';
+    const liv = livretOf(C, n.id);
+    if (!liv) return '';
+    const end = state.horizon;
+    const interest = liv.interests?.[end] || 0;
+    const put = (liv.start || 0) + (liv.deposits?.[end] || 0);
+    const bal = liv.balances[end] || 0;
+    const years = livretYearRows(liv);
+    const now = currentMonth();
+    const share = bal > 0.5 ? Math.min(100, Math.round((interest / bal) * 100)) : 0;
+    const putPct = bal > 0.5 ? Math.max(0, 100 - share) : 100;
+    return `
+      <div class="prop-interest" data-interest>
+        <div class="eyebrow">Intérêts dans le temps</div>
+        <p class="builder-hint prop-interest-lead">À l’horizon, le solde projeté = ce que vous versez + ce que le taux produit.</p>
+        <div class="prop-interest-kpis">
+          <div>
+            <span>Versé</span>
+            <b class="mono">${euro(put)}</b>
+          </div>
+          <div>
+            <span>Intérêts</span>
+            <b class="mono is-proj">${euro(interest)}</b>
+          </div>
+        </div>
+        <div class="prop-interest-mix" aria-hidden="true">
+          <i class="is-put" style="width:${putPct}%"></i>
+          <i class="is-yield" style="width:${share}%"></i>
+        </div>
+        <div class="prop-interest-mix-legend">
+          <span>Versements</span>
+          <span>${share ? share + ' % du solde' : 'Pas encore d’intérêts'}</span>
+        </div>
+        <div class="prop-interest-years">
+          ${years.map((row) => {
+            const current = now > (row.year - 1) * 12 && now <= row.month;
+            return `<div class="prop-interest-year${current ? ' is-now' : ''}" data-interest-year="${row.year}">
+              <div class="prop-interest-year-top">
+                <span>${escapeHtml(row.label)}</span>
+                <b class="mono">${euro(row.balance)}</b>
+              </div>
+              <div class="prop-interest-year-sub">
+                <span>${signedEuro(row.produced)} cette année</span>
+                <span>${euro(row.cum)} cumulés</span>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function paintInterestYears() {
+    if (!propsForm) return;
+    const now = currentMonth();
+    propsForm.querySelectorAll('[data-interest-year]').forEach((el) => {
+      const year = Number(el.dataset.interestYear);
+      const start = (year - 1) * 12;
+      const end = Math.min(year * 12, state.horizon);
+      el.classList.toggle('is-now', now > start && now <= end);
+    });
+  }
+
+  function refreshLivretInterest(n) {
+    if (!n || n.kind !== 'livret' || !propsForm) return;
+    const C = lastCompute || compute();
+    lastCompute = C;
+    const stats = nodeStats(n, C);
+    const box = propsForm.querySelector('.prop-stats');
+    if (box) box.innerHTML = statRowsHtml(stats.rows, 'prop-stat');
+    const host = propsForm.querySelector('[data-interest]');
+    const html = livretInterestHtml(n, C).trim();
+    if (host && html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const next = tmp.firstElementChild;
+      if (next) host.replaceWith(next);
+    } else if (host && !html) {
+      host.remove();
+    } else if (!host && html) {
+      const lecture = propsForm.querySelector('.prop-stats')?.closest('div');
+      if (lecture) lecture.insertAdjacentHTML('afterend', html);
+    }
   }
 
   function setPlayMonth(month, fromUser) {
@@ -701,7 +839,12 @@
     if (legend) {
       legend.innerHTML = livrets.map((liv) => {
         const at = liv.balances[currentMonth()] || 0;
-        return `<span class="builder-time-swatch"><i style="background:${liv.color}"></i>${escapeHtml(liv.title)} <b class="mono">${euro(at)}</b></span>`;
+        const yieldAt = liv.interests?.[currentMonth()] || 0;
+        const on = state.selected === liv.id;
+        const extra = on && (liv.rate || 0) > 0
+          ? `<em>${euro(yieldAt)} d’intérêts</em>`
+          : '';
+        return `<span class="builder-time-swatch${on ? ' is-on' : ''}"><i style="background:${liv.color}"></i>${escapeHtml(liv.title)} <b class="mono">${euro(at)}</b>${extra}</span>`;
       }).join('');
     }
     if (!svg) return;
@@ -789,7 +932,10 @@
         const val = sw.querySelector('b');
         if (dot) dot.style.background = full ? TINTS.orange.block : liv.color;
         if (val) val.textContent = euro(liv.balances[month] || 0);
+        const yieldEl = sw.querySelector('em');
+        if (yieldEl) yieldEl.textContent = euro(liv.interests?.[month] || 0) + ' d’intérêts';
         sw.classList.toggle('is-full', full);
+        sw.classList.toggle('is-on', state.selected === liv.id);
       });
     }
     const svg = root.querySelector('[data-time-svg]');
@@ -810,10 +956,16 @@
     const stage = root.querySelector('.builder-time-stage');
     const C = lastCompute;
     if (!tip || !stage || !C?.series) return;
-    const total = C.series.total[month] || 0;
-    const dlt = C.series.delta[month] || 0;
+    const selected = nodeById(state.selected);
+    const liv = selected?.kind === 'livret' ? livretOf(C, selected.id) : null;
+    const total = liv ? (liv.balances[month] || 0) : (C.series.total[month] || 0);
+    const prev = liv
+      ? (month > 0 ? (liv.balances[month - 1] || 0) : liv.balances[0] || 0)
+      : (month > 0 ? (C.series.total[month - 1] || 0) : C.series.total[0] || 0);
+    const dlt = liv ? total - prev : (C.series.delta[month] || 0);
+    const yieldAt = liv ? (liv.interests?.[month] || 0) : 0;
     tip.hidden = false;
-    tip.innerHTML = `<strong>${playTitle(month)}</strong><span class="mono">${euro(total)}</span><em>${signedEuro(dlt)}</em>`;
+    tip.innerHTML = `<strong>${playTitle(month)}</strong><span class="mono">${euro(total)}</span><em>${signedEuro(dlt)}</em>${liv && (liv.rate || 0) > 0 ? `<em class="is-yield">${euro(yieldAt)} d’intérêts</em>` : ''}`;
     const r = stage.getBoundingClientRect();
     const x = Math.min(r.width - 8, Math.max(8, clientX - r.left));
     tip.style.left = x + 'px';
@@ -871,6 +1023,7 @@
           if (label) label.textContent = k;
           if (val) val.textContent = v;
         });
+        paintInterestYears();
       }
     }
     renderSide();
@@ -1070,7 +1223,9 @@
         rows.push([String(item.title || '').trim() || 'Poste', euro(item.amount), 'is-line']);
       });
       rows.push(['Par mois', euro(n.amount)]);
-      rows.push(['Reçoit', euro(inflow)]);
+      if (Math.abs(inflow - (Number(n.amount) || 0)) > 0.5) {
+        rows.push(['Reçoit', euro(inflow)]);
+      }
       const span = currentMonth();
       rows.push([span <= 0 ? 'Aujourd’hui' : 'Sur ' + span + ' mois', euro(inflow * span), '', 'span']);
     } else {
@@ -1081,6 +1236,9 @@
       const month = currentMonth();
       rows.push(['Taux', (n.rate || 0).toString().replace('.', ',') + ' %']);
       rows.push([playLabel(month), euro(livretAt(C, n.id, month)), 'is-proj', 'proj']);
+      if ((n.rate || 0) > 0) {
+        rows.push(['Intérêts', euro(livretInterestAt(C, n.id, month)), 'is-proj', 'interest']);
+      }
     }
     let chip = '';
     if (n.kind === 'repartiteur') {
@@ -1371,16 +1529,17 @@
               <input data-prop="cap" type="number" min="0" step="1" value="${n.cap}">
             </label>
           </div>` : ''}
-        <label class="prop-field">
-          <span>Commentaire</span>
-          <textarea data-prop="note" rows="${n.kind === 'depense' ? 2 : 4}" placeholder="Précisions, hypothèse, rappel…">${escapeHtml(n.note)}</textarea>
-        </label>
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
             ${statRowsHtml(stats.rows, 'prop-stat')}
           </div>
         </div>
+        ${livretInterestHtml(n, C)}
+        <label class="prop-field">
+          <span>Commentaire</span>
+          <textarea data-prop="note" rows="${n.kind === 'depense' ? 2 : 4}" placeholder="Précisions, hypothèse, rappel…">${escapeHtml(n.note)}</textarea>
+        </label>
         ${n.kind === 'depense' ? `
           <div>
             <div class="eyebrow" style="margin-bottom:8px;">Liens entrants</div>
@@ -2379,6 +2538,9 @@
     syncPayload();
     if (edgeMode) renderProps();
     else if (itemAmount && n.kind === 'depense') refreshDepenseReadout(n);
+    else if (n.kind === 'livret' && (prop === 'rate' || prop === 'start' || prop === 'cap' || prop === 'preset')) {
+      refreshLivretInterest(n);
+    }
   });
 
   propsForm?.addEventListener('click', (e) => {

@@ -512,17 +512,17 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
   };
 
   const applyCircuitVals = (complete) => {
-    setVal('compte-reste', complete ? '0 €' : '7 160 €');
-    setVal('repart-in', complete ? '3 665 €' : '0 €');
+    setVal('compte-reste', complete ? '0 €' : '3 280 €');
+    setVal('repart-in', complete ? '1 000 €' : '0 €');
     setVal('repart-pct', complete ? '100 %' : '0 %');
-    setVal('prelev-in', complete ? '3 254 €' : '0 €');
-    setVal('livreta-in', complete ? '1 466 €' : '0 €');
+    setVal('prelev-in', complete ? '2 280 €' : '0 €');
+    setVal('livreta-in', complete ? '400 €' : '0 €');
     setVal('livreta-proj', complete ? '22 950 €' : '0 €');
-    setVal('ldds-in', complete ? '1 100 €' : '0 €');
+    setVal('ldds-in', complete ? '300 €' : '0 €');
     setVal('ldds-proj', complete ? '12 000 €' : '0 €');
-    setVal('lep-in', complete ? '1 100 €' : '0 €');
+    setVal('lep-in', complete ? '300 €' : '0 €');
     setVal('lep-proj', complete ? '10 000 €' : '0 €');
-    setUnassigned(complete ? '0 €' : '7 160 €', complete);
+    setUnassigned(complete ? '0 €' : '3 280 €', complete);
     setSaved(complete ? '44 950 €' : '0 €');
   };
 
@@ -771,16 +771,16 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     select(null);
     if (!(await grab('depense', 'prelev', 'Dépense', 'Prélèvements', 'oklch(0.55 0.16 25)', { x: 560, y: 150, z: 1.22 }))) return;
     if (!(await connect('compte', 'prelev', 'c-p', { x: 500, y: 160, z: 1.18 }))) return;
-    setVal('prelev-in', '3 254 €');
-    setVal('compte-reste', '3 906 €');
-    setUnassigned('3 906 €', false);
+    setVal('prelev-in', '2 280 €');
+    setVal('compte-reste', '1 000 €');
+    setUnassigned('1 000 €', false);
     if (!(await sleep(700, token))) return;
 
     if (!(await cameraTo(390, 280, 1.08, 800, token))) return;
     if (!(await grab('repartiteur', 'repart', 'Répartiteur', 'Répartiteur épargne', 'oklch(0.68 0.18 38)', { x: 420, y: 300, z: 1.16 }))) return;
     if (!(await connect('compte', 'repart', 'c-r'))) return;
     setVal('compte-reste', '0 €');
-    setVal('repart-in', '3 665 €');
+    setVal('repart-in', '1 000 €');
     setUnassigned('0 €', true);
     if (!(await sleep(640, token))) return;
 
@@ -788,7 +788,7 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     if (!(await grab('livret', 'livreta', 'Livret', 'Livret A', 'oklch(0.48 0.11 240)', { x: 620, y: 220, z: 1.2 }))) return;
     if (!(await connect('repart', 'livreta', 'r-a'))) return;
     setVal('repart-pct', '40 %');
-    setVal('livreta-in', '1 466 €');
+    setVal('livreta-in', '400 €');
     setVal('livreta-proj', '22 950 €');
     setSaved('22 950 €');
     if (!(await together(token,
@@ -804,7 +804,7 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     if (!(await grab('livret', 'ldds', 'Livret', 'LDDS', 'oklch(0.48 0.11 240)', { x: 600, y: 340, z: 1.12 }))) return;
     if (!(await connect('repart', 'ldds', 'r-d'))) return;
     setVal('repart-pct', '70 %');
-    setVal('ldds-in', '1 100 €');
+    setVal('ldds-in', '300 €');
     setVal('ldds-proj', '12 000 €');
     setSaved('34 950 €');
     if (!(await sleep(900, token))) return;
@@ -812,7 +812,7 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     if (!(await grab('livret', 'lep', 'Livret', 'LEP', 'oklch(0.48 0.11 240)', { x: 600, y: 420, z: 1.1 }))) return;
     if (!(await connect('repart', 'lep', 'r-e'))) return;
     setVal('repart-pct', '100 %');
-    setVal('lep-in', '1 100 €');
+    setVal('lep-in', '300 €');
     setVal('lep-proj', '10 000 €');
     setSaved('44 950 €');
     if (!(await sleep(900, token))) return;

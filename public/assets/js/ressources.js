@@ -73,26 +73,29 @@
     const { inn, set, html, onChange } = api(root);
     onChange(() => {
       const ae = num(inn('ae'));
-      const provision = 1340;
+      const provision = 380;
+      const factures = 1260;
+      const quotidien = 1560;
+      const autres = 1860;
       const net = ae - provision;
-      const julien = net + 3500;
-      const save = julien - 3495;
+      const julien = net + autres;
+      const save = julien - factures - quotidien;
       set('ae', euro(ae));
       set('net', euro(Math.max(0, net)));
-      set('save', euro(Math.max(0, save)), save < 500);
+      set('save', euro(Math.max(0, save)), save < 150);
       let cut = 'Rien — circuit tenu';
       if (ae < provision) cut = 'Le compte pro ne couvre plus l’URSSAF';
       else if (save <= 0) cut = 'Le répartiteur de Julien s’arrête';
-      else if (save < 500) cut = 'Épargne Julien presque à sec';
-      else if (save < 2000) cut = 'Épargne Julien réduite';
-      set('cut', cut, save < 2000 || ae < provision);
+      else if (save < 150) cut = 'Épargne Julien presque à sec';
+      else if (save < 300) cut = 'Épargne Julien réduite';
+      set('cut', cut, save < 300 || ae < provision);
       if (root.querySelector('[data-out="flow"]')) {
-        const fact = clamp((1800 / Math.max(julien, 1)) * 100, 0, 100);
-        const quot = clamp((1695 / Math.max(julien, 1)) * 100, 0, 100);
+        const fact = clamp((factures / Math.max(julien, 1)) * 100, 0, 100);
+        const quot = clamp((quotidien / Math.max(julien, 1)) * 100, 0, 100);
         const rest = clamp(100 - fact - quot, 0, 100);
         html('flow', [
-          ['Factures', fact, euro(Math.min(1800, Math.max(0, julien)))],
-          ['Quotidien', quot, euro(Math.min(1695, Math.max(0, julien - 1800)))],
+          ['Factures', fact, euro(Math.min(factures, Math.max(0, julien)))],
+          ['Quotidien', quot, euro(Math.min(quotidien, Math.max(0, julien - factures)))],
           ['Épargne Julien', rest, euro(Math.max(0, save))],
         ].map(([label, pct, val]) => `
           <div class="lab-flow-row">
@@ -102,9 +105,9 @@
           </div>
         `).join(''));
       }
-      set('note', ae >= 5000
-        ? 'À 5 000 €, Julien verse 1 800 € vers Factures, 1 695 € vers Quotidien, et tout le reste vers son épargne.'
-        : `À ${euro(ae)} de CA, l’URSSAF reste à 1 340 € (fixe du circuit). C’est l’épargne personnelle qui encaisse l’écart en premier.`);
+      set('note', ae >= 1800
+        ? 'À 1 800 €, Julien verse 1 260 € vers Factures, 1 560 € vers Quotidien, et tout le reste vers son épargne.'
+        : `À ${euro(ae)} de CA, l’URSSAF reste à 380 € (fixe du circuit). C’est l’épargne personnelle qui encaisse l’écart en premier.`);
     });
   };
 

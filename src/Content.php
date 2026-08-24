@@ -49,8 +49,27 @@ class Content
 
     public static function templates(): array
     {
-        $items = Scenarios::all();
+        $items = [];
+        foreach (self::hydrateAll() as $key => $item) {
+            if (($item['catalog'] ?? true) === false) {
+                continue;
+            }
+            $items[$key] = $item;
+        }
 
+        return $items;
+    }
+
+    /** @return array<string, mixed>|null */
+    public static function template(string $key): ?array
+    {
+        return self::hydrateAll()[$key] ?? null;
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    private static function hydrateAll(): array
+    {
+        $items = Scenarios::all();
         foreach ($items as $key => &$item) {
             $item['payload'] = self::layoutPayload($item['payload']);
             $item['key'] = $key;
@@ -82,7 +101,9 @@ class Content
 
     public static function templatePayload(string $key): ?array
     {
-        return self::templates()[$key]['payload'] ?? null;
+        $pack = self::template($key);
+
+        return is_array($pack) ? ($pack['payload'] ?? null) : null;
     }
 
     public static function showcaseKey(): string

@@ -17,16 +17,17 @@ $C = [
       <a class="btn btn-ghost" href="<?= e(url('/circuit-rempli')) ?>">Voir un circuit rempli</a>
     </div>
     <div class="stat-grid">
-      <div><strong>12 338 €</strong><span>entrées réparties / mois</span></div>
+      <?php $heroStats = \App\Content::showcase()['stats'] ?? []; ?>
+      <div><strong><?= e(money($heroStats['monthly_in'] ?? 0)) ?></strong><span>entrées réparties / mois</span></div>
       <div><strong>60</strong><span>mois de projection</span></div>
-      <div><strong>0 €</strong><span>euro non affecté</span></div>
+      <div><strong><?= e(money($heroStats['unassigned'] ?? 0)) ?></strong><span>euro non affecté</span></div>
     </div>
   </div>
   <div class="hero-canvas" data-hero-demo aria-hidden="true">
     <div class="dots"></div>
     <div class="hero-canvas-bar">
       <span class="chip">mon-circuit · 60 mois</span>
-      <span class="chip hero-unassigned is-warn" data-hero-unassigned>non affecté · 7 160 €</span>
+      <span class="chip hero-unassigned is-warn" data-hero-unassigned>non affecté · 3 280 €</span>
     </div>
     <span class="chip hero-saved is-empty" data-hero-saved>dans 5 ans · <b data-hero-saved-amount>0 €</b></span>
     <div class="hero-palette">
@@ -67,10 +68,10 @@ $C = [
       </svg>
       <?php
       $nodes = [
-          ['salaire', 20, 60, 'revenu', 'Revenu', 'Salaire', [['Par mois', '1 500 €']], false],
-          ['ae', 20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '5 000 €']], false],
-          ['loyers', 20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '2 000 €']], false],
-          ['compte', 320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '7 160 €'], ['Reste', '7 160 €', 'compte-reste']], false],
+          ['salaire', 20, 60, 'revenu', 'Revenu', 'Salaire', [['Par mois', '1 320 €']], false],
+          ['ae', 20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '1 800 €']], false],
+          ['loyers', 20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '540 €']], false],
+          ['compte', 320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '3 280 €'], ['Reste', '3 280 €', 'compte-reste']], false],
           ['repart', 320, 320, 'repartiteur', 'Répartiteur', 'Répartiteur épargne', [['Reçoit', '0 €', 'repart-in'], ['Ventilé', '0 %', 'repart-pct']], true],
           ['prelev', 630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '0 €', 'prelev-in']], true],
           ['livreta', 630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '0 €', 'livreta-in'], ['Dans 60 mois', '0 €', 'livreta-proj']], true],
@@ -95,14 +96,14 @@ $C = [
       <div class="hero-node hero-ghost" data-hero-ghost hidden></div>
       <?php
       $flows = [
-          ['j-c', 286, 133, '1 500 €', false],
-          ['ae-c', 286, 203, '3 660 €', false],
-          ['lo-c', 286, 273, '2 000 €', false],
-          ['c-p', 591, 122, '3 254 €', true],
-          ['c-r', 591, 262, '3 665 €', true],
-          ['r-a', 591, 292, '1 466 €', true],
-          ['r-d', 591, 386, '1 100 €', true],
-          ['r-e', 591, 426, '1 100 €', true],
+          ['j-c', 286, 133, '1 320 €', false],
+          ['ae-c', 286, 203, '1 420 €', false],
+          ['lo-c', 286, 273, '540 €', false],
+          ['c-p', 591, 122, '2 280 €', true],
+          ['c-r', 591, 262, '1 000 €', true],
+          ['r-a', 591, 292, '400 €', true],
+          ['r-d', 591, 386, '300 €', true],
+          ['r-e', 591, 426, '300 €', true],
       ];
       foreach ($flows as [$id, $x, $y, $label, $pending]): ?>
         <div class="hero-flow<?= $pending ? ' is-pending' : ' is-on' ?>" data-hero-flow="<?= e($id) ?>" style="left:<?= (int) $x ?>px;top:<?= (int) $y ?>px;"><?= e($label) ?></div>
@@ -136,9 +137,9 @@ $C = [
   <div class="split cols-3">
     <?php
     $steps = [
-      ['01', 'Posez vos blocs', 'oklch(0.95 0.03 192)', 'oklch(0.45 0.11 195)', 'Un bloc par revenu, compte, livret ou poste de dépense. Rien à catégoriser, rien à importer.', [['Salaire','1 500 €'],['Auto-entreprise','5 000 €'],['Loyers du local','2 000 €']]],
-      ['02', 'Reliez les flux', 'oklch(0.96 0.04 38)', 'oklch(0.56 0.17 38)', 'Tirez un fil d’un bloc à l’autre, en montant fixe ou en pourcentage. Le solde de chaque bloc s’ajuste en direct.', [['Compte → Joint','3 254 €'],['Compte → Épargne','3 665 €'],['Non affecté','0 €']]],
-      ['03', 'Lisez la suite', 'oklch(0.94 0.02 265)', 'oklch(0.36 0.09 265)', 'repartio déroule votre mois type sur 60 mois, applique taux et plafonds, et vous dit quand chaque livret sature.', [['Épargné / mois','5 234 €'],['Dans 5 ans','105 615 €'],['Livret A plein en','16 mois']]],
+      ['01', 'Posez vos blocs', 'oklch(0.95 0.03 192)', 'oklch(0.45 0.11 195)', 'Un bloc par revenu, compte, livret ou poste de dépense. Rien à catégoriser, rien à importer.', [['Salaire','1 320 €'],['Auto-entreprise','1 800 €'],['Loyers du local','540 €']]],
+      ['02', 'Reliez les flux', 'oklch(0.96 0.04 38)', 'oklch(0.56 0.17 38)', 'Tirez un fil d’un bloc à l’autre, en montant fixe ou en pourcentage. Le solde de chaque bloc s’ajuste en direct.', [['Compte → Joint','2 280 €'],['Compte → Épargne','1 000 €'],['Non affecté','0 €']]],
+      ['03', 'Lisez la suite', 'oklch(0.94 0.02 265)', 'oklch(0.36 0.09 265)', 'repartio déroule votre mois type sur 60 mois, applique taux et plafonds, et vous dit quand chaque livret sature.', [['Épargné / mois','860 €'],['Dans 5 ans','55 786 €'],['LEP Julien plein en','38 mois']]],
     ];
     foreach ($steps as $s): ?>
       <div style="padding:26px 26px 28px;">
@@ -241,7 +242,7 @@ $C = [
     <?php foreach ([
       ['Méthode', '6 min', 'Pourquoi votre budget ne tient pas dans un tableur', 'Un tableur décrit des totaux ; un circuit décrit des chemins. Ajoutez des comptes, voyez ce qui casse.', 'budget-tableur'],
       ['Réglementaire', '4 min', 'Ordre de remplissage des livrets réglementés', 'LEP, LDDS, Livret A : réglez l’épargne mensuelle, lisez les dates de saturation.', 'ordre-livrets'],
-      ['Étude de cas', '12 min', 'Un couple, 12 338 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
+      ['Étude de cas', '12 min', 'Un couple, 6 280 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
     ] as $p): ?>
       <a href="<?= e(url('/ressources/' . $p[4])) ?>" style="padding:24px 26px;color:inherit;display:flex;flex-direction:column;gap:10px;">
         <div class="eyebrow" style="display:flex;"><span style="color:var(--teal-live);"><?= e($p[0]) ?></span><span style="margin-left:auto;color:var(--faint);"><?= e($p[1]) ?></span></div>

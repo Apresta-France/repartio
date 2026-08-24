@@ -44,11 +44,11 @@ $guides = \App\Articles::guides();
           <p>Le reste du foyer est figé. Seul le CA de Julien bouge.</p>
         </div>
         <div class="lab-field">
-          <div class="lab-field-top"><span>CA auto-entreprise</span><b data-out="ae">5 000 €</b></div>
-          <input type="range" min="0" max="5000" step="50" value="5000" data-in="ae">
+          <div class="lab-field-top"><span>CA auto-entreprise</span><b data-out="ae">1 800 €</b></div>
+          <input type="range" min="0" max="3000" step="50" value="1800" data-in="ae">
         </div>
         <div class="lab-kpis lab-kpis-2">
-          <div><span>Épargne Julien</span><strong data-out="save">3 665 €</strong></div>
+          <div><span>Épargne Julien</span><strong data-out="save">460 €</strong></div>
           <div><span>Ce qui s’arrête</span><strong data-out="cut">Rien — circuit tenu</strong></div>
         </div>
       </div>
