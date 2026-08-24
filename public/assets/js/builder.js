@@ -647,6 +647,7 @@
       el.style.top = n.y + 'px';
       const selected = state.selected === n.id ? ' is-selected' : '';
       const kill = readonly ? '' : `<button type="button" class="node-kill" data-del="${n.id}" title="Supprimer">×</button>`;
+      if (!readonly) el.setAttribute('data-drag', n.id);
 
       if (n.kind === 'groupe') {
         const tint = tintOf(n);
@@ -655,7 +656,6 @@
         el.style.height = (n.h || 340) + 'px';
         el.style.background = tint.fill;
         el.style.borderColor = tint.stroke;
-        if (!readonly) el.setAttribute('data-drag', n.id);
         el.innerHTML = `
           <div class="group-label" style="color:${tint.ink};border-color:${tint.stroke}">
             <span class="group-title">${escapeHtml(n.title)}</span>
@@ -672,7 +672,7 @@
         el.style.borderColor = tint.stroke;
         el.innerHTML = `
           <div class="node-inner">
-            <div class="node-head"${readonly ? '' : ` data-drag="${n.id}"`}>
+            <div class="node-head">
               <span class="node-kind" style="color:${tint.ink}">Note</span>
               ${kill}
             </div>
@@ -687,7 +687,7 @@
         el.innerHTML = `
           <div class="node-inner">
             <div class="node-bar" style="background:${color}"></div>
-            <div class="node-head"${readonly ? '' : ` data-drag="${n.id}"`}>
+            <div class="node-head">
               <span class="node-kind" style="color:${color}">${meta.label}</span>
               ${kill}
             </div>
@@ -1142,16 +1142,123 @@
     dismissLinkCoach();
   }
 
+  function kindSize(kind) {
+    if (kind === 'groupe') return { w: 560, h: 340 };
+    if (kind === 'note') return { w: 200, h: 90 };
+    return { w: 244, h: 118 };
+  }
+
+  function boxesOverlap(a, b, pad = 20) {
+    return a.x < b.x + b.w + pad
+      && a.x + a.w + pad > b.x
+      && a.y < b.y + b.h + pad
+      && a.y + a.h + pad > b.y;
+  }
+
+  function contentBounds() {
+    if (!state.nodes.length) return null;
+    let x1 = Infinity;
+    let y1 = Infinity;
+    let x2 = -Infinity;
+    let y2 = -Infinity;
+    state.nodes.forEach((n) => {
+      const b = nodeBox(n);
+      x1 = Math.min(x1, b.x);
+      y1 = Math.min(y1, b.y);
+      x2 = Math.max(x2, b.x + b.w);
+      y2 = Math.max(y2, b.y + b.h);
+    });
+    return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+  }
+
+  function isSpotFree(box) {
+    return !state.nodes.some((n) => boxesOverlap(box, nodeBox(n)));
+  }
+
+  function viewportBox() {
+    const r = canvas.getBoundingClientRect();
+    const tl = screenToWorld(r.left, r.top);
+    const br = screenToWorld(r.right, r.bottom);
+    return { x: tl.x, y: tl.y, w: br.x - tl.x, h: br.y - tl.y };
+  }
+
+  function visibleArea(box, view) {
+    const x1 = Math.max(box.x, view.x);
+    const y1 = Math.max(box.y, view.y);
+    const x2 = Math.min(box.x + box.w, view.x + view.w);
+    const y2 = Math.min(box.y + box.h, view.y + view.h);
+    return Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+  }
+
+  function findClearSpot(kind, preferredX, preferredY) {
+    const size = kindSize(kind);
+    const preferred = { x: preferredX, y: preferredY, w: size.w, h: size.h };
+    const bounds = contentBounds();
+    if (!bounds) return { x: preferredX, y: preferredY };
+    const insideCluster = boxesOverlap(preferred, bounds, 0);
+    if (!insideCluster && isSpotFree(preferred)) return { x: preferredX, y: preferredY };
+
+    const gap = 32;
+    const alignY = Math.max(bounds.y, Math.min(preferredY, bounds.y + Math.max(0, bounds.h - size.h)));
+    const alignX = Math.max(bounds.x, Math.min(preferredX, bounds.x + Math.max(0, bounds.w - size.w)));
+    const slots = [
+      { x: bounds.x + bounds.w + gap, y: alignY },
+      { x: alignX, y: bounds.y + bounds.h + gap },
+      { x: bounds.x - size.w - gap, y: alignY },
+      { x: alignX, y: bounds.y - size.h - gap },
+    ];
+    const view = viewportBox();
+    slots.sort((a, b) => {
+      const va = visibleArea({ x: a.x, y: a.y, w: size.w, h: size.h }, view);
+      const vb = visibleArea({ x: b.x, y: b.y, w: size.w, h: size.h }, view);
+      if (vb !== va) return vb - va;
+      return Math.hypot(a.x - preferredX, a.y - preferredY) - Math.hypot(b.x - preferredX, b.y - preferredY);
+    });
+    for (let i = 0; i < slots.length; i += 1) {
+      const s = slots[i];
+      if (isSpotFree({ x: s.x, y: s.y, w: size.w, h: size.h })) {
+        return { x: Math.round(s.x), y: Math.round(s.y) };
+      }
+    }
+
+    const step = 48;
+    for (let ring = 1; ring <= 16; ring += 1) {
+      for (let i = -ring; i <= ring; i += 1) {
+        const pts = [
+          { x: preferredX + i * step, y: preferredY - ring * step },
+          { x: preferredX + i * step, y: preferredY + ring * step },
+          { x: preferredX - ring * step, y: preferredY + i * step },
+          { x: preferredX + ring * step, y: preferredY + i * step },
+        ];
+        for (let j = 0; j < pts.length; j += 1) {
+          const p = pts[j];
+          if (isSpotFree({ x: p.x, y: p.y, w: size.w, h: size.h })) {
+            return { x: Math.round(p.x), y: Math.round(p.y) };
+          }
+        }
+      }
+    }
+    return { x: Math.round(bounds.x + bounds.w + gap), y: Math.round(bounds.y) };
+  }
+
   function dropPosition(clientX, clientY, kind) {
-    const ox = kind === 'groupe' ? 280 : (kind === 'note' ? 100 : 122);
-    const oy = kind === 'groupe' ? 40 : 40;
+    const size = kindSize(kind);
+    const ox = size.w / 2;
+    const oy = 40;
+    let x;
+    let y;
     if (clientX != null && clientY != null) {
       const w = screenToWorld(clientX, clientY);
-      return { x: Math.round(w.x - ox), y: Math.round(w.y - oy) };
+      x = Math.round(w.x - ox);
+      y = Math.round(w.y - oy);
+    } else {
+      const r = canvas.getBoundingClientRect();
+      const w = screenToWorld(r.left + r.width / 2, r.top + r.height / 2);
+      x = Math.round(w.x - ox + (Math.random() * 40 - 20));
+      y = Math.round(w.y - oy + (Math.random() * 40 - 20));
     }
-    const r = canvas.getBoundingClientRect();
-    const w = screenToWorld(r.left + r.width / 2, r.top + r.height / 2);
-    return { x: Math.round(w.x - ox + (Math.random() * 40 - 20)), y: Math.round(w.y - oy + (Math.random() * 40 - 20)) };
+    if (isAnnotation(kind)) return findClearSpot(kind, x, y);
+    return { x, y };
   }
 
   function openPresetModal(kind, x, y) {
@@ -1541,6 +1648,7 @@
     if (!node) return;
     e.preventDefault();
     e.stopPropagation();
+    window.getSelection()?.removeAllRanges();
     selectNodeLive(id);
     const riders = node.kind === 'groupe'
       ? nodesInside(node).map((n) => ({ id: n.id, ox: n.x, oy: n.y, el: layer.querySelector(`[data-node="${n.id}"]`) }))
@@ -1554,7 +1662,15 @@
     canvas.classList.add('is-grabbing');
   });
 
+  document.addEventListener('selectstart', (e) => {
+    if (drag || pan || state.connectFrom) e.preventDefault();
+  });
+
   document.addEventListener('mousemove', (e) => {
+    if (drag || pan || state.connectFrom) {
+      e.preventDefault();
+      window.getSelection()?.removeAllRanges();
+    }
     if (drag && drag.type === 'resize') {
       if (!drag.moved && !pointerMoved(drag, e.clientX, e.clientY)) return;
       drag.moved = true;
@@ -1892,10 +2008,19 @@
   const KIND_WEIGHT = { revenu: 0, compte: 1, depense: 2, repartiteur: 3, livret: 4 };
 
   function nodeBox(n) {
-    return {
-      w: n.kind === 'groupe' ? (n.w || n._w || 560) : (n._w || 244),
-      h: n.kind === 'groupe' ? (n.h || n._h || 340) : (n._h || 118),
-    };
+    let w;
+    let h;
+    if (n.kind === 'groupe') {
+      w = n.w || n._w || 560;
+      h = n.h || n._h || 340;
+    } else if (n.kind === 'note') {
+      w = n.w || n._w || 200;
+      h = n._h || 90;
+    } else {
+      w = n._w || 244;
+      h = n._h || 118;
+    }
+    return { x: n.x, y: n.y, w, h };
   }
 
   function layoutCircuit() {
@@ -2017,9 +2142,12 @@
       byId[id].y = Math.round(Math.max(originY, avg - heights[id] / 2));
     });
 
+    let x2 = 0;
     let y2 = 0;
     graph.forEach((n) => {
-      y2 = Math.max(y2, n.y + nodeBox(n).h);
+      const b = nodeBox(n);
+      x2 = Math.max(x2, n.x + b.w);
+      y2 = Math.max(y2, n.y + b.h);
     });
     state.nodes.filter((n) => n.kind === 'note').forEach((n, i) => {
       n.x = originX;

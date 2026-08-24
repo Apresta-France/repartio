@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contrôle tooltips palette</title>
+  <link rel="stylesheet" href="/public/assets/css/app.css">
+</head>
+<body>
+<div class="builder" data-builder>
+  <aside class="builder-side">
+    <div>
+      <div class="eyebrow">← Mes circuits</div>
+      <div class="builder-project-name">Circuit test</div>
+      <div class="eyebrow">Ventilation des revenus</div>
+    </div>
+    <div>
+      <div class="builder-side-label"><span class="eyebrow">Poser un bloc</span></div>
+      <div class="palette-list">
+        <button type="button" class="palette-item" data-add="revenu" data-hint="Fait entrer de l’argent. Une sortie, pas d’entrée." aria-label="Revenu. Fait entrer de l’argent. Une sortie, pas d’entrée.">
+          <span class="dot" style="background:oklch(0.48 0.10 152)"></span>
+          <span class="palette-item-label">Revenu</span>
+          <span class="mono palette-key">R</span>
+        </button>
+        <button type="button" class="palette-item" data-add="compte" data-hint="Reçoit, peut garder un matelas, et fait ressortir le reste." aria-label="Compte. Reçoit, peut garder un matelas, et fait ressortir le reste.">
+          <span class="dot" style="background:oklch(0.48 0.10 248)"></span>
+          <span class="palette-item-label">Compte</span>
+          <span class="mono palette-key">C</span>
+        </button>
+        <button type="button" class="palette-item" data-add="repartiteur" data-hint="Découpe ce qu’il reçoit en parts. Ne conserve rien." aria-label="Répartiteur. Découpe ce qu’il reçoit en parts. Ne conserve rien.">
+          <span class="dot" style="background:oklch(0.48 0.12 300)"></span>
+          <span class="palette-item-label">Répartiteur</span>
+          <span class="mono palette-key">P</span>
+        </button>
+        <button type="button" class="palette-item" data-add="livret" data-hint="Accumule, porte un taux et un plafond, dit quand il sature." aria-label="Livret. Accumule, porte un taux et un plafond, dit quand il sature.">
+          <span class="dot" style="background:oklch(0.55 0.11 62)"></span>
+          <span class="palette-item-label">Livret</span>
+          <span class="mono palette-key">L</span>
+        </button>
+        <button type="button" class="palette-item" data-add="depense" data-hint="Sortie définitive du circuit : loyer, courses, cotisations…" aria-label="Dépense. Sortie définitive du circuit : loyer, courses, cotisations…">
+          <span class="dot" style="background:oklch(0.52 0.14 32)"></span>
+          <span class="palette-item-label">Dépense</span>
+          <span class="mono palette-key">D</span>
+        </button>
+      </div>
+      <div class="builder-side-label"><span class="eyebrow">Annoter</span></div>
+      <div class="palette-list">
+        <button type="button" class="palette-item" data-add="groupe" data-hint="Encadre plusieurs blocs pour les lire ensemble. Hors calcul." aria-label="Groupe. Encadre plusieurs blocs pour les lire ensemble. Hors calcul.">
+          <span class="dot" style="background:oklch(0.55 0.04 255)"></span>
+          <span class="palette-item-label">Groupe</span>
+          <span class="mono palette-key">G</span>
+        </button>
+        <button type="button" class="palette-item" data-add="note" data-hint="Un commentaire posé sur le plan. Hors calcul." aria-label="Note. Un commentaire posé sur le plan. Hors calcul.">
+          <span class="dot" style="background:oklch(0.62 0.10 85)"></span>
+          <span class="palette-item-label">Note</span>
+          <span class="mono palette-key">N</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+  <div class="palette-flyout" data-palette-flyout hidden>
+    <strong data-palette-flyout-title></strong>
+    <p data-palette-flyout-text></p>
+  </div>
+  <main class="builder-main">
+    <div class="canvas-wrap" style="min-height:100vh;background:var(--grid);"></div>
+  </main>
+</div>
+<script src="/public/assets/js/app.js"></script>
+</body>
+</html>

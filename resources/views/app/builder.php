@@ -6,37 +6,55 @@
       <div class="eyebrow">Ventilation des revenus</div>
     </div>
     <div>
-      <div class="eyebrow" style="margin-bottom:8px;">Poser un bloc</div>
+      <div class="builder-side-label">
+        <span class="eyebrow">Poser un bloc</span>
+        <button type="button" class="builder-info-btn" data-info-toggle aria-expanded="false" aria-controls="info-blocks" aria-label="Aide : poser un bloc">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="8" cy="5.2" r=".95" fill="currentColor"/>
+            <path d="M8 7.35v4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <p class="builder-info-pop" id="info-blocks" hidden>Cliquez un type, ou glissez-le sur le canvas. Pour relier deux blocs, restez cliqué sur un point et glissez jusqu’au point opposé.</p>
+      </div>
       <div class="palette-list">
         <?php foreach ([
-          ['revenu', 'Revenu', 'R', 'oklch(0.48 0.10 152)'],
-          ['compte', 'Compte', 'C', 'oklch(0.48 0.10 248)'],
-          ['repartiteur', 'Répartiteur', 'P', 'oklch(0.48 0.12 300)'],
-          ['livret', 'Livret', 'L', 'oklch(0.55 0.11 62)'],
-          ['depense', 'Dépense', 'D', 'oklch(0.52 0.14 32)'],
+          ['revenu', 'Revenu', 'R', 'oklch(0.48 0.10 152)', 'Fait entrer de l’argent. Une sortie, pas d’entrée.'],
+          ['compte', 'Compte', 'C', 'oklch(0.48 0.10 248)', 'Reçoit, peut garder un matelas, et fait ressortir le reste.'],
+          ['repartiteur', 'Répartiteur', 'P', 'oklch(0.48 0.12 300)', 'Découpe ce qu’il reçoit en parts. Ne conserve rien.'],
+          ['livret', 'Livret', 'L', 'oklch(0.55 0.11 62)', 'Accumule, porte un taux et un plafond, dit quand il sature.'],
+          ['depense', 'Dépense', 'D', 'oklch(0.52 0.14 32)', 'Sortie définitive du circuit : loyer, courses, cotisations…'],
         ] as $p): ?>
-          <button type="button" class="palette-item" data-add="<?= e($p[0]) ?>">
+          <button type="button" class="palette-item" data-add="<?= e($p[0]) ?>" data-hint="<?= e($p[4]) ?>" aria-label="<?= e($p[1] . '. ' . $p[4]) ?>">
             <span class="dot" style="background:<?= $p[3] ?>"></span>
-            <span><?= e($p[1]) ?></span>
+            <span class="palette-item-label"><?= e($p[1]) ?></span>
             <span class="mono palette-key"><?= e($p[2]) ?></span>
           </button>
         <?php endforeach; ?>
       </div>
-      <p class="builder-hint">Cliquez un type, ou glissez-le sur le canvas. Pour relier deux blocs, restez cliqué sur un point et glissez jusqu’au point opposé.</p>
-      <div class="eyebrow" style="margin:16px 0 8px;">Annoter</div>
+      <div class="builder-side-label">
+        <span class="eyebrow">Annoter</span>
+        <button type="button" class="builder-info-btn" data-info-toggle aria-expanded="false" aria-controls="info-notes" aria-label="Aide : annoter">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="8" cy="5.2" r=".95" fill="currentColor"/>
+            <path d="M8 7.35v4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <p class="builder-info-pop" id="info-notes" hidden>Un groupe encadre plusieurs blocs (famille, épargne…). Une note pose un commentaire, hors calcul.</p>
+      </div>
       <div class="palette-list">
         <?php foreach ([
-          ['groupe', 'Groupe', 'G', 'oklch(0.55 0.04 255)'],
-          ['note', 'Note', 'N', 'oklch(0.62 0.10 85)'],
+          ['groupe', 'Groupe', 'G', 'oklch(0.55 0.04 255)', 'Encadre plusieurs blocs pour les lire ensemble. Hors calcul.'],
+          ['note', 'Note', 'N', 'oklch(0.62 0.10 85)', 'Un commentaire posé sur le plan. Hors calcul.'],
         ] as $p): ?>
-          <button type="button" class="palette-item" data-add="<?= e($p[0]) ?>">
+          <button type="button" class="palette-item" data-add="<?= e($p[0]) ?>" data-hint="<?= e($p[4]) ?>" aria-label="<?= e($p[1] . '. ' . $p[4]) ?>">
             <span class="dot" style="background:<?= $p[3] ?>"></span>
-            <span><?= e($p[1]) ?></span>
+            <span class="palette-item-label"><?= e($p[1]) ?></span>
             <span class="mono palette-key"><?= e($p[2]) ?></span>
           </button>
         <?php endforeach; ?>
       </div>
-      <p class="builder-hint">Un groupe encadre plusieurs blocs (famille, épargne…). Une note pose un commentaire, hors calcul.</p>
     </div>
     <div>
       <div class="eyebrow" style="padding-bottom:8px;">Chaque mois</div>
@@ -56,6 +74,10 @@
     </div>
     <div data-warns></div>
   </aside>
+  <div class="palette-flyout" data-palette-flyout hidden>
+    <strong data-palette-flyout-title></strong>
+    <p data-palette-flyout-text></p>
+  </div>
 
   <main class="builder-main">
     <header class="app-top">

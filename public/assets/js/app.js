@@ -39,6 +39,77 @@ sidebarBackdrop?.addEventListener('click', () => {
   document.body.classList.remove('is-locked');
 });
 
+(() => {
+  const flyout = document.querySelector('[data-palette-flyout]');
+  if (!flyout) return;
+
+  const titleEl = flyout.querySelector('[data-palette-flyout-title]');
+  const textEl = flyout.querySelector('[data-palette-flyout-text]');
+  const compact = window.matchMedia('(max-width: 980px)');
+
+  const hideFlyout = () => {
+    flyout.hidden = true;
+    flyout.classList.remove('is-below');
+    flyout.style.left = '';
+    flyout.style.top = '';
+    flyout.style.width = '';
+  };
+
+  const placeFlyout = (btn) => {
+    const hint = btn.dataset.hint;
+    if (!hint || btn.classList.contains('is-dragging')) {
+      hideFlyout();
+      return;
+    }
+    const label = btn.querySelector('.palette-item-label');
+    const dot = btn.querySelector('.dot');
+    if (titleEl) titleEl.textContent = label?.textContent?.trim() || '';
+    if (textEl) textEl.textContent = hint;
+    flyout.style.setProperty('--tip-accent', dot?.style.background || 'var(--line)');
+    flyout.hidden = false;
+    flyout.classList.toggle('is-below', compact.matches);
+
+    const r = btn.getBoundingClientRect();
+    const gap = 12;
+    if (compact.matches) {
+      flyout.style.width = `${Math.max(160, r.width)}px`;
+      flyout.style.left = `${Math.max(8, r.left)}px`;
+      flyout.style.top = `${r.bottom + 8}px`;
+      const tip = flyout.getBoundingClientRect();
+      if (tip.right > window.innerWidth - 8) {
+        flyout.style.left = `${Math.max(8, window.innerWidth - tip.width - 8)}px`;
+      }
+      if (tip.bottom > window.innerHeight - 8) {
+        flyout.style.top = `${Math.max(8, r.top - tip.height - 8)}px`;
+      }
+      return;
+    }
+
+    flyout.style.width = '';
+    flyout.style.left = `${r.right + gap}px`;
+    flyout.style.top = `${r.top + r.height / 2}px`;
+    const tip = flyout.getBoundingClientRect();
+    if (tip.right > window.innerWidth - 8) {
+      flyout.style.left = `${Math.max(8, window.innerWidth - tip.width - 8)}px`;
+    }
+    if (tip.top < 8) {
+      flyout.style.top = `${8 + tip.height / 2}px`;
+    } else if (tip.bottom > window.innerHeight - 8) {
+      flyout.style.top = `${window.innerHeight - 8 - tip.height / 2}px`;
+    }
+  };
+
+  document.querySelectorAll('.palette-item[data-hint]').forEach((btn) => {
+    btn.addEventListener('pointerenter', () => placeFlyout(btn));
+    btn.addEventListener('pointerleave', hideFlyout);
+    btn.addEventListener('focus', () => placeFlyout(btn));
+    btn.addEventListener('blur', hideFlyout);
+    btn.addEventListener('pointerdown', hideFlyout);
+  });
+  document.querySelector('.builder-side')?.addEventListener('scroll', hideFlyout, { passive: true });
+  window.addEventListener('resize', hideFlyout);
+})();
+
 document.querySelector('[data-builder-side-toggle]')?.addEventListener('click', (event) => {
   const builder = document.querySelector('[data-builder]');
   if (!builder) return;
@@ -47,8 +118,37 @@ document.querySelector('[data-builder-side-toggle]')?.addEventListener('click', 
   event.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
 });
 
+const closeInfoPops = (except) => {
+  document.querySelectorAll('.builder-side-label.is-open').forEach((el) => {
+    if (el === except) return;
+    el.classList.remove('is-open');
+    const btn = el.querySelector('[data-info-toggle]');
+    const pop = el.querySelector('.builder-info-pop');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    if (pop) pop.hidden = true;
+  });
+};
+
+document.addEventListener('click', (event) => {
+  const btn = event.target.closest('[data-info-toggle]');
+  if (btn) {
+    const wrap = btn.closest('.builder-side-label');
+    const open = !wrap?.classList.contains('is-open');
+    closeInfoPops(open ? wrap : null);
+    if (wrap) {
+      wrap.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const pop = wrap.querySelector('.builder-info-pop');
+      if (pop) pop.hidden = !open;
+    }
+    return;
+  }
+  if (!event.target.closest('.builder-side-label')) closeInfoPops();
+});
+
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
+  closeInfoPops();
   setOpen(false, siteHeader, navToggle, navBackdrop);
   if (sidebar?.classList.contains('is-open')) {
     sidebar.classList.remove('is-open');
