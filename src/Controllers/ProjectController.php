@@ -9,6 +9,7 @@ use App\Core\Auth;
 use App\Core\Session;
 use App\Core\View;
 use App\Models\Project;
+use App\Models\Share;
 
 class ProjectController
 {
@@ -55,6 +56,7 @@ class ProjectController
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
+        $share = Share::findForProject((int) $project['id'], (int) $user['id']);
         View::render('app/builder', [
             'title' => $project['name'],
             'nav' => 'projets',
@@ -64,6 +66,10 @@ class ProjectController
             'payload' => json_decode((string) $project['payload'], true) ?: Project::emptyPayload(),
             'recents' => Project::recents((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
+            'share' => $share,
+            'sends' => $share ? Share::sendsForShare((int) $share['id']) : [],
+            'suggestedTitle' => $share['title'] ?? $project['name'],
+            'suggestedSlug' => $share['slug'] ?? Share::uniqueSlug($project['name']),
         ], 'layouts/app');
     }
 

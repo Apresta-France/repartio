@@ -9,6 +9,7 @@ use App\Controllers\AuthController;
 use App\Controllers\ContactController;
 use App\Controllers\InstallController;
 use App\Controllers\ProjectController;
+use App\Controllers\ShareController;
 use App\Controllers\SiteController;
 
 class App
@@ -23,6 +24,14 @@ class App
 
         if (!is_installed() && !str_starts_with($path, '/install') && !str_starts_with($path, '/public/')) {
             redirect('/install');
+        }
+
+        if (is_installed()) {
+            try {
+                (new Migrator(Database::pdo()))->run();
+            } catch (\Throwable) {
+                // tables already present, or DB temporarily unavailable
+            }
         }
 
         if ($method === 'POST' && $path !== '/install' && !str_starts_with($path, '/install')) {
@@ -77,9 +86,14 @@ class App
         $router->get('/app/circuits/nouveau', [ProjectController::class, 'create']);
         $router->get('/app/circuits/{id}', [ProjectController::class, 'show']);
         $router->post('/app/circuits/{id}', [ProjectController::class, 'update']);
+        $router->get('/app/circuits/{id}/partage', [ShareController::class, 'show']);
+        $router->post('/app/circuits/{id}/partage', [ShareController::class, 'store']);
+        $router->post('/app/circuits/{id}/partage/revoquer', [ShareController::class, 'revoke']);
+        $router->post('/app/circuits/{id}/partage/reactiver', [ShareController::class, 'restore']);
         $router->post('/app/circuits/{id}/dupliquer', [ProjectController::class, 'duplicate']);
         $router->post('/app/circuits/{id}/archiver', [ProjectController::class, 'archive']);
         $router->post('/app/circuits/{id}/supprimer', [ProjectController::class, 'destroy']);
+        $router->get('/p/{slug}', [ShareController::class, 'preview']);
         $router->get('/app/forfait', [AppController::class, 'billing']);
         $router->get('/app/profil', [AppController::class, 'profile']);
         $router->post('/app/profil', [AppController::class, 'updateProfile']);

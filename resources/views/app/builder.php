@@ -57,6 +57,7 @@
         <input type="hidden" name="payload" data-payload-input>
         <button class="btn btn-ghost" type="button" data-clear>Vider</button>
         <button class="btn btn-orange" type="submit">Enregistrer</button>
+        <button type="button" class="btn btn-ghost" data-share-open>Partager</button>
         <button type="button" class="btn btn-ghost builder-props-toggle" data-props-toggle aria-expanded="false">Propriétés</button>
       </form>
     </header>
@@ -100,5 +101,22 @@
     </div>
     <p class="builder-hint" data-preset-intro>Choisissez un modèle, ou partez vierge.</p>
     <div class="preset-groups" data-preset-list></div>
+  </div>
+</div>
+
+<div class="builder-modal" data-share-modal hidden>
+  <div class="builder-modal-backdrop" data-share-dismiss></div>
+  <div class="builder-modal-card share-modal-card" role="dialog" aria-modal="true" aria-labelledby="share-title">
+    <div class="builder-modal-head">
+      <div>
+        <div class="eyebrow">Lecture seule</div>
+        <h2 id="share-title">Partager le circuit</h2>
+      </div>
+      <button type="button" class="btn btn-ghost builder-modal-close" data-share-dismiss aria-label="Fermer">×</button>
+    </div>
+    <?php
+      $returnTo = 'builder';
+      require BASE_PATH . '/resources/views/partials/share-form.php';
+    ?>
   </div>
 </div>

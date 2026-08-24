@@ -30,6 +30,9 @@ class View
     private static function capture(string $view, array $data): string
     {
         $file = BASE_PATH . '/resources/views/' . $view . '.php';
+        if (!is_file($file) && str_starts_with($view, 'emails/')) {
+            $file = BASE_PATH . '/resources/' . $view . '.php';
+        }
         if (!is_file($file)) {
             throw new \RuntimeException('Vue introuvable : ' . $view);
         }

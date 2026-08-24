@@ -80,6 +80,7 @@
     custom: { title: 'Livret', rate: 0, cap: 0 },
   };
 
+  const readonly = root.hasAttribute('data-readonly');
   const initial = JSON.parse(root.getAttribute('data-payload') || '{}');
   const state = {
     nodes: (initial.nodes || []).map(normalizeNode),
@@ -313,9 +314,9 @@
       el.innerHTML = `
         <div class="node-inner">
           <div class="node-bar" style="background:${meta.color}"></div>
-          <div class="node-head" data-drag="${n.id}">
+          <div class="node-head"${readonly ? '' : ` data-drag="${n.id}"`}>
             <span class="node-kind" style="color:${meta.color}">${meta.label}</span>
-            <button type="button" class="node-kill" data-del="${n.id}" title="Supprimer">×</button>
+            ${readonly ? '' : `<button type="button" class="node-kill" data-del="${n.id}" title="Supprimer">×</button>`}
           </div>
           <div class="node-title">${escapeHtml(n.title)}</div>
           <div class="node-body">
@@ -323,8 +324,8 @@
             ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}">${stats.chip.text}</div>` : ''}
           </div>
         </div>
-        ${meta.hasIn ? `<div class="port port-in" data-port-in="${n.id}" style="border:2px solid ${meta.color}" title="Entrée"></div>` : ''}
-        ${meta.hasOut ? `<div class="port port-out" data-port-out="${n.id}" style="background:${meta.color};border:2px solid #fff;box-shadow:0 0 0 1px ${meta.color}" title="Sortie"></div>` : ''}
+        ${readonly ? '' : (meta.hasIn ? `<div class="port port-in" data-port-in="${n.id}" style="border:2px solid ${meta.color}" title="Entrée"></div>` : '')}
+        ${readonly ? '' : (meta.hasOut ? `<div class="port port-out" data-port-out="${n.id}" style="background:${meta.color};border:2px solid #fff;box-shadow:0 0 0 1px ${meta.color}" title="Sortie"></div>` : '')}
       `;
       layer.appendChild(el);
       n._w = el.offsetWidth;
@@ -356,6 +357,7 @@
       pill.type = 'button';
       const tag = e.mode === 'pct' ? e.value + ' %' : (e.mode === 'fixe' ? 'fixe' : 'reste');
       pill.className = 'edge-pill' + (e._amt > 0.5 ? '' : ' is-zero') + (state.openEdge === e.id ? ' is-open' : '');
+      if (readonly) pill.disabled = true;
       pill.dataset.edge = e.id;
       pill.style.left = mid.x + 'px';
       pill.style.top = mid.y + 'px';
@@ -689,6 +691,7 @@
   });
 
   layer.addEventListener('mousedown', (e) => {
+    if (readonly) return;
     const handle = e.target.closest('[data-drag]');
     if (!handle) return;
     const id = handle.getAttribute('data-drag');
@@ -760,6 +763,7 @@
   });
 
   layer.addEventListener('click', (e) => {
+    if (readonly) return;
     const del = e.target.closest('[data-del]');
     if (del) {
       e.stopPropagation();
@@ -791,6 +795,7 @@
   });
 
   labels?.addEventListener('click', (e) => {
+    if (readonly) return;
     const pill = e.target.closest('[data-edge]');
     if (!pill) return;
     const edge = state.edges.find((x) => x.id === pill.getAttribute('data-edge'));
@@ -912,7 +917,7 @@
       if (state.selected) selectNode(null);
       return;
     }
-    if ((e.key === 'Delete' || e.key === 'Backspace') && state.selected && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !readonly && state.selected && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
       removeNode(state.selected);
       render();
     }

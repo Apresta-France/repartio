@@ -20,6 +20,7 @@
           <div><span class="k">Dans <?= (int) $p['horizon'] ?> mois</span><span><?= e(money($p['projection'])) ?></span></div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;">
+          <a class="btn btn-ghost" href="<?= e(url('/app/circuits/' . $p['id'] . '/partage')) ?>" style="padding:5px 10px;font-size:12px;">Partager</a>
           <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/dupliquer')) ?>"><?= csrf_field() ?><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;">Dupliquer</button></form>
           <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/archiver')) ?>"><?= csrf_field() ?><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;"><?= $p['status'] === 'archive' ? 'Réactiver' : 'Archiver' ?></button></form>
           <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/supprimer')) ?>" onsubmit="return confirm('Supprimer ce circuit ?');"><?= csrf_field() ?><button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;">Supprimer</button></form>

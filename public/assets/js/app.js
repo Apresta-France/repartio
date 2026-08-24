@@ -118,6 +118,119 @@ if (faqSearch) {
   });
 }
 
+const shareModal = document.querySelector('[data-share-modal]');
+const openShare = () => {
+  if (!shareModal) return;
+  shareModal.hidden = false;
+  document.body.classList.add('is-locked');
+};
+const closeShare = () => {
+  if (!shareModal) return;
+  shareModal.hidden = true;
+  document.body.classList.remove('is-locked');
+};
+document.querySelector('[data-share-open]')?.addEventListener('click', openShare);
+shareModal?.addEventListener('click', (event) => {
+  if (event.target.closest('[data-share-dismiss]')) closeShare();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && shareModal && !shareModal.hidden) closeShare();
+});
+
+const slugifyLive = (text) => (text || '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+document.querySelectorAll('[data-share-form]').forEach((form) => {
+  const title = form.querySelector('[data-share-title]');
+  const slug = form.querySelector('[data-share-slug]');
+  const copyInput = form.querySelector('[data-copy-value]');
+  const prefix = (copyInput?.value || '').replace(/[^/]+$/, '');
+  let slugTouched = Boolean(slug?.getAttribute('data-existing'));
+
+  const syncUrl = () => {
+    if (!copyInput || !slug) return;
+    const value = slugifyLive(slug.value) || 'circuit';
+    copyInput.value = prefix + value;
+  };
+
+  title?.addEventListener('input', () => {
+    if (slugTouched || !slug) return;
+    slug.value = slugifyLive(title.value);
+    syncUrl();
+  });
+  slug?.addEventListener('input', () => {
+    slugTouched = true;
+    slug.value = slugifyLive(slug.value);
+    syncUrl();
+  });
+
+  form.querySelector('[data-copy]')?.addEventListener('click', async () => {
+    const value = copyInput?.value || '';
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      const btn = form.querySelector('[data-copy]');
+      if (!btn) return;
+      const prev = btn.textContent;
+      btn.textContent = 'Copié';
+      setTimeout(() => { btn.textContent = prev; }, 1400);
+    } catch {
+      copyInput?.select();
+    }
+  });
+});
+
+(() => {
+  const root = document.querySelector('[data-auth-circuit]');
+  if (!root) return;
+
+  const items = [...root.querySelectorAll('[data-appear]')];
+  if (!items.length) return;
+
+  const showAll = () => items.forEach((el) => el.classList.add('is-on'));
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    showAll();
+    return;
+  }
+
+  let timers = [];
+  const clearTimers = () => {
+    timers.forEach((id) => clearTimeout(id));
+    timers = [];
+  };
+
+  const play = () => {
+    clearTimers();
+    root.classList.add('is-reset');
+    items.forEach((el) => el.classList.remove('is-on'));
+    void root.offsetWidth;
+    root.classList.remove('is-reset', 'is-fading');
+    items.forEach((el) => {
+      const delay = Number(el.getAttribute('data-appear')) || 0;
+      timers.push(setTimeout(() => el.classList.add('is-on'), delay));
+    });
+    timers.push(setTimeout(() => root.classList.add('is-fading'), 15500));
+    timers.push(setTimeout(play, 16400));
+  };
+
+  const start = () => play();
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        io.disconnect();
+        start();
+      }
+    }, { threshold: 0.12 });
+    io.observe(root);
+  } else {
+    start();
+  }
+})();
+
 document.querySelectorAll('[data-cycle]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const annual = btn.getAttribute('data-cycle') === 'Annuel';
