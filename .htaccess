@@ -1,16 +1,24 @@
-DirectoryIndex index.php
-ErrorDocument 404 /index.php
+<IfModule mod_dir.c>
+    DirectoryIndex index.php index.html
+</IfModule>
 
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
 
-# Bloquer l’accès direct aux fichiers PHP internes, pas les routes /app
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^(src|resources|storage)/ - [F,L]
+    # La racine est un dossier : il faut la forcer vers index.php
+    RewriteRule ^$ index.php [L]
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^(src|resources|storage)/ - [F,L]
 
-<Files ".env">
-    Require all denied
-</Files>
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    <Files ".env">
+        Require all denied
+    </Files>
+</IfModule>

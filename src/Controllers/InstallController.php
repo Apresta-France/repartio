@@ -25,7 +25,7 @@ class InstallController
         View::render('install/index', [
             'title' => 'Installation',
             'defaults' => [
-                'app_url' => rtrim((string) ($_ENV['APP_URL'] ?? 'http://repartio.test'), '/'),
+                'app_url' => rtrim((string) ($_ENV['APP_URL'] ?? self::detectedAppUrl()), '/'),
                 'db_host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
                 'db_port' => $_ENV['DB_PORT'] ?? '3306',
                 'db_name' => $_ENV['DB_NAME'] ?? 'repartio',
@@ -124,6 +124,14 @@ class InstallController
 
         Session::flashSet('success', 'repartio est installé. Connectez-vous avec le compte créé.');
         redirect('/connexion');
+    }
+
+    private static function detectedAppUrl(): string
+    {
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+        $host = $_SERVER['HTTP_HOST'] ?? 'repartio.fr';
+        return ($https ? 'https://' : 'http://') . $host;
     }
 
     private function checks(): array

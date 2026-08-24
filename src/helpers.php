@@ -56,13 +56,13 @@ function flash(string $key, mixed $default = null): mixed
     return Session::flash($key, $default);
 }
 
-function redirect(string $path, int $code = 302): never
+function redirect(string $path, int $code = 302): void
 {
     header('Location: ' . (str_starts_with($path, 'http') ? $path : url($path)), true, $code);
     exit;
 }
 
-function back(string $fallback = '/'): never
+function back(string $fallback = '/'): void
 {
     $ref = $_SERVER['HTTP_REFERER'] ?? url($fallback);
     header('Location: ' . $ref, true, 302);
