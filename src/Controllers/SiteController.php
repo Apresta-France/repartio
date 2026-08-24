@@ -34,6 +34,22 @@ class SiteController
         ], 'layouts/site');
     }
 
+    public function circuitRempli(): void
+    {
+        $showcase = Content::showcase();
+        if (!$showcase) {
+            redirect('/circuits-types');
+        }
+
+        View::render('site/circuit-rempli', [
+            'title' => 'Un circuit rempli',
+            'nav' => 'circuits',
+            'builder' => true,
+            'showcase' => true,
+            'pack' => $showcase,
+        ], 'layouts/site');
+    }
+
     public function capacites(): void
     {
         View::render('site/capacites', [

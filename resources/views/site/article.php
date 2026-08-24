@@ -5,5 +5,10 @@
   <?php foreach ($post['body'] as $p): ?>
     <p style="font-size:16px;line-height:1.7;color:oklch(0.36 0.05 265);"><?= e($p) ?></p>
   <?php endforeach; ?>
-  <a class="btn btn-ghost" href="<?= e(url('/ressources')) ?>" style="margin-top:20px;">← Toutes les notes</a>
+  <div class="cta-row" style="margin-top:20px;">
+    <?php if (!empty($post['cta'])): ?>
+      <a class="btn btn-orange" href="<?= e(url($post['cta']['href'])) ?>"><?= e($post['cta']['label']) ?></a>
+    <?php endif; ?>
+    <a class="btn btn-ghost" href="<?= e(url('/ressources')) ?>">← Toutes les notes</a>
+  </div>
 </article>

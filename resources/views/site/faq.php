@@ -13,13 +13,13 @@
       $groups[$row[0]][] = $row;
   }
   foreach ($groups as $label => $items): ?>
-    <div style="margin-bottom:30px;">
-      <h2 style="font-size:20px;"><?= e($label) ?></h2>
+    <div class="faq-group">
+      <h2><?= e($label) ?></h2>
       <div class="card">
         <?php foreach ($items as $i): ?>
           <div class="faq-item" data-faq-q="<?= e(mb_strtolower($i[1] . ' ' . $i[2])) ?>">
-            <button type="button" data-faq style="padding:15px 18px;"><span style="flex:1;"><?= e($i[1]) ?></span><span class="sign">+</span></button>
-            <p style="padding:0 18px 18px;"><?= e($i[2]) ?><?php if ($i[4]): ?> <a href="<?= e(url($i[4])) ?>"><?= e($i[3]) ?> →</a><?php endif; ?></p>
+            <button type="button" data-faq><span style="flex:1;"><?= e($i[1]) ?></span><span class="sign">+</span></button>
+            <p><?= e($i[2]) ?><?php if ($i[4]): ?> <a href="<?= e(url($i[4])) ?>"><?= e($i[3]) ?> →</a><?php endif; ?></p>
           </div>
         <?php endforeach; ?>
       </div>

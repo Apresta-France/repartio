@@ -40,7 +40,7 @@
         'depense' => 'oklch(0.55 0.16 25)',
     ];
     $nodes = [
-        [20, 60, 'revenu', 'Revenu', 'Salaire Julien', [['Par mois', '1 500 €']], 400],
+        [20, 60, 'revenu', 'Revenu', 'Salaire', [['Par mois', '1 500 €']], 400],
         [20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '5 000 €']], 1100],
         [20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '2 000 €']], 1800],
         [320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '8 500 €'], ['Reste', '0 €']], 2600],

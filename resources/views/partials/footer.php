@@ -16,6 +16,7 @@
   <div class="footer-col">
     <span class="eyebrow">Produit</span>
     <a href="<?= e(url('/fonctionnement')) ?>">Fonctionnement</a>
+    <a href="<?= e(url('/circuit-rempli')) ?>">Un circuit rempli</a>
     <a href="<?= e(url('/circuits-types')) ?>">Circuits types</a>
     <a href="<?= e(url('/capacites')) ?>">Capacités</a>
     <a href="<?= e(url('/tarifs')) ?>">Tarifs</a>

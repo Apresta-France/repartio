@@ -31,6 +31,12 @@ class Content
                     'repartio sert à rendre ces chemins visibles : chaque euro entre par un bloc, circule le long d’un fil, et arrive quelque part. Si un montant reste « non affecté », le mois n’est pas encore décrit.',
                     'Les chiffres cités dans cette note sont des exemples de simulation. Ils ne constituent pas un conseil en investissement.',
                 ];
+                if ($post['slug'] === 'couple-12338') {
+                    $post['cta'] = ['href' => '/circuit-rempli', 'label' => 'Voir le circuit commenté'];
+                    array_splice($post['body'], 2, 0, [
+                        'Le circuit commenté est en ligne : vous pouvez le parcourir, lancer la démo, puis le reprendre avec vos montants.',
+                    ]);
+                }
                 return $post;
             }
         }
@@ -51,7 +57,7 @@ class Content
             ['Le moteur', 'Les intérêts sont-ils composés ?', 'Ils sont capitalisés une fois par an sur le solde moyen, au taux que porte le livret.', '', ''],
             ['Le moteur', 'Peut-on modéliser un revenu irrégulier ?', 'Oui, en moyenne lissée. Pour de fortes variations, créez deux scénarios : un mois bas et un mois haut.', '', ''],
             ['Le moteur', 'L’inflation est-elle prise en compte ?', 'Non par défaut : nous n’imposons aucune hypothèse macroéconomique.', '', ''],
-            ['Situations', 'Peut-on modéliser un couple avec des comptes séparés ?', 'C’est le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts.', 'Voir le modèle', '/circuits-types'],
+            ['Situations', 'Peut-on modéliser un couple avec des comptes séparés ?', 'C’est le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts.', 'Voir un circuit rempli', '/circuit-rempli'],
             ['Situations', 'Comment provisionner l’URSSAF en auto-entreprise ?', 'Avec un bloc dépense dédié, alimenté depuis le compte professionnel.', '', ''],
             ['Situations', 'Et les livrets des enfants ?', 'Un bloc livret par enfant, avec son solde de départ, son taux et son plafond.', '', ''],
             ['Situations', 'Peut-on suivre un objectif chiffré, comme un apport ?', 'Oui : vous posez la cible sur le bloc de destination, et repartio affiche le mois d’atteinte.', '', ''],
@@ -106,6 +112,34 @@ class Content
         return self::templates()[$key]['payload'] ?? null;
     }
 
+    public static function showcaseKey(): string
+    {
+        return 'couple-complet';
+    }
+
+    /** @return array<string, mixed>|null */
+    public static function showcase(): ?array
+    {
+        $key = self::showcaseKey();
+        $raw = Scenarios::all()[$key] ?? null;
+        if (!$raw) {
+            return null;
+        }
+
+        $payload = $raw['payload'];
+        $nodes = $payload['nodes'] ?? [];
+
+        return [
+            'key' => $key,
+            'title' => $raw['title'],
+            'category' => $raw['category'],
+            'hint' => $raw['hint'],
+            'payload' => $payload,
+            'blocks' => count($nodes),
+            'stats' => \App\Models\Project::summarize($payload),
+        ];
+    }
+
     private static function layoutPayload(array $payload): array
     {
         $nodes = $payload['nodes'] ?? [];
@@ -117,9 +151,25 @@ class Content
         $kindLayer = ['revenu' => 0, 'compte' => 1, 'repartiteur' => 2, 'livret' => 3, 'depense' => 3];
         $kindWeight = ['revenu' => 0, 'compte' => 1, 'depense' => 2, 'repartiteur' => 3, 'livret' => 4];
         $heightOf = static function (array $n): float {
-            return match ($n['kind'] ?? '') {
+            $kind = $n['kind'] ?? '';
+            if ($kind === 'depense') {
+                $lines = 0;
+                foreach ($n['items'] ?? [] as $item) {
+                    if (!is_array($item)) {
+                        continue;
+                    }
+                    $title = trim((string) ($item['title'] ?? ''));
+                    $amount = (float) ($item['amount'] ?? 0);
+                    if ($title !== '' || $amount > 0) {
+                        $lines++;
+                    }
+                }
+
+                return 152.0 + $lines * 26.0;
+            }
+
+            return match ($kind) {
                 'livret' => 176.0,
-                'depense' => 152.0,
                 'repartiteur' => 148.0,
                 default => 120.0,
             };

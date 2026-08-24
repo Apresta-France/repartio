@@ -14,7 +14,7 @@ $C = [
     <p class="lede">repartio est un canvas de nœuds pour votre argent. Posez vos revenus, vos comptes, vos livrets, vos dépenses&nbsp;; reliez-les&nbsp;; lisez ce qui reste chaque mois et où vous en serez dans cinq ans.</p>
     <div class="cta-row">
       <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Construire mon circuit</a>
-      <a class="btn btn-ghost" href="<?= e(url('/circuits-types')) ?>">Voir un circuit rempli</a>
+      <a class="btn btn-ghost" href="<?= e(url('/circuit-rempli')) ?>">Voir un circuit rempli</a>
     </div>
     <div class="stat-grid">
       <div><strong>12 338 €</strong><span>entrées réparties / mois</span></div>
@@ -28,7 +28,7 @@ $C = [
       <span class="chip">mon-circuit · 60 mois</span>
       <span class="chip hero-unassigned is-warn" data-hero-unassigned>non affecté · 7 160 €</span>
     </div>
-    <span class="chip hero-saved is-empty" data-hero-saved>dans 5 ans · 0 €</span>
+    <span class="chip hero-saved is-empty" data-hero-saved>dans 5 ans · <b data-hero-saved-amount>0 €</b></span>
     <div class="hero-palette">
       <span class="eyebrow">Poser un bloc</span>
       <div class="hero-palette-list">
@@ -72,10 +72,10 @@ $C = [
           ['loyers', 20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '2 000 €']], false],
           ['compte', 320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '7 160 €'], ['Reste', '7 160 €', 'compte-reste']], false],
           ['repart', 320, 320, 'repartiteur', 'Répartiteur', 'Répartiteur épargne', [['Reçoit', '0 €', 'repart-in'], ['Ventilé', '0 %', 'repart-pct']], true],
-          ['prelev', 630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '3 254 €']], true],
-          ['livreta', 630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '1 466 €'], ['Dans 60 mois', '22 950 €', 'livreta-proj']], true],
-          ['ldds', 630, 350, 'livret', 'Livret', 'LDDS', [['Reçoit', '1 100 €'], ['Dans 60 mois', '12 000 €']], true],
-          ['lep', 630, 430, 'livret', 'Livret', 'LEP', [['Reçoit', '1 100 €'], ['Dans 60 mois', '10 000 €']], true],
+          ['prelev', 630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '0 €', 'prelev-in']], true],
+          ['livreta', 630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '0 €', 'livreta-in'], ['Dans 60 mois', '0 €', 'livreta-proj']], true],
+          ['ldds', 630, 350, 'livret', 'Livret', 'LDDS', [['Reçoit', '0 €', 'ldds-in'], ['Dans 60 mois', '0 €', 'ldds-proj']], true],
+          ['lep', 630, 430, 'livret', 'Livret', 'LEP', [['Reçoit', '0 €', 'lep-in'], ['Dans 60 mois', '0 €', 'lep-proj']], true],
       ];
       foreach ($nodes as [$id, $x, $y, $kind, $label, $title, $rows, $pending]):
           $color = $C[$kind];

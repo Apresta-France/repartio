@@ -56,6 +56,7 @@ class App
         $router->get('/', [SiteController::class, 'home']);
         $router->get('/fonctionnement', [SiteController::class, 'fonctionnement']);
         $router->get('/circuits-types', [SiteController::class, 'circuits']);
+        $router->get('/circuit-rempli', [SiteController::class, 'circuitRempli']);
         $router->get('/capacites', [SiteController::class, 'capacites']);
         $router->get('/tarifs', [SiteController::class, 'tarifs']);
         $router->get('/vos-donnees', [SiteController::class, 'donnees']);

@@ -15,7 +15,6 @@ $horizon = (int) ($payload['horizon'] ?? $share['horizon'] ?? 60);
     <div>
       <span class="eyebrow">Circuit partagé</span>
       <div class="builder-project-name"><?= e($share['title']) ?></div>
-      <div class="eyebrow">Ventilation des revenus</div>
     </div>
     <div>
       <div class="eyebrow" style="padding-bottom:8px;">Chaque mois</div>

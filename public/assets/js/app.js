@@ -495,10 +495,33 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
 
   const setSaved = (text) => {
     if (!savedEl) return;
-    savedEl.textContent = `dans 5 ans · ${text}`;
+    const amountEl = savedEl.querySelector('[data-hero-saved-amount]');
+    const prev = amountEl ? amountEl.textContent : savedEl.textContent;
+    if (amountEl) amountEl.textContent = text;
+    else savedEl.textContent = `dans 5 ans · ${text}`;
     const on = text !== '0 €';
     savedEl.classList.toggle('is-on', on);
     savedEl.classList.toggle('is-empty', !on);
+    const same = amountEl ? prev === text : prev === `dans 5 ans · ${text}`;
+    if (!on || same || root.classList.contains('is-reset')) return;
+    savedEl.classList.remove('is-pop');
+    void savedEl.offsetWidth;
+    savedEl.classList.add('is-pop');
+  };
+
+  const applyCircuitVals = (complete) => {
+    setVal('compte-reste', complete ? '0 €' : '7 160 €');
+    setVal('repart-in', complete ? '3 665 €' : '0 €');
+    setVal('repart-pct', complete ? '100 %' : '0 %');
+    setVal('prelev-in', complete ? '3 254 €' : '0 €');
+    setVal('livreta-in', complete ? '1 466 €' : '0 €');
+    setVal('livreta-proj', complete ? '22 950 €' : '0 €');
+    setVal('ldds-in', complete ? '1 100 €' : '0 €');
+    setVal('ldds-proj', complete ? '12 000 €' : '0 €');
+    setVal('lep-in', complete ? '1 100 €' : '0 €');
+    setVal('lep-proj', complete ? '10 000 €' : '0 €');
+    setUnassigned(complete ? '0 €' : '7 160 €', complete);
+    setSaved(complete ? '44 950 €' : '0 €');
   };
 
   const palettePoint = (kind) => {
@@ -636,11 +659,7 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
       el.classList.toggle('is-on', complete || !pending);
       el.classList.toggle('is-pending', pending && !complete);
     });
-    setVal('compte-reste', complete ? '0 €' : '7 160 €');
-    setVal('repart-in', complete ? '3 665 €' : '0 €');
-    setVal('repart-pct', complete ? '100 %' : '0 %');
-    setUnassigned(complete ? '0 €' : '7 160 €', complete);
-    setSaved(complete ? '44 950 €' : '0 €');
+    applyCircuitVals(complete);
     hideGhost();
     dragEl.classList.remove('is-on');
     clearPalette();
@@ -750,6 +769,7 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     select(null);
     if (!(await grab('depense', 'prelev', 'Dépense', 'Prélèvements', 'oklch(0.55 0.16 25)', { x: 560, y: 150, z: 1.22 }))) return;
     if (!(await connect('compte', 'prelev', 'c-p', { x: 500, y: 160, z: 1.18 }))) return;
+    setVal('prelev-in', '3 254 €');
     setVal('compte-reste', '3 906 €');
     setUnassigned('3 906 €', false);
     if (!(await sleep(700, token))) return;
@@ -766,6 +786,8 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     if (!(await grab('livret', 'livreta', 'Livret', 'Livret A', 'oklch(0.48 0.11 240)', { x: 620, y: 220, z: 1.2 }))) return;
     if (!(await connect('repart', 'livreta', 'r-a'))) return;
     setVal('repart-pct', '40 %');
+    setVal('livreta-in', '1 466 €');
+    setVal('livreta-proj', '22 950 €');
     setSaved('22 950 €');
     if (!(await together(token,
       cameraTo(720, 230, 1.58, 1100, token),
@@ -780,14 +802,18 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
     if (!(await grab('livret', 'ldds', 'Livret', 'LDDS', 'oklch(0.48 0.11 240)', { x: 600, y: 340, z: 1.12 }))) return;
     if (!(await connect('repart', 'ldds', 'r-d'))) return;
     setVal('repart-pct', '70 %');
+    setVal('ldds-in', '1 100 €');
+    setVal('ldds-proj', '12 000 €');
     setSaved('34 950 €');
-    if (!(await sleep(360, token))) return;
+    if (!(await sleep(900, token))) return;
 
     if (!(await grab('livret', 'lep', 'Livret', 'LEP', 'oklch(0.48 0.11 240)', { x: 600, y: 420, z: 1.1 }))) return;
     if (!(await connect('repart', 'lep', 'r-e'))) return;
     setVal('repart-pct', '100 %');
+    setVal('lep-in', '1 100 €');
+    setVal('lep-proj', '10 000 €');
     setSaved('44 950 €');
-    if (!(await sleep(420, token))) return;
+    if (!(await sleep(900, token))) return;
 
     select('lep');
     if (!(await moveCursorScene(pos.lep.x + 86, pos.lep.y + 22, 480, token))) return;

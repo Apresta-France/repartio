@@ -155,7 +155,6 @@
   const setupName = setupModal?.querySelector('[data-setup-name]');
   const setupHorizon = setupModal?.querySelector('[data-setup-horizon]');
   const scenarioModal = document.querySelector('[data-scenario-modal]');
-  const projectName = root.querySelector('.builder-project-name');
   const horizonInput = root.querySelector('[data-horizon]');
   const saveBtn = form?.querySelector('[data-save-btn]');
   const horizonUnitWrap = root.querySelector('[data-horizon-unit]');
@@ -215,6 +214,11 @@
     if (n?.kind !== 'livret') return false;
     const when = livretFullMonth(C, n.id);
     return when !== null && currentMonth() >= when;
+  }
+
+  function needsAmount(n) {
+    if (n?.kind !== 'revenu' && n?.kind !== 'depense') return false;
+    return !(Number(n.amount) > 0);
   }
 
   function accentColorOf(n, C) {
@@ -1072,6 +1076,12 @@
       else chip = { text: 'plein dans ' + (fullAt - month) + ' mois', bad: false, full: false };
     }
     if (C.over[n.id]) chip = { text: 'sorties > entrées', bad: true };
+    if (needsAmount(n) && !(chip && chip.bad)) {
+      chip = {
+        text: n.kind === 'depense' ? 'postes à saisir' : 'montant à saisir',
+        pending: true,
+      };
+    }
     return { rows, chip };
   }
 
@@ -1134,7 +1144,8 @@
         const stats = nodeStats(n, C);
         const color = accentColorOf(n, C);
         const full = isLivretFullNow(n, C);
-        el.className = 'node' + selected + (full ? ' is-full' : '');
+        const pending = needsAmount(n);
+        el.className = 'node' + selected + (full ? ' is-full' : '') + (pending ? ' is-pending' : '');
         el.innerHTML = `
           <div class="node-inner">
             <div class="node-bar" style="background:${color}"></div>
@@ -1145,7 +1156,7 @@
             <div class="node-title">${escapeHtml(n.title)}</div>
             <div class="node-body">
               ${stats.rows.map(([k, v, cls, key]) => `<div class="node-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
-              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}${stats.chip.full ? ' is-full' : ''}">${stats.chip.text}</div>` : ''}
+              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}${stats.chip.full ? ' is-full' : ''}${stats.chip.pending ? ' is-pending' : ''}">${stats.chip.text}</div>` : ''}
               ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
             </div>
           </div>
@@ -1201,6 +1212,7 @@
 
       spawnPellets(e, path, color);
     });
+    applyTourFocus();
   }
 
   function renderSide() {
@@ -1295,17 +1307,13 @@
             ${tintControl(n, 'block')}
           </div>
         </div>
-        <label class="prop-field">
-          <span>Commentaire</span>
-          <textarea data-prop="note" rows="4" placeholder="Précisions, hypothèse, rappel…">${escapeHtml(n.note)}</textarea>
-        </label>
         ${n.kind === 'revenu' ? `
           <label class="prop-field">
             <span>Montant par mois</span>
             <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}">
           </label>` : ''}
         ${n.kind === 'depense' ? `
-          <div>
+          <div data-items-block>
             <div class="prop-items-head">
               <div class="eyebrow">Postes du mois</div>
               <button type="button" class="btn btn-ghost" data-item-add style="min-height:0;padding:4px 8px;font-size:12px;">Ajouter</button>
@@ -1345,6 +1353,10 @@
               <input data-prop="cap" type="number" min="0" step="1" value="${n.cap}">
             </label>
           </div>` : ''}
+        <label class="prop-field">
+          <span>Commentaire</span>
+          <textarea data-prop="note" rows="${n.kind === 'depense' ? 2 : 4}" placeholder="Précisions, hypothèse, rappel…">${escapeHtml(n.note)}</textarea>
+        </label>
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
@@ -1554,9 +1566,32 @@
       x, y,
       ...extra,
     });
+    if (n.kind === 'depense' && !(n.items && n.items.length)) {
+      addDepenseItem(n);
+    }
     state.nodes.push(n);
     offerLinkCoach();
     return n;
+  }
+
+  function revealDepenseItem(itemId) {
+    requestAnimationFrame(() => {
+      const sel = itemId
+        ? `[data-item-title="${CSS.escape(itemId)}"]`
+        : '[data-item-title]';
+      const field = propsForm?.querySelector(sel);
+      if (!field) return;
+      const panel = root.querySelector('[data-props]');
+      const box = field.closest('.prop-item') || field;
+      if (panel) {
+        const panelRect = panel.getBoundingClientRect();
+        const boxRect = box.getBoundingClientRect();
+        if (boxRect.top < panelRect.top || boxRect.bottom > panelRect.bottom) {
+          box.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+      }
+      field.focus();
+    });
   }
 
   function removeNode(id) {
@@ -1719,6 +1754,7 @@
     if (!modal || !presetList) {
       const n = addNode(kind, x, y);
       selectNode(n.id);
+      if (n.kind === 'depense') revealDepenseItem();
       return;
     }
     const meta = KINDS[kind];
@@ -1860,6 +1896,7 @@
     const n = addNode(finalKind, x, y, values);
     closePresetModal();
     selectNode(n.id);
+    if (n.kind === 'depense') revealDepenseItem();
   }
 
   function cancelLink() {
@@ -2336,10 +2373,7 @@
       if (n && n.kind === 'depense') {
         const item = addDepenseItem(n);
         render();
-        if (item) {
-          const field = propsForm.querySelector(`[data-item-title="${CSS.escape(item.id)}"]`);
-          field?.focus();
-        }
+        if (item) revealDepenseItem(item.id);
       }
       return;
     }
@@ -2624,7 +2658,6 @@
     const currentName = (nameInput?.value || '').trim();
     if (nameInput && (!currentName || /^nouveau circuit$/i.test(currentName))) {
       nameInput.value = pack.title;
-      if (projectName) projectName.textContent = pack.title;
       document.title = pack.title + ' — repartio.fr';
     }
     closeScenarioModal();
@@ -2639,7 +2672,6 @@
     const raw = parseInt(setupHorizon?.value, 10);
     const horizon = Number.isNaN(raw) ? 60 : Math.min(360, Math.max(1, raw));
     if (nameInput) nameInput.value = name;
-    if (projectName) projectName.textContent = name;
     document.title = name + ' — repartio.fr';
     state.horizon = horizon;
     syncHorizonInput();
@@ -2714,6 +2746,72 @@
     }
   });
 
+  let tourFocus = [];
+
+  function applyTourFocus() {
+    const ids = new Set(tourFocus);
+    const on = ids.size > 0;
+    layer?.querySelectorAll('.node').forEach((el) => {
+      el.classList.toggle('is-tour-on', on && ids.has(el.dataset.node));
+      el.classList.toggle('is-tour-dim', on && !ids.has(el.dataset.node));
+    });
+    state.edges.forEach((e) => {
+      const hit = !on || ids.has(e.from) || ids.has(e.to);
+      flow.paths[e.id]?.classList.toggle('is-tour-dim', on && !hit);
+      flow.paths[e.id]?.classList.toggle('is-tour-on', on && hit);
+      flow.pills[e.id]?.classList.toggle('is-tour-dim', on && !hit);
+    });
+  }
+
+  function animateCamera(k, tx, ty) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      state.scale = k;
+      state.tx = tx;
+      state.ty = ty;
+      applyTransform();
+      return;
+    }
+    const s0 = state.scale;
+    const x0 = state.tx;
+    const y0 = state.ty;
+    const t0 = performance.now();
+    const dur = 520;
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (((-2 * t + 2) ** 3) / 2));
+    const tick = (now) => {
+      const t = Math.min(1, (now - t0) / dur);
+      const e = ease(t);
+      state.scale = s0 + (k - s0) * e;
+      state.tx = x0 + (tx - x0) * e;
+      state.ty = y0 + (ty - y0) * e;
+      applyTransform();
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  function focusNodes(ids, pad = 72) {
+    const nodes = state.nodes.filter((n) => ids.includes(n.id));
+    if (!nodes.length) {
+      fit();
+      return;
+    }
+    let x1 = 1e9;
+    let y1 = 1e9;
+    let x2 = -1e9;
+    let y2 = -1e9;
+    nodes.forEach((n) => {
+      x1 = Math.min(x1, n.x);
+      y1 = Math.min(y1, n.y);
+      x2 = Math.max(x2, n.x + (n._w || 244));
+      y2 = Math.max(y2, n.y + (n._h || 110));
+    });
+    const r = canvas.getBoundingClientRect();
+    let k = Math.min(1.15, (r.width - pad * 2) / Math.max(1, x2 - x1), (r.height - pad * 2) / Math.max(1, y2 - y1));
+    k = Math.max(0.35, Math.min(1.2, k));
+    animateCamera(k, (r.width - (x2 - x1) * k) / 2 - x1 * k, (r.height - (y2 - y1) * k) / 2 - y1 * k);
+  }
+
   function fit() {
     if (!state.nodes.length) {
       state.scale = 0.85;
@@ -2744,4 +2842,18 @@
   render();
   markSaved();
   requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });
+
+  root.repartioTour = {
+    highlight(ids) {
+      tourFocus = Array.isArray(ids) ? ids : [];
+      applyTourFocus();
+    },
+    focus(ids, pad) {
+      focusNodes(Array.isArray(ids) ? ids : [], pad);
+    },
+    fit,
+    setMonth(month) {
+      setPlayMonth(month, true);
+    },
+  };
 })();

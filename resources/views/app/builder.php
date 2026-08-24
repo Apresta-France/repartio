@@ -6,11 +6,7 @@ $readonly = !$canEdit;
 <div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
   <div class="builder-workspace">
   <aside class="builder-side">
-    <div>
-      <a href="<?= e(url('/app/circuits')) ?>" class="eyebrow">← Mes circuits</a>
-      <div class="builder-project-name"><?= e($project['name']) ?></div>
-      <div class="eyebrow">Ventilation des revenus</div>
-    </div>
+    <a href="<?= e(url('/app/circuits')) ?>" class="btn btn-navy builder-back">← Mes circuits</a>
     <div>
       <div class="builder-side-label">
         <span class="eyebrow">Poser un bloc</span>
