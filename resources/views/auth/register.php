@@ -67,6 +67,15 @@
         [591, 462, '1 100 €', 10900],
     ];
     ?>
+    <div class="auth-side-copy">
+      <h2 style="color:#fff;font-size:27px;">Ce que vous aurez fait dans dix minutes</h2>
+      <?php foreach ([['01','Vos revenus posés','Salaires, auto-entreprise, loyers perçus, allocations.'],['02','Vos comptes câblés','Comptes personnels, joints, répartiteurs d’épargne.'],['03','Votre première projection','Ce que vous aurez dans cinq ans, saturation des livrets.']] as $s): ?>
+        <div style="display:flex;gap:14px;margin:14px 0;">
+          <span class="mono" style="width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:oklch(0.32 0.07 265);color:oklch(0.78 0.11 192);"><?= e($s[0]) ?></span>
+          <div><strong style="color:#fff;"><?= e($s[1]) ?></strong><div style="color:oklch(0.79 0.03 255);font-size:13.5px;"><?= e($s[2]) ?></div></div>
+        </div>
+      <?php endforeach; ?>
+    </div>
     <div class="auth-circuit" data-auth-circuit aria-hidden="true">
       <div class="auth-circuit-scene">
         <svg class="hero-wires auth-circuit-wires" width="920" height="720">
@@ -91,15 +100,6 @@
           <div class="hero-flow auth-circuit-flow" data-appear="<?= (int) $at ?>" style="left:<?= (int) $x ?>px;top:<?= (int) $y ?>px;"><?= e($label) ?></div>
         <?php endforeach; ?>
       </div>
-    </div>
-    <div class="auth-side-copy">
-      <h2 style="color:#fff;font-size:27px;">Ce que vous aurez fait dans dix minutes</h2>
-      <?php foreach ([['01','Vos revenus posés','Salaires, auto-entreprise, loyers perçus, allocations.'],['02','Vos comptes câblés','Comptes personnels, joints, répartiteurs d’épargne.'],['03','Votre première projection','Ce que vous aurez dans cinq ans, saturation des livrets.']] as $s): ?>
-        <div style="display:flex;gap:14px;margin:14px 0;">
-          <span class="mono" style="width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:oklch(0.32 0.07 265);color:oklch(0.78 0.11 192);"><?= e($s[0]) ?></span>
-          <div><strong style="color:#fff;"><?= e($s[1]) ?></strong><div style="color:oklch(0.79 0.03 255);font-size:13.5px;"><?= e($s[2]) ?></div></div>
-        </div>
-      <?php endforeach; ?>
     </div>
   </div>
 </div>

@@ -166,10 +166,11 @@ h1.page-title { font-size: clamp(30px, 7vw, 48px) !important; letter-spacing: -.
 .field input, .field textarea, .field select { padding: 12px 14px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: var(--paper); font-size: 16px; color: var(--navy); outline: none; width: 100%; }
 .field input:focus, .field textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14); }
 .auth-side { position: relative; overflow: hidden; background: var(--navy); padding: 44px; display: flex; flex-direction: column; color: oklch(0.97 0.01 250); }
+.auth-side:has(.auth-circuit) { padding-bottom: 0; }
 .auth-side .dots { opacity: .3; background-image: radial-gradient(oklch(0.5 0.06 265) 1px, transparent 1px); }
-.auth-circuit { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .4; overflow: hidden; transition: opacity .75s ease; }
+.auth-circuit { position: relative; flex: 1; min-height: 340px; z-index: 0; pointer-events: none; opacity: .9; overflow: hidden; transition: opacity .75s ease; margin: 8px -44px 0; }
 .auth-circuit.is-fading { opacity: 0; }
-.auth-circuit-scene { position: absolute; width: 920px; height: 720px; left: 46%; top: 48%; transform: translate(-50%, -50%) scale(.64); transform-origin: center center; }
+.auth-circuit-scene { position: absolute; width: 920px; height: 720px; left: 50%; top: 8px; transform: translateX(-50%) scale(.58); transform-origin: top center; }
 .auth-circuit-wires { position: absolute; top: 0; left: 0; overflow: visible; }
 .auth-circuit-node { opacity: 0; transform: scale(.86) translateY(12px); transition: opacity .48s ease, transform .55s cubic-bezier(.22, 1.15, .36, 1); }
 .auth-circuit-node.is-on { opacity: 1; transform: none; }
@@ -181,13 +182,13 @@ h1.page-title { font-size: clamp(30px, 7vw, 48px) !important; letter-spacing: -.
 .auth-circuit.is-reset .auth-circuit-node,
 .auth-circuit.is-reset .auth-circuit-wire,
 .auth-circuit.is-reset .auth-circuit-flow { transition: none; animation: none; }
-.auth-side-copy { position: relative; z-index: 1; margin: auto 0; max-width: 470px; text-shadow: 0 1px 16px oklch(0.24 0.075 265 / 0.7); }
+.auth-side-copy { position: relative; z-index: 1; flex: none; max-width: 470px; }
 @keyframes auth-bar-flash {
   0% { filter: brightness(1.8); }
   100% { filter: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .auth-circuit { opacity: .36; transition: none; }
+  .auth-circuit { opacity: .85; transition: none; }
   .auth-circuit-node, .auth-circuit-flow { opacity: 1; transform: none; transition: none; }
   .auth-circuit-wire { stroke-dashoffset: 0; transition: none; }
   .auth-circuit-node .bar { animation: none; }
@@ -420,7 +421,9 @@ h1.page-title { font-size: clamp(30px, 7vw, 48px) !important; letter-spacing: -.
 
   .auth-form { padding: 24px 20px 32px; gap: 24px; }
   .auth-side { padding: 28px 20px; min-height: 280px; }
-  .auth-circuit-scene { transform: translate(-50%, -42%) scale(.4); }
+  .auth-side:has(.auth-circuit) { padding-bottom: 0; min-height: 420px; }
+  .auth-circuit { margin: 8px -20px 0; min-height: 240px; }
+  .auth-circuit-scene { transform: translateX(-50%) scale(.36); }
   .legal-toc { position: static; padding: 20px 20px 8px; border-right: 0; border-bottom: 1px solid var(--line); flex-direction: row; flex-wrap: wrap; gap: 8px 16px; }
   .legal-body { padding: 24px 20px 48px; }
   .kv .k { width: 120px; }
