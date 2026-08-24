@@ -174,6 +174,7 @@
   const horizonUnitLabel = root.querySelector('[data-horizon-unit-label]');
   let horizonUnit = 'mois';
   let savedSnap = null;
+  let saving = false;
   let SCENARIOS = {};
   try {
     SCENARIOS = JSON.parse(document.querySelector('[data-scenarios]')?.textContent || '{}');
@@ -648,6 +649,8 @@
   }
 
   function reportSpendLines() {
+    const C = lastCompute || compute();
+    lastCompute = C;
     const bag = {};
     state.nodes.forEach((n) => {
       if (n.kind !== 'depense') return;
@@ -663,7 +666,7 @@
         });
         return;
       }
-      const monthly = Math.max(0, Number(n.amount) || 0);
+      const monthly = Math.max(0, Number(n.amount) || C.inflow[n.id] || 0);
       if (monthly < 0.5) return;
       const title = n.title || 'Dépense';
       const key = title.toLowerCase();
@@ -2714,7 +2717,11 @@
       return;
     }
     syncPayload();
-    if (!isDirty()) e.preventDefault();
+    if (!isDirty()) {
+      e.preventDefault();
+      return;
+    }
+    saving = true;
   });
 
   function setupOpen() {
@@ -3205,7 +3212,7 @@
 
   if (nameInput) nameInput.addEventListener('input', syncPayload);
   window.addEventListener('beforeunload', (e) => {
-    if (readonly || !isDirty()) return;
+    if (readonly || saving || !isDirty()) return;
     e.preventDefault();
     e.returnValue = '';
   });
