@@ -57,7 +57,7 @@ class ProjectController
         }
         View::render('app/builder', [
             'title' => $project['name'],
-            'nav' => 'builder',
+            'nav' => 'projets',
             'builder' => true,
             'user' => $user,
             'project' => $project,

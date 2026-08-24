@@ -1,7 +1,7 @@
 <section class="section" style="text-align:center;padding-bottom:40px;display:flex;flex-direction:column;align-items:center;gap:16px;">
-  <span class="eyebrow">Tarifs</span>
+  <span class="eyebrow eyebrow-live">Tarifs</span>
   <h1 class="page-title" style="font-size:46px;max-width:22ch;">Le circuit est gratuit. Le confort est payant.</h1>
-  <p class="lede">Tous les types de blocs, tous les plafonds réglementaires et la projection à 60 mois sont dans la version gratuite.</p>
+  <p class="lede">Tous les types de blocs, tous les plafonds réglementaires et la projection à 60 mois sont dans la version gratuite. On ne facture pas le calcul, on facture ce qui fait gagner du temps quand on gère plusieurs circuits.</p>
   <div class="chips" style="background:oklch(0.94 0.01 255);padding:4px;border-radius:11px;">
     <button type="button" class="chip active" data-cycle="Mensuel">Mensuel</button>
     <button type="button" class="chip" data-cycle="Annuel">Annuel</button>
@@ -52,7 +52,7 @@
 </section>
 <section class="section" style="padding-top:0;">
   <div class="table">
-    <div class="table-row" style="grid-template-columns:1.6fr repeat(3,.8fr);background:oklch(0.975 0.005 250);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);">
+    <div class="table-row table-compare" style="background:oklch(0.975 0.005 250);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);">
       <span>Comparaison</span><span style="text-align:center;">Libre</span><span style="text-align:center;">Complet</span><span style="text-align:center;">Foyer</span>
     </div>
     <?php foreach ([
@@ -63,7 +63,7 @@
       ['Historique', '—', '✓', '✓'],
       ['Comptes liés', '1', '1', '2'],
     ] as $r): ?>
-      <div class="table-row" style="grid-template-columns:1.6fr repeat(3,.8fr);">
+      <div class="table-row table-compare">
         <span><?= e($r[0]) ?></span>
         <span class="mono" style="text-align:center;"><?= e($r[1]) ?></span>
         <span class="mono" style="text-align:center;"><?= e($r[2]) ?></span>

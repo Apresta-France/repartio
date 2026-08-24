@@ -1,5 +1,5 @@
 <section class="section" style="padding-bottom:52px;">
-  <span class="eyebrow">Capacités</span>
+  <span class="eyebrow eyebrow-live">Capacités</span>
   <h1 class="page-title" style="font-size:48px;max-width:24ch;margin:12px 0;">Un moteur de flux, pas un agrégateur de dépenses</h1>
   <p class="lede">repartio ne cherche pas à classer votre passé. Il décrit une mécanique : qui reçoit quoi, dans quel ordre, jusqu’à quel plafond — et ce que cela donne dans cinq ans.</p>
 </section>
@@ -23,13 +23,13 @@
     ['Historique des versions', 'Chaque enregistrement est daté et restaurable.'],
   ]],
 ] as $g): ?>
-<section style="border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(300px,.72fr) 1.28fr;">
-  <div style="padding:46px 44px 48px 32px;border-right:1px solid var(--line);">
+<section class="page-split" style="border-bottom:1px solid var(--line);">
+  <div style="padding:46px 44px 48px 32px;">
     <span class="eyebrow"><?= e($g[0]) ?></span>
     <h2 style="margin:12px 0;"><?= e($g[1]) ?></h2>
     <p class="lede"><?= e($g[2]) ?></p>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;">
+  <div class="feature-grid">
     <?php foreach ($g[3] as $i): ?>
       <div style="padding:26px 28px;border-bottom:1px solid var(--line-soft);border-right:1px solid var(--line-soft);">
         <strong><?= e($i[0]) ?></strong>
@@ -41,7 +41,7 @@
 <?php endforeach; ?>
 <section class="dark-band section">
   <div class="section-head"><span class="eyebrow" style="color:oklch(0.75 0.12 192);">Limites assumées</span><h2 style="color:#fff;">Ce que repartio ne fait pas</h2></div>
-  <div class="split" style="grid-template-columns:repeat(3,1fr);background:var(--navy-soft);border-color:var(--navy-soft);">
+  <div class="split cols-3" style="background:var(--navy-soft);border-color:var(--navy-soft);">
     <?php foreach ([
       ['Pas de synchronisation bancaire', 'Aucun accès à vos comptes, aucun mandat DSP2.'],
       ['Pas de conseil en placement', 'repartio calcule ce que vous décrivez. Il ne recommande aucun produit.'],

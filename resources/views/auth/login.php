@@ -16,6 +16,7 @@
         <label class="check"><input type="checkbox" name="remember" checked> Rester connecté 30 jours</label>
         <button class="btn btn-orange" type="submit">Se connecter</button>
       </form>
+      <div class="auth-sep"><i></i><span>ou</span><i></i></div>
       <form method="post" action="<?= e(url('/connexion/lien')) ?>" style="display:flex;flex-direction:column;gap:10px;">
         <?= csrf_field() ?>
         <input type="email" name="email" required value="<?= e((string) old('email')) ?>" placeholder="vous@exemple.fr" style="padding:12px 14px;border-radius:10px;border:1px solid oklch(0.89 0.014 255);">

@@ -70,28 +70,30 @@ class Content
 
     public static function templatePayload(string $key): ?array
     {
-        $node = static fn (string $id, string $kind, string $title, float $x, float $y, float $amount) => compact('id', 'kind', 'title', 'x', 'y', 'amount');
+        $node = static function (string $id, string $kind, string $title, float $x, float $y, float $amount, array $extra = []): array {
+            return array_merge(compact('id', 'kind', 'title', 'x', 'y', 'amount'), $extra);
+        };
         $templates = [
             'couple' => [
                 'horizon' => 60,
                 'nodes' => [
                     $node('r1', 'revenu', 'Salaire A', 40, 60, 2200),
                     $node('r2', 'revenu', 'Salaire B', 40, 240, 2800),
-                    $node('c1', 'compte', 'Joint Factures', 360, 60, 1800),
-                    $node('c2', 'compte', 'Joint Quotidien', 360, 240, 1600),
-                    $node('p1', 'repartiteur', 'Épargne', 360, 420, 1600),
-                    $node('d1', 'depense', 'Prélèvements', 680, 60, 1800),
-                    $node('l1', 'livret', 'Livret A', 680, 240, 800),
-                    $node('l2', 'livret', 'LDDS', 680, 400, 800),
+                    $node('c1', 'compte', 'Joint Factures', 360, 60, 0),
+                    $node('c2', 'compte', 'Joint Quotidien', 360, 240, 0),
+                    $node('p1', 'repartiteur', 'Épargne', 360, 420, 0),
+                    $node('d1', 'depense', 'Prélèvements', 680, 60, 0),
+                    $node('l1', 'livret', 'Livret A', 680, 240, 0, ['rate' => 1.7, 'cap' => 22950, 'start' => 0, 'preset' => 'livret-a']),
+                    $node('l2', 'livret', 'LDDS', 680, 400, 0, ['rate' => 1.7, 'cap' => 12000, 'start' => 0, 'preset' => 'ldds']),
                 ],
                 'edges' => [
-                    ['from' => 'r1', 'to' => 'c1', 'amount' => 1800],
-                    ['from' => 'r1', 'to' => 'c2', 'amount' => 400],
-                    ['from' => 'r2', 'to' => 'c2', 'amount' => 1200],
-                    ['from' => 'r2', 'to' => 'p1', 'amount' => 1600],
-                    ['from' => 'c1', 'to' => 'd1', 'amount' => 1800],
-                    ['from' => 'p1', 'to' => 'l1', 'amount' => 800],
-                    ['from' => 'p1', 'to' => 'l2', 'amount' => 800],
+                    ['from' => 'r1', 'to' => 'c1', 'mode' => 'fixe', 'value' => 1800],
+                    ['from' => 'r1', 'to' => 'c2', 'mode' => 'fixe', 'value' => 400],
+                    ['from' => 'r2', 'to' => 'c2', 'mode' => 'fixe', 'value' => 1200],
+                    ['from' => 'r2', 'to' => 'p1', 'mode' => 'reste', 'value' => 0],
+                    ['from' => 'c1', 'to' => 'd1', 'mode' => 'reste', 'value' => 0],
+                    ['from' => 'p1', 'to' => 'l1', 'mode' => 'fixe', 'value' => 800],
+                    ['from' => 'p1', 'to' => 'l2', 'mode' => 'reste', 'value' => 0],
                 ],
             ],
         ];

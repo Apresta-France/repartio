@@ -11,8 +11,17 @@
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
 </head>
 <body>
-<div class="app-shell">
+<div class="app-shell<?= !empty($builder) ? ' is-builder' : '' ?>">
   <?php if (empty($builder)): ?>
+    <header class="app-mobile-bar">
+      <button type="button" class="nav-toggle" data-sidebar-toggle aria-expanded="false" aria-controls="app-sidebar">
+        <span class="nav-toggle-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="visually-hidden">Menu</span>
+      </button>
+      <a href="<?= e(url('/app')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
+      <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;padding:8px 12px;font-size:13px;min-height:0;">+ Circuit</a>
+    </header>
+    <div class="sidebar-backdrop" data-sidebar-close hidden></div>
     <?php require BASE_PATH . '/resources/views/partials/sidebar.php'; ?>
   <?php endif; ?>
   <div class="app-main">

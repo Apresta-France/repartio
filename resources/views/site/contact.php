@@ -1,10 +1,10 @@
 <section class="section" style="padding-bottom:44px;">
-  <span class="eyebrow">Contact</span>
+  <span class="eyebrow eyebrow-live">Contact</span>
   <h1 class="page-title" style="font-size:46px;max-width:24ch;margin:12px 0;">Une vraie personne vous répond</h1>
   <p class="lede">Pas de robot de premier niveau. Vous écrivez, quelqu’un de l’équipe lit et répond — généralement le jour même, au plus tard sous 72 heures ouvrées.</p>
 </section>
-<section style="display:grid;grid-template-columns:1.12fr .88fr;border-bottom:1px solid var(--line);">
-  <div style="padding:36px 44px 44px 32px;border-right:1px solid var(--line);">
+<section class="page-split" style="border-bottom:1px solid var(--line);">
+  <div style="padding:36px 44px 44px 32px;">
     <?php if (!empty($sent)): ?>
       <div class="card" style="padding:28px;">
         <h2>Message envoyé</h2>
@@ -20,7 +20,7 @@
             <label class="chip" style="cursor:pointer;"><input type="radio" name="topic" value="<?= e($k) ?>" <?= old('topic', 'autre') === $k ? 'checked' : '' ?>> <?= e($l) ?></label>
           <?php endforeach; ?>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="fields-2">
           <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>" placeholder="Julien"></label>
           <label class="field"><span>E-mail</span><input type="email" name="email" required value="<?= e((string) old('email')) ?>" placeholder="vous@exemple.fr"></label>
         </div>

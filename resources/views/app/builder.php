@@ -2,21 +2,27 @@
   <aside class="builder-side">
     <div>
       <a href="<?= e(url('/app/circuits')) ?>" class="eyebrow">← Mes circuits</a>
-      <div style="font-size:19px;font-weight:600;margin-top:8px;"><?= e($project['name']) ?></div>
+      <div class="builder-project-name"><?= e($project['name']) ?></div>
       <div class="eyebrow">Ventilation des revenus</div>
     </div>
     <div>
       <div class="eyebrow" style="margin-bottom:8px;">Poser un bloc</div>
-      <div style="display:grid;gap:6px;">
-        <?php foreach ([['revenu','Revenu','R','var(--teal)'],['compte','Compte','C','var(--navy)'],['repartiteur','Répartiteur','P','var(--orange)'],['livret','Livret','L','var(--blue)'],['depense','Dépense','D','var(--red)']] as $p): ?>
+      <div class="palette-list">
+        <?php foreach ([
+          ['revenu', 'Revenu', 'R', 'oklch(0.48 0.10 152)'],
+          ['compte', 'Compte', 'C', 'oklch(0.48 0.10 248)'],
+          ['repartiteur', 'Répartiteur', 'P', 'oklch(0.48 0.12 300)'],
+          ['livret', 'Livret', 'L', 'oklch(0.55 0.11 62)'],
+          ['depense', 'Dépense', 'D', 'oklch(0.52 0.14 32)'],
+        ] as $p): ?>
           <button type="button" class="palette-item" data-add="<?= e($p[0]) ?>">
             <span class="dot" style="background:<?= $p[3] ?>"></span>
             <span><?= e($p[1]) ?></span>
-            <span class="mono" style="margin-left:auto;font-size:10px;color:var(--faint);"><?= e($p[2]) ?></span>
+            <span class="mono palette-key"><?= e($p[2]) ?></span>
           </button>
         <?php endforeach; ?>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);">Cliquez un type pour le poser. Reliez le point droit d’un bloc au point gauche d’un autre.</p>
+      <p class="builder-hint">Cliquez un type, ou glissez-le sur le canvas. Reliez le point droit d’un bloc au point gauche d’un autre.</p>
     </div>
     <div>
       <div class="eyebrow" style="padding-bottom:8px;">Chaque mois</div>
@@ -27,31 +33,72 @@
         <div><span>Non affecté</span><strong class="mono" data-stat="unassigned">0 €</strong></div>
       </div>
     </div>
-    <div style="margin-top:auto;padding:15px;border-radius:12px;background:oklch(0.96 0.012 152);border:1px solid oklch(0.9 0.02 152);">
-      <div style="display:flex;justify-content:space-between;"><span class="eyebrow" style="color:var(--teal-ink);">Projection</span><strong class="mono" data-stat="proj">0 €</strong></div>
+    <div class="builder-proj">
+      <div class="builder-proj-row">
+        <span class="eyebrow" style="color:var(--teal-ink);" data-horizon-label>Dans 5 ans</span>
+        <strong class="mono" data-stat="proj">0 €</strong>
+      </div>
+      <p class="builder-proj-hint" data-stat="proj-hint"></p>
     </div>
+    <div data-warns></div>
   </aside>
-  <main style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+  <main class="builder-main">
     <header class="app-top">
-      <form method="post" action="<?= e(url('/app/circuits/' . $project['id'])) ?>" data-save-form style="display:flex;align-items:center;gap:10px;flex:1;">
+      <form method="post" action="<?= e(url('/app/circuits/' . $project['id'])) ?>" data-save-form class="builder-toolbar">
         <?= csrf_field() ?>
-        <input name="name" data-name value="<?= e($project['name']) ?>" style="border:1px solid var(--line);border-radius:9px;padding:8px 12px;font-weight:700;">
+        <button type="button" class="btn btn-ghost builder-side-toggle" data-builder-side-toggle aria-expanded="false">Blocs &amp; chiffres</button>
+        <input name="name" data-name value="<?= e($project['name']) ?>" class="builder-name-input">
+        <label class="builder-horizon">
+          <span>Projection</span>
+          <input type="number" min="1" max="360" step="12" data-horizon value="<?= e((string) ($payload['horizon'] ?? 60)) ?>">
+          <span>mois</span>
+        </label>
         <input type="hidden" name="payload" data-payload-input>
         <button class="btn btn-ghost" type="button" data-clear>Vider</button>
         <button class="btn btn-orange" type="submit">Enregistrer</button>
+        <button type="button" class="btn btn-ghost builder-props-toggle" data-props-toggle aria-expanded="false">Propriétés</button>
       </form>
     </header>
     <div class="canvas-wrap" data-canvas>
       <div class="dots"></div>
-      <div data-layer style="position:absolute;top:0;left:0;transform-origin:0 0;">
-        <svg data-edges width="2400" height="1400" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none;"></svg>
+      <div data-layer class="builder-layer">
+        <svg data-edges width="6000" height="4200" class="builder-edges"></svg>
+        <div data-labels class="builder-labels"></div>
       </div>
-      <div style="position:absolute;right:18px;bottom:18px;display:flex;gap:4px;padding:4px;border-radius:11px;background:#fff;border:1px solid var(--line);">
+      <div class="canvas-empty" data-empty>
+        <strong>Le plan est vide</strong>
+        <span>Posez un bloc à gauche, ou glissez-le ici. Un modèle vous sera proposé pour préremplir taux et plafonds.</span>
+      </div>
+      <div class="canvas-zoom">
         <button type="button" class="btn btn-ghost" data-zoom-out>−</button>
-        <span class="mono" data-zoom style="min-width:42px;text-align:center;align-self:center;">85%</span>
+        <span class="mono" data-zoom>85%</span>
         <button type="button" class="btn btn-ghost" data-zoom-in>+</button>
         <button type="button" class="btn btn-ghost" data-fit>Ajuster</button>
       </div>
     </div>
   </main>
+
+  <aside class="builder-props" data-props>
+    <div class="builder-props-empty" data-props-empty>
+      <div class="eyebrow">Propriétés</div>
+      <p>Sélectionnez un bloc pour modifier son nom, ses montants, son taux ou ses liens sortants.</p>
+    </div>
+    <div data-props-form hidden></div>
+  </aside>
+</div>
+
+<div class="builder-modal" data-preset-modal hidden>
+  <div class="builder-modal-backdrop" data-preset-dismiss></div>
+  <div class="builder-modal-card" role="dialog" aria-modal="true" aria-labelledby="preset-title">
+    <div class="builder-modal-head">
+      <div>
+        <div class="eyebrow" data-preset-kind>Nouveau bloc</div>
+        <h2 id="preset-title">Préconfigurer</h2>
+      </div>
+      <button type="button" class="btn btn-ghost builder-modal-close" data-preset-dismiss aria-label="Fermer">×</button>
+    </div>
+    <p class="builder-hint" data-preset-intro>Choisissez un modèle, ou partez vierge.</p>
+    <div class="preset-groups" data-preset-list></div>
+  </div>
 </div>

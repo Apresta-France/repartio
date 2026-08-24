@@ -1,5 +1,5 @@
 <section class="section" style="padding-bottom:56px;">
-  <span class="eyebrow">Fonctionnement</span>
+  <span class="eyebrow eyebrow-live">Fonctionnement</span>
   <h1 class="page-title" style="font-size:48px;max-width:24ch;margin:12px 0;">Un circuit se lit comme un plan de plomberie</h1>
   <p class="lede">Vous ne remplissez pas des catégories, vous branchez des tuyaux. Chaque bloc reçoit un montant, en garde une part s’il veut, et fait sortir le reste. Quand tous les tuyaux sont raccordés, le compteur « non affecté » tombe à zéro.</p>
 </section>
@@ -10,8 +10,8 @@ $steps = [
   ['03', 'Dérouler le temps', 'Le mois type est répété sur l’horizon choisi. Les livrets capitalisent à leur taux, saturent à leur plafond, et le surplus part vers la destination câblée.', ['Horizons prêts : 12, 60 et 120 mois.', 'Chaque livret affiche sa date de saturation.', 'La projection se recalcule à chaque modification.'], [['Épargné par mois','5 234 €'],['Patrimoine dans 5 ans','105 615 €'],['Livret A Julien plein en','16 mois'],['Dépenses cumulées','426 240 €']]],
 ];
 foreach ($steps as $s): ?>
-<section style="display:grid;grid-template-columns:minmax(340px,.85fr) 1.15fr;border-bottom:1px solid var(--line);">
-  <div style="padding:44px 44px 46px 32px;border-right:1px solid var(--line);">
+<section class="page-split" style="border-bottom:1px solid var(--line);">
+  <div style="padding:44px 44px 46px 32px;">
     <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;">
       <span class="mono" style="width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:oklch(0.95 0.03 192);color:var(--teal-ink);"><?= e($s[0]) ?></span>
       <h2 style="margin:0;"><?= e($s[1]) ?></h2>
@@ -31,7 +31,7 @@ foreach ($steps as $s): ?>
 
 <section class="section" style="background:var(--paper);">
   <div class="section-head"><span class="eyebrow">Vocabulaire</span><h2>Les cinq types de blocs</h2></div>
-  <div class="split" style="grid-template-columns:repeat(5,1fr);">
+  <div class="split cols-5">
     <?php foreach ([
       ['Revenu', 'var(--teal)', 'Fait entrer de l’argent. N’a pas d’entrée, seulement une sortie.', 'salaire · loyers'],
       ['Compte', 'var(--navy)', 'Reçoit, peut garder un matelas, et fait ressortir le reste.', 'courant · joint'],

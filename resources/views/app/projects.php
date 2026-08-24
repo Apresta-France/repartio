@@ -5,7 +5,7 @@
   </div>
   <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;">Nouveau circuit</a>
 </header>
-<section style="padding:24px 28px 34px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;">
+<section class="cards-fill" style="padding:24px 28px 34px;">
   <?php foreach ($projects as $p): ?>
     <div class="card" style="display:flex;flex-direction:column;">
       <a href="<?= e(url('/app/circuits/' . $p['id'])) ?>" style="height:120px;background:var(--grid);border-bottom:1px solid var(--line);display:block;"></a>

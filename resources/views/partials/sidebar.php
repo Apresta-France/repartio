@@ -6,7 +6,6 @@ $pct = $limit > 0 ? min(100, (int) round($used / $limit * 100)) : 0;
 $main = [
     ['dashboard', 'Tableau de bord', '/app', 'var(--teal)'],
     ['projets', 'Mes circuits', '/app/circuits', 'var(--blue)'],
-    ['builder', 'Builder', '/app/circuits/nouveau', 'var(--orange)'],
 ];
 $bottom = [
     ['forfait', 'Forfait & facturation', '/app/forfait', 'var(--orange)'],
@@ -14,7 +13,7 @@ $bottom = [
     ['reglages', 'Réglages', '/app/reglages', 'var(--navy)'],
 ];
 ?>
-<aside class="sidebar">
+<aside class="sidebar" id="app-sidebar">
   <a href="<?= e(url('/app')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:30px;"></a>
   <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>">+ Nouveau circuit</a>
   <nav>

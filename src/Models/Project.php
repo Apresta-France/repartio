@@ -137,10 +137,169 @@ class Project
     public static function summarize(array $payload): array
     {
         $nodes = $payload['nodes'] ?? [];
+        $edges = $payload['edges'] ?? [];
+        $horizon = (int) ($payload['horizon'] ?? 60);
+
+        $legacyAmounts = false;
+        foreach ($nodes as $node) {
+            if (($node['kind'] ?? '') !== 'revenu' && (float) ($node['amount'] ?? 0) > 0) {
+                $legacyAmounts = true;
+                break;
+            }
+        }
+        if ($edges === [] && $legacyAmounts) {
+            return self::summarizeLegacy($payload);
+        }
+
+        $byId = [];
+        $outs = [];
+        $indeg = [];
+        foreach ($nodes as $node) {
+            $id = (string) ($node['id'] ?? '');
+            if ($id === '') {
+                continue;
+            }
+            $byId[$id] = $node;
+            $outs[$id] = [];
+            $indeg[$id] = 0;
+        }
+        foreach ($edges as $edge) {
+            $from = (string) ($edge['from'] ?? '');
+            $to = (string) ($edge['to'] ?? '');
+            if (!isset($byId[$from], $byId[$to])) {
+                continue;
+            }
+            $value = (float) ($edge['value'] ?? $edge['amount'] ?? 0);
+            $mode = $edge['mode'] ?? ($value > 0 ? 'fixe' : 'reste');
+            $outs[$from][] = ['to' => $to, 'mode' => $mode, 'value' => $value, 'amt' => 0.0];
+            $indeg[$to]++;
+        }
+
+        $queue = [];
+        foreach ($indeg as $id => $degree) {
+            if ($degree === 0) {
+                $queue[] = $id;
+            }
+        }
+        $order = [];
+        $seen = [];
+        while ($queue) {
+            $id = array_shift($queue);
+            if (isset($seen[$id])) {
+                continue;
+            }
+            $seen[$id] = true;
+            $order[] = $id;
+            foreach ($outs[$id] as $edge) {
+                $indeg[$edge['to']]--;
+                if ($indeg[$edge['to']] === 0) {
+                    $queue[] = $edge['to'];
+                }
+            }
+        }
+        foreach ($byId as $id => $_) {
+            if (!isset($seen[$id])) {
+                $order[] = $id;
+            }
+        }
+
+        $inflow = array_fill_keys(array_keys($byId), 0.0);
+        $kept = [];
+        foreach ($order as $id) {
+            $node = $byId[$id] ?? null;
+            if (!$node) {
+                continue;
+            }
+            $available = ($node['kind'] ?? '') === 'revenu'
+                ? max(0.0, (float) ($node['amount'] ?? 0))
+                : $inflow[$id];
+            $list = $outs[$id];
+            $remaining = $available;
+            foreach ($list as $i => $edge) {
+                if ($edge['mode'] !== 'fixe') {
+                    continue;
+                }
+                $ask = max(0.0, $edge['value']);
+                $amt = min($ask, max(0.0, $remaining));
+                $list[$i]['amt'] = $amt;
+                $remaining -= $amt;
+            }
+            foreach ($list as $i => $edge) {
+                if ($edge['mode'] !== 'pct') {
+                    continue;
+                }
+                $ask = $available * max(0.0, $edge['value']) / 100;
+                $amt = min($ask, max(0.0, $remaining));
+                $list[$i]['amt'] = $amt;
+                $remaining -= $amt;
+            }
+            $rest = [];
+            foreach ($list as $i => $edge) {
+                if ($edge['mode'] === 'reste') {
+                    $rest[] = $i;
+                }
+            }
+            if ($rest) {
+                $share = max(0.0, $remaining) / count($rest);
+                foreach ($rest as $i) {
+                    $list[$i]['amt'] = $share;
+                }
+                $remaining -= $share * count($rest);
+            }
+            $kept[$id] = max(0.0, $remaining);
+            foreach ($list as $edge) {
+                $inflow[$edge['to']] += $edge['amt'];
+            }
+            $outs[$id] = $list;
+        }
+
         $in = 0.0;
         $out = 0.0;
         $saved = 0.0;
-        foreach ($nodes as $node) {
+        $leftover = 0.0;
+        $projection = 0.0;
+        foreach ($byId as $id => $node) {
+            $kind = $node['kind'] ?? '';
+            $outAmt = 0.0;
+            foreach ($outs[$id] as $edge) {
+                $outAmt += $edge['amt'];
+            }
+            if ($kind === 'revenu') {
+                $in += max(0.0, (float) ($node['amount'] ?? 0));
+            } elseif ($kind === 'depense') {
+                $out += ($kept[$id] ?? 0) + $outAmt;
+            } elseif ($kind === 'livret') {
+                $saved += $kept[$id] ?? 0;
+                $balance = max(0.0, (float) ($node['start'] ?? 0));
+                $cap = (float) ($node['cap'] ?? 0);
+                $cap = $cap > 0 ? $cap : INF;
+                $add = $kept[$id] ?? 0;
+                $rate = max(0.0, (float) ($node['rate'] ?? 0));
+                for ($month = 1; $month <= $horizon; $month++) {
+                    $balance += $balance * ($rate / 100) / 12;
+                    $balance = min($cap, $balance + $add);
+                }
+                $projection += $balance;
+            } else {
+                $leftover += $kept[$id] ?? 0;
+            }
+        }
+
+        return [
+            'monthly_in' => $in,
+            'monthly_out' => $out,
+            'monthly_saved' => $saved,
+            'unassigned' => $leftover,
+            'projection' => $projection > 0 ? $projection : $saved * $horizon,
+        ];
+    }
+
+    private static function summarizeLegacy(array $payload): array
+    {
+        $in = 0.0;
+        $out = 0.0;
+        $saved = 0.0;
+        foreach ($payload['nodes'] ?? [] as $node) {
             $amount = (float) ($node['amount'] ?? 0);
             $kind = $node['kind'] ?? '';
             if ($kind === 'revenu') {
@@ -151,13 +310,12 @@ class Project
                 $saved += $amount;
             }
         }
-        $unassigned = max(0, $in - $out - $saved);
         $horizon = (int) ($payload['horizon'] ?? 60);
         return [
             'monthly_in' => $in,
             'monthly_out' => $out,
             'monthly_saved' => $saved,
-            'unassigned' => $unassigned,
+            'unassigned' => max(0, $in - $out - $saved),
             'projection' => $saved * $horizon,
         ];
     }

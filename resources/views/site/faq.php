@@ -1,5 +1,5 @@
 <section class="section" style="padding-bottom:36px;">
-  <span class="eyebrow">Questions fréquentes</span>
+  <span class="eyebrow eyebrow-live">Questions fréquentes</span>
   <h1 class="page-title" style="font-size:46px;max-width:24ch;margin:12px 0;">Tout ce qu’on nous demande, rangé</h1>
   <p class="lede">Si la vôtre n’y est pas, écrivez-nous : la question finit souvent par rejoindre cette page.</p>
   <label class="field" style="max-width:420px;margin-top:12px;">

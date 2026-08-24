@@ -1,4 +1,4 @@
-<section class="dark-band" style="display:grid;grid-template-columns:1.05fr .95fr;">
+<section class="dark-band band-2">
   <div style="padding:70px 44px 70px 32px;">
     <span class="eyebrow" style="color:oklch(0.75 0.12 192);">Vos données</span>
     <h1 style="color:#fff;font-size:46px;max-width:22ch;margin:14px 0;">Aucune connexion bancaire. Aucun agrégateur.</h1>
@@ -16,8 +16,8 @@
       ['Suppression', 'Un clic, sans période de rétention.'],
       ['Publicité', 'Aucun traceur publicitaire, aucune revente.'],
     ] as $t): ?>
-      <div style="display:flex;gap:16px;padding:18px 0;border-bottom:1px solid oklch(0.28 0.07 265);">
-        <span class="eyebrow" style="width:128px;flex:none;color:oklch(0.72 0.11 192);"><?= e($t[0]) ?></span>
+      <div class="trust-row" style="border-bottom-color:oklch(0.28 0.07 265);">
+        <span class="eyebrow k" style="width:128px;color:oklch(0.72 0.11 192);"><?= e($t[0]) ?></span>
         <span><?= e($t[1]) ?></span>
       </div>
     <?php endforeach; ?>
@@ -26,7 +26,7 @@
 <section class="section" style="background:var(--paper);">
   <div class="section-head"><span class="eyebrow">Inventaire</span><h2>Ce que nous stockons, exactement</h2></div>
   <div class="table">
-    <div class="table-row" style="grid-template-columns:1fr 1.5fr .7fr .7fr;background:oklch(0.975 0.005 250);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);">
+    <div class="table-row table-data" style="background:oklch(0.975 0.005 250);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);">
       <span>Donnée</span><span>Pourquoi</span><span>Conservation</span><span>Chiffrée</span>
     </div>
     <?php foreach ([
@@ -36,7 +36,7 @@
       ['Messages de contact', 'Répondre à votre demande', 'Le temps du traitement', 'Oui'],
       ['Journaux d’e-mails', 'Tracer les envois transactionnels', '90 jours', 'Oui'],
     ] as $r): ?>
-      <div class="table-row" style="grid-template-columns:1fr 1.5fr .7fr .7fr;">
+      <div class="table-row table-data">
         <strong><?= e($r[0]) ?></strong><span style="color:var(--muted);"><?= e($r[1]) ?></span>
         <span class="mono"><?= e($r[2]) ?></span><span class="mono" style="color:var(--teal-ink);"><?= e($r[3]) ?></span>
       </div>
@@ -45,7 +45,7 @@
 </section>
 <section class="section">
   <div class="section-head"><span class="eyebrow">Vos droits</span><h2>Quatre boutons, pas quatre courriers</h2></div>
-  <div class="split" style="grid-template-columns:repeat(4,1fr);">
+  <div class="split cols-4">
     <?php foreach ([
       ['01', 'Accéder', 'Télécharger vos circuits depuis l’espace.', 'Mes circuits'],
       ['02', 'Corriger', 'Modifier prénom et e-mail dans le profil.', 'Mon profil'],

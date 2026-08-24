@@ -1,3 +1,66 @@
+const siteHeader = document.querySelector('[data-site-header]');
+const navToggle = document.querySelector('[data-nav-toggle]');
+const navBackdrop = document.querySelector('[data-nav-close]');
+const sidebar = document.querySelector('#app-sidebar');
+const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+const sidebarBackdrop = document.querySelector('[data-sidebar-close]');
+
+const setOpen = (open, header, toggle, backdrop) => {
+  if (!header || !toggle) return;
+  header.classList.toggle('is-open', open);
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (backdrop) {
+    backdrop.hidden = !open;
+    backdrop.classList.toggle('is-on', open);
+  }
+  document.body.classList.toggle('is-locked', open || Boolean(sidebar?.classList.contains('is-open')));
+};
+
+navToggle?.addEventListener('click', () => {
+  setOpen(!siteHeader.classList.contains('is-open'), siteHeader, navToggle, navBackdrop);
+});
+navBackdrop?.addEventListener('click', () => setOpen(false, siteHeader, navToggle, navBackdrop));
+
+sidebarToggle?.addEventListener('click', () => {
+  const open = !sidebar.classList.contains('is-open');
+  sidebar.classList.toggle('is-open', open);
+  sidebarToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (sidebarBackdrop) {
+    sidebarBackdrop.hidden = !open;
+    sidebarBackdrop.classList.toggle('is-on', open);
+  }
+  document.body.classList.toggle('is-locked', open);
+});
+sidebarBackdrop?.addEventListener('click', () => {
+  sidebar?.classList.remove('is-open');
+  sidebarToggle?.setAttribute('aria-expanded', 'false');
+  sidebarBackdrop.hidden = true;
+  sidebarBackdrop.classList.remove('is-on');
+  document.body.classList.remove('is-locked');
+});
+
+document.querySelector('[data-builder-side-toggle]')?.addEventListener('click', (event) => {
+  const builder = document.querySelector('[data-builder]');
+  if (!builder) return;
+  const open = !builder.classList.contains('is-palette-open');
+  builder.classList.toggle('is-palette-open', open);
+  event.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  setOpen(false, siteHeader, navToggle, navBackdrop);
+  if (sidebar?.classList.contains('is-open')) {
+    sidebar.classList.remove('is-open');
+    sidebarToggle?.setAttribute('aria-expanded', 'false');
+    if (sidebarBackdrop) {
+      sidebarBackdrop.hidden = true;
+      sidebarBackdrop.classList.remove('is-on');
+    }
+    document.body.classList.remove('is-locked');
+  }
+});
+
 document.addEventListener('click', (event) => {
   const trigger = event.target.closest('[data-faq]');
   if (!trigger) return;
