@@ -134,6 +134,7 @@
       rate: Number(n.rate) || 0,
       cap: Number(n.cap) || 0,
       preset: n.preset || '',
+      note: typeof n.note === 'string' ? n.note : '',
     };
   }
 
@@ -237,7 +238,7 @@
       if (n.kind !== 'livret') return;
       let b = Math.max(0, n.start);
       const cap = n.cap > 0 ? n.cap : Infinity;
-      const add = kept[n.id] || 0;
+      const add = (kept[n.id] > 0 ? kept[n.id] : (inflow[n.id] || 0));
       let when = null;
       if (b >= cap - 0.5) when = 0;
       for (let m = 1; m <= state.horizon; m += 1) {
@@ -388,15 +389,18 @@
     if (n.kind === 'revenu') {
       rows.push(['Par mois', euro(n.amount)]);
       rows.push(['Sort', euro(out)]);
+    } else if (n.kind === 'depense') {
+      rows.push(['Par mois', euro(n.amount)]);
+      rows.push(['Reçoit', euro(inflow)]);
+      rows.push(['Sur ' + state.horizon + ' mois', euro(inflow * state.horizon)]);
     } else {
       rows.push(['Reçoit', euro(inflow)]);
     }
     if (n.kind === 'compte') rows.push(['Reste dessus', euro(kept)]);
     if (n.kind === 'livret') {
       rows.push(['Taux', (n.rate || 0).toString().replace('.', ',') + ' %']);
-      rows.push(['Dans ' + state.horizon + ' mois', euro(C.fin[n.id] || 0)]);
+      rows.push(['Dans ' + state.horizon + ' mois', euro(C.fin?.[n.id] || 0), 'is-proj']);
     }
-    if (n.kind === 'depense') rows.push(['Sur ' + state.horizon + ' mois', euro(inflow * state.horizon)]);
     let chip = '';
     if (n.kind === 'repartiteur') {
       chip = kept > 0.5 ? { text: euro(kept) + ' non ventilés', bad: true } : { text: 'tout est ventilé', bad: false };
@@ -434,8 +438,9 @@
           </div>
           <div class="node-title">${escapeHtml(n.title)}</div>
           <div class="node-body">
-            ${stats.rows.map(([k, v]) => `<div class="node-stat"><span>${k}</span><b>${v}</b></div>`).join('')}
+            ${stats.rows.map(([k, v, cls]) => `<div class="node-stat"><span>${k}</span><b${cls ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
             ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}">${stats.chip.text}</div>` : ''}
+            ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
           </div>
         </div>
         ${readonly ? '' : (meta.hasIn ? `<div class="port port-in" data-port-in="${n.id}" style="border:2px solid ${meta.color}" title="Entrée"></div>` : '')}
@@ -545,7 +550,11 @@
           <span>Nom du bloc</span>
           <input data-prop="title" value="${escapeAttr(n.title)}">
         </label>
-        ${n.kind === 'revenu' ? `
+        <label class="prop-field">
+          <span>Commentaire</span>
+          <textarea data-prop="note" rows="4" placeholder="Précisions, hypothèse, rappel…">${escapeHtml(n.note)}</textarea>
+        </label>
+        ${n.kind === 'revenu' || n.kind === 'depense' ? `
           <label class="prop-field">
             <span>Montant par mois</span>
             <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}">
@@ -578,9 +587,33 @@
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
-            ${stats.rows.map(([k, v]) => `<div class="prop-stat"><span>${k}</span><b>${v}</b></div>`).join('')}
+            ${stats.rows.map(([k, v, cls]) => `<div class="prop-stat"><span>${k}</span><b${cls ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
           </div>
         </div>
+        ${n.kind === 'depense' ? `
+          <div>
+            <div class="eyebrow" style="margin-bottom:8px;">Liens entrants</div>
+            <div class="prop-links">
+              ${state.edges.filter((e) => e.to === n.id).length ? state.edges.filter((e) => e.to === n.id).map((e) => {
+                const src = C.byId[e.from];
+                return `<div class="prop-link" data-edge-edit="${e.id}">
+                  <div class="prop-link-top">
+                    <span>← ${escapeHtml(src ? src.title : e.from)}</span>
+                    <button type="button" class="btn btn-ghost" data-edge-del="${e.id}" style="min-height:0;padding:4px 8px;font-size:12px;">Retirer</button>
+                  </div>
+                  <div class="prop-link-row">
+                    <select data-edge-mode="${e.id}">
+                      <option value="reste"${e.mode === 'reste' ? ' selected' : ''}>Le reste</option>
+                      <option value="pct"${e.mode === 'pct' ? ' selected' : ''}>Pourcentage</option>
+                      <option value="fixe"${e.mode === 'fixe' ? ' selected' : ''}>Montant fixe</option>
+                    </select>
+                    ${e.mode === 'reste' ? '' : `<input data-edge-value="${e.id}" type="number" min="0" step="1" value="${e.value}">`}
+                  </div>
+                  <div class="prop-link-amt">${euro(e._amt)} / mois</div>
+                </div>`;
+              }).join('') : '<p class="builder-hint">Aucun lien. Reliez un compte ou un revenu vers ce bloc, puis saisissez le montant.</p>'}
+            </div>
+          </div>` : ''}
         ${meta.hasOut ? `
           <div>
             <div class="eyebrow" style="margin-bottom:8px;">Liens sortants</div>
@@ -664,17 +697,27 @@
     if (state.connectFrom === id) cancelLink();
   }
 
+  function syncDepenseAmount(n) {
+    const ins = state.edges.filter((e) => e.to === n.id);
+    if (!ins.length || n.amount <= 0) return;
+    const edge = ins.length === 1 ? ins[0] : (ins.find((e) => e.mode === 'fixe') || ins[0]);
+    edge.mode = 'fixe';
+    edge.value = n.amount;
+  }
+
   function addEdge(from, to) {
     if (from === to) return;
     if (!nodeById(from) || !nodeById(to)) return;
     if (state.edges.some((e) => e.from === from && e.to === to)) return;
+    const dest = nodeById(to);
     const already = state.edges.some((e) => e.from === from);
+    const useFixe = dest && dest.kind === 'depense' && dest.amount > 0;
     state.edges.push({
       id: uid('e'),
       from,
       to,
-      mode: already ? 'pct' : 'reste',
-      value: already ? 25 : 0,
+      mode: useFixe ? 'fixe' : (already ? 'pct' : 'reste'),
+      value: useFixe ? dest.amount : (already ? 25 : 0),
     });
   }
 
@@ -946,7 +989,11 @@
     if (!n) return;
     const prop = e.target.getAttribute('data-prop');
     if (prop === 'title') n.title = e.target.value;
-    if (prop === 'amount') n.amount = Number(e.target.value) || 0;
+    if (prop === 'note') n.note = e.target.value;
+    if (prop === 'amount') {
+      n.amount = Number(e.target.value) || 0;
+      if (n.kind === 'depense') syncDepenseAmount(n);
+    }
     if (prop === 'start') n.start = Number(e.target.value) || 0;
     if (prop === 'rate') { n.rate = Number(e.target.value) || 0; n.preset = 'custom'; }
     if (prop === 'cap') { n.cap = Number(e.target.value) || 0; n.preset = 'custom'; }
