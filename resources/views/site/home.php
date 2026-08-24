@@ -139,7 +139,7 @@ $C = [
     $steps = [
       ['01', 'Posez vos blocs', 'oklch(0.95 0.03 192)', 'oklch(0.45 0.11 195)', 'Un bloc par revenu, compte, livret ou poste de dépense. Rien à catégoriser, rien à importer.', [['Salaire','1 320 €'],['Auto-entreprise','1 800 €'],['Loyers du local','540 €']]],
       ['02', 'Reliez les flux', 'oklch(0.96 0.04 38)', 'oklch(0.56 0.17 38)', 'Tirez un fil d’un bloc à l’autre, en montant fixe ou en pourcentage. Le solde de chaque bloc s’ajuste en direct.', [['Compte → Joint','2 280 €'],['Compte → Épargne','1 000 €'],['Non affecté','0 €']]],
-      ['03', 'Lisez la suite', 'oklch(0.94 0.02 265)', 'oklch(0.36 0.09 265)', 'repartio déroule votre mois type sur 60 mois, applique taux et plafonds, et vous dit quand chaque livret sature.', [['Épargné / mois','860 €'],['Dans 5 ans','55 786 €'],['LEP Julien plein en','38 mois']]],
+      ['03', 'Lisez la suite', 'oklch(0.94 0.02 265)', 'oklch(0.36 0.09 265)', 'repartio déroule votre mois type sur 60 mois, applique taux et plafonds, et vous dit quand chaque livret sature.', [['Épargné / mois','860 €'],['Dans 5 ans','55 786 €'],['LEP A plein en','38 mois']]],
     ];
     foreach ($steps as $s): ?>
       <div style="padding:26px 26px 28px;">

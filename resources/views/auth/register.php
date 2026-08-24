@@ -13,7 +13,7 @@
       </div>
       <form method="post" action="<?= e(url('/creer-un-compte')) ?>" style="display:flex;flex-direction:column;gap:14px;">
         <?= csrf_field() ?>
-        <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>" placeholder="Julien"></label>
+        <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>" placeholder="Camille"></label>
         <label class="field"><span>Adresse e-mail</span><input type="email" name="email" required value="<?= e((string) old('email')) ?>" placeholder="vous@exemple.fr"></label>
         <label class="field">
           <span>Mot de passe</span>

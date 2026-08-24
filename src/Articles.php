@@ -280,21 +280,21 @@ class Articles
     {
         return [
             ['type' => 'h', 'text' => 'Le point de départ : un tableur qui ne tenait plus'],
-            ['type' => 'p', 'text' => 'Julien et Malorie ont quatre sources de revenus, deux enfants, un local commercial loué et six livrets réglementés. Leur tableur fonctionnait très bien tant qu’il n’y avait qu’un salaire et un compte joint. Il a cessé de fonctionner le jour où l’auto-entreprise de Julien est devenue la première source du foyer.'],
+            ['type' => 'p', 'text' => 'Ce foyer a cinq sources de revenus, deux enfants, un local commercial loué et six livrets réglementés. Le tableur fonctionnait très bien tant qu’il n’y avait qu’un salaire et un compte joint. Il a cessé de fonctionner le jour où l’auto-entreprise est devenue la première source du foyer.'],
             ['type' => 'p', 'text' => 'Le problème n’était pas le calcul — un tableur calcule parfaitement — mais la lecture. Personne ne savait plus répondre à la question « si l’auto-entreprise baisse de mille euros, qu’est-ce qui s’arrête en premier ? ». La réponse existait, quelque part, dans une colonne masquée.'],
             ['type' => 'h', 'text' => 'Les entrées, telles qu’elles ont été posées'],
             ['type' => 'p', 'text' => 'Cinq blocs de revenus, dont deux variables. Les montants retenus sont des moyennes lissées sur les douze derniers mois, arrondies à l’euro inférieur — un choix conservateur assumé.'],
             ['type' => 'table', 'head' => 'Bloc de revenu', 'rows' => [
-                ['k' => 'Auto-entreprise (Julien)', 'v' => '1 800 €', 'c' => 'teal'],
-                ['k' => 'Salaire (Malorie)', 'v' => '2 240 €', 'c' => 'teal'],
+                ['k' => 'Auto-entreprise (A)', 'v' => '1 800 €', 'c' => 'teal'],
+                ['k' => 'Salaire (B)', 'v' => '2 240 €', 'c' => 'teal'],
                 ['k' => 'Loyers du local', 'v' => '540 €', 'c' => 'teal'],
-                ['k' => 'Salaire (Julien)', 'v' => '1 320 €', 'c' => 'teal'],
+                ['k' => 'Salaire (A)', 'v' => '1 320 €', 'c' => 'teal'],
                 ['k' => 'Allocations', 'v' => '380 €', 'c' => 'teal'],
             ]],
             ['type' => 'widget', 'id' => 'couple'],
             ['type' => 'h', 'text' => 'La première surprise : la provision URSSAF'],
             ['type' => 'p', 'text' => 'Dans le tableur, les cotisations étaient une ligne trimestrielle, donc invisible deux mois sur trois. En posant un bloc dépense alimenté chaque mois depuis le compte professionnel, le revenu réellement disponible a perdu 380 € — et gagné en honnêteté.'],
-            ['type' => 'quote', 'text' => 'On croyait disposer de tout le chiffre d’affaires. On en garde mille quatre cent vingt, et c’est très bien — au moins c’est vrai.', 'by' => 'Julien, sur le circuit terminé'],
+            ['type' => 'quote', 'text' => 'On croyait disposer de tout le chiffre d’affaires. On en garde mille quatre cent vingt, et c’est très bien — au moins c’est vrai.', 'by' => 'Lecture du circuit, après provision URSSAF'],
             ['type' => 'h', 'text' => 'Deux comptes joints, pas un'],
             ['type' => 'p', 'text' => 'La décision structurante du circuit n’est pas financière, elle est organisationnelle : séparer les prélèvements du quotidien. Le joint « Factures » ne reçoit que ce que les prélèvements consomment, au centime. Le joint « Quotidien » reçoit une enveloppe fixe.'],
             ['type' => 'list', 'items' => [
@@ -305,21 +305,21 @@ class Articles
             ['type' => 'h', 'text' => 'L’épargne : deux répartiteurs, six livrets'],
             ['type' => 'p', 'text' => 'Chacun conserve son propre répartiteur, qui découpe ce qu’il reçoit entre ses trois livrets. C’est ce qui permet de dire « mon épargne » sans avoir à négocier chaque virement.'],
             ['type' => 'table', 'head' => 'Destination d’épargne', 'rows' => [
-                ['k' => 'Répartiteur Julien', 'v' => '460 €', 'c' => 'orange'],
-                ['k' => 'Répartiteur Malorie', 'v' => '320 €', 'c' => 'orange'],
+                ['k' => 'Répartiteur A', 'v' => '460 €', 'c' => 'orange'],
+                ['k' => 'Répartiteur B', 'v' => '320 €', 'c' => 'orange'],
                 ['k' => 'Livrets des enfants', 'v' => '80 €', 'c' => 'blue'],
                 ['k' => 'Total épargné / mois', 'v' => '860 €', 'c' => 'teal'],
             ]],
             ['type' => 'h', 'text' => 'Ce que la projection a changé'],
             ['type' => 'p', 'text' => 'À soixante mois, le patrimoine atteint 55 786 €. Mais l’information utile n’est pas ce total : c’est la liste des dates de saturation. Les LEP se remplissent en premier ; le Livret A, lui, a encore de la place.'],
-            ['type' => 'p', 'text' => 'Aucun débordement n’était câblé. Concrètement, quand le LEP de Julien sature, 200 € par mois n’ont plus de destination. Le compteur « non affecté » restait à zéro dans le mois type, mais la projection révélait le blocage à venir.'],
+            ['type' => 'p', 'text' => 'Aucun débordement n’était câblé. Concrètement, quand le LEP A sature, 200 € par mois n’ont plus de destination. Le compteur « non affecté » restait à zéro dans le mois type, mais la projection révélait le blocage à venir.'],
             ['type' => 'list', 'items' => [
                 'Ajout d’un fil de débordement du LDDS vers le Livret A.',
                 'Ajout d’un second débordement du Livret A vers un bloc « épargne longue » à définir.',
                 'Décision reportée sur le support de cette épargne longue — hors du périmètre de repartio.',
             ]],
             ['type' => 'h', 'text' => 'Ce qu’on retient'],
-            ['type' => 'p', 'text' => 'Un circuit ne rend pas les décisions plus faciles, il rend leurs conséquences visibles. Ici, la question de départ — « qu’est-ce qui s’arrête si l’auto-entreprise baisse ? » — a désormais une réponse d’une ligne : le répartiteur de Julien, avant toute autre chose.'],
+            ['type' => 'p', 'text' => 'Un circuit ne rend pas les décisions plus faciles, il rend leurs conséquences visibles. Ici, la question de départ — « qu’est-ce qui s’arrête si l’auto-entreprise baisse ? » — a désormais une réponse d’une ligne : le répartiteur A, avant toute autre chose.'],
         ];
     }
 
@@ -333,7 +333,7 @@ class Articles
             ['type' => 'h', 'text' => 'Trois signes que la feuille a saturé'],
             ['type' => 'list', 'items' => [
                 'Une colonne « virements internes » qu’on soustrait pour ne pas double-compter — et qu’on oublie un mois sur deux.',
-                'Des formules qui pointent vers une feuille « Julien » et une feuille « Malorie », sans jamais dire qui alimente le joint.',
+                'Des formules qui pointent vers une feuille « A » et une feuille « B », sans jamais dire qui alimente le joint.',
                 'L’impossibilité de répondre, en une phrase, à « si ce revenu baisse, quelle enveloppe se réduit ? ».',
             ]],
             ['type' => 'h', 'text' => 'Ce qu’un circuit force à écrire'],

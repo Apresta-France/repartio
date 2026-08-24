@@ -3,7 +3,7 @@ $pack = $pack ?? [];
 $stats = $pack['stats'] ?? [];
 $key = (string) ($pack['key'] ?? 'couple-complet');
 $blocks = (int) ($pack['blocks'] ?? 0);
-$packTitle = (string) ($pack['title'] ?? 'Julien et Malorie');
+$packTitle = (string) ($pack['title'] ?? 'Famille, revenus mixtes');
 $user = \App\Core\Auth::user();
 $claimLabel = $user ? 'Ouvrir dans mon builder' : 'Reprendre ce circuit';
 $sumItems = static function (array $nodes, string $id): float {
@@ -65,7 +65,7 @@ $steps = [
         'n' => '05',
         'title' => 'Chacun son répartiteur',
         'kicker' => money($stats['monthly_saved'] ?? 0) . ' mis de côté',
-        'text' => 'Julien et Malorie gardent chacun leur épargne. Le répartiteur découpe ce qu’il reçoit entre LEP, LDDS et Livret A — sans recalculer à chaque hausse.',
+        'text' => 'Chacun garde son épargne. Le répartiteur découpe ce qu’il reçoit entre LEP, LDDS et Livret A — sans recalculer à chaque hausse.',
         'nodes' => ['p-j', 'p-m', 'l-lep-j', 'l-ldds-j', 'l-a-j', 'l-lep-m', 'l-ldds-m', 'l-a-m'],
         'month' => null,
     ],
@@ -74,7 +74,7 @@ $steps = [
         'n' => '06',
         'title' => 'Les livrets des enfants',
         'kicker' => '40 € × 2, depuis les allocations',
-        'text' => 'Un virement fixe par enfant, prélevé sur le compte de Malorie. Petit, régulier, plafonné. Le circuit le traite comme n’importe quel autre livret.',
+        'text' => 'Un virement fixe par enfant, prélevé sur le compte B. Petit, régulier, plafonné. Le circuit le traite comme n’importe quel autre livret.',
         'nodes' => ['r-alloc', 'c-m', 'l-kid1', 'l-kid2'],
         'month' => null,
     ],
@@ -93,7 +93,7 @@ $steps = [
   <div class="showcase-intro-copy">
     <span class="eyebrow eyebrow-live">Circuit rempli · étude de cas</span>
     <h1>Un foyer, <?= e(money($stats['monthly_in'] ?? 0)) ?>, <em>zéro euro perdu.</em></h1>
-    <p class="lede">Julien, Malorie, deux enfants. Cinq revenus, deux comptes joints, l’URSSAF provisionnée, six livrets réglementés. Le circuit est réel : vous pouvez le parcourir, lancer la démo, puis le reprendre avec vos chiffres.</p>
+    <p class="lede">Un couple, deux enfants. Cinq revenus, deux comptes joints, l’URSSAF provisionnée, six livrets réglementés. Le circuit est prêt : vous pouvez le parcourir, lancer la démo, puis le reprendre avec vos chiffres.</p>
     <div class="cta-row">
       <button type="button" class="btn btn-orange" data-showcase-play data-rv="event" data-rv-name="showcase_demo" data-rv-props='{"source":"intro"}'>Lancer la démo</button>
       <form method="post" action="<?= e(url('/app/circuits')) ?>">
@@ -143,7 +143,7 @@ $steps = [
 
   <div class="showcase-board">
     <div class="showcase-toolbar">
-      <span class="chip">julien-malorie · 60 mois</span>
+      <span class="chip">foyer-mixte · 60 mois</span>
       <span class="chip is-ok">non affecté · <?= e(money($stats['unassigned'] ?? 0)) ?></span>
       <span class="chip">épargné · <b class="mono" data-stat="saved"><?= e(money($stats['monthly_saved'] ?? 0)) ?></b></span>
       <span class="chip" style="margin-left:auto;" data-horizon-label>Dans 5 ans</span>

@@ -37,7 +37,7 @@
       <input type="hidden" name="mail_encryption" value="starttls">
       <label class="field"><span>Expéditeur</span><input name="mail_from" value="<?= e($defaults['mail_from']) ?>"></label>
       <h2 style="font-size:18px;margin:8px 0 0;">Compte administrateur</h2>
-      <label class="field"><span>Prénom</span><input name="first_name" required placeholder="Julien"></label>
+      <label class="field"><span>Prénom</span><input name="first_name" required placeholder="Camille"></label>
       <label class="field"><span>E-mail</span><input type="email" name="email" required placeholder="vous@repartio.fr"></label>
       <label class="field"><span>Mot de passe (12 caractères min.)</span><input type="password" name="password" required minlength="12"></label>
       <button class="btn btn-orange" type="submit">Installer la plateforme</button>

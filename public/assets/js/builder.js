@@ -163,6 +163,9 @@
   const setupName = setupModal?.querySelector('[data-setup-name]');
   const setupHorizon = setupModal?.querySelector('[data-setup-horizon]');
   const scenarioModal = document.querySelector('[data-scenario-modal]');
+  const reportModal = document.querySelector('[data-report-modal]');
+  const reportBody = reportModal?.querySelector('[data-report-body]');
+  const reportTitle = reportModal?.querySelector('#report-title');
   const horizonInput = root.querySelector('[data-horizon]');
   const saveBtn = form?.querySelector('[data-save-btn]');
   const horizonUnitWrap = root.querySelector('[data-horizon-unit]');
@@ -624,6 +627,70 @@
     if (month >= state.horizon) return 'Horizon · ' + yearsLabel(state.horizon);
     if (month % 12 === 0) return 'Mois ' + month + ' · ' + yearsLabel(month);
     return 'Mois ' + month;
+  }
+
+  const REPORT_HABIT = /course|resto|restaurant|caf[eé]|sortie|loisir|essence|abonnement/i;
+
+  function reportSpanLabel(month) {
+    if (month <= 0) return '';
+    return yearsLabel(month);
+  }
+
+  function reportMarks() {
+    const H = state.horizon;
+    const marks = [];
+    const add = (m) => {
+      const n = Math.min(H, Math.max(0, Math.round(Number(m) || 0)));
+      if (n > 0 && !marks.includes(n)) marks.push(n);
+    };
+    [12, 24, 36, 60, 120, H, currentMonth()].forEach(add);
+    return marks.sort((a, b) => a - b);
+  }
+
+  function reportSpendLines() {
+    const bag = {};
+    state.nodes.forEach((n) => {
+      if (n.kind !== 'depense') return;
+      const items = (n.items || []).filter((item) => (item.amount || 0) > 0.5 || String(item.title || '').trim());
+      if (items.length) {
+        items.forEach((item) => {
+          const monthly = Math.max(0, Number(item.amount) || 0);
+          if (monthly < 0.5) return;
+          const title = String(item.title || '').trim() || n.title || 'Poste';
+          const key = title.toLowerCase();
+          if (!bag[key]) bag[key] = { title, monthly: 0 };
+          bag[key].monthly += monthly;
+        });
+        return;
+      }
+      const monthly = Math.max(0, Number(n.amount) || 0);
+      if (monthly < 0.5) return;
+      const title = n.title || 'Dépense';
+      const key = title.toLowerCase();
+      if (!bag[key]) bag[key] = { title, monthly: 0 };
+      bag[key].monthly += monthly;
+    });
+    return Object.values(bag)
+      .map((row) => ({ ...row, total: row.monthly * currentMonth() }))
+      .sort((a, b) => b.total - a.total || b.monthly - a.monthly);
+  }
+
+  function reportInsights(lines, month) {
+    if (month <= 0 || !lines.length) return [];
+    const span = reportSpanLabel(month);
+    const picked = [];
+    lines.forEach((row) => {
+      if (picked.length >= 3) return;
+      if (REPORT_HABIT.test(row.title)) picked.push(row);
+    });
+    lines.forEach((row) => {
+      if (picked.length >= 3) return;
+      if (!picked.includes(row)) picked.push(row);
+    });
+    return picked.map((row) => ({
+      title: row.title,
+      text: 'un budget de ' + euro(row.monthly) + '/mois pendant ' + span + ', soit ' + euro(row.total) + '.',
+    }));
   }
 
   function playTotal(C) {
@@ -1418,6 +1485,7 @@
     if (box) box.innerHTML = warns.slice(0, 4).map((t) => '<div class="builder-warn">' + escapeHtml(t) + '</div>').join('');
     const empty = root.querySelector('[data-empty]');
     if (empty) empty.hidden = state.nodes.length > 0;
+    if (reportOpen()) fillReport();
   }
 
   function renderProps() {
@@ -2696,6 +2764,75 @@
     document.body.classList.remove('is-locked');
   }
 
+  function reportOpen() {
+    return Boolean(reportModal && !reportModal.hidden);
+  }
+
+  function fillReport() {
+    if (!reportModal || !reportBody) return;
+    const C = lastCompute || compute();
+    lastCompute = C;
+    const month = currentMonth();
+    const span = reportSpanLabel(month);
+    const lines = reportSpendLines();
+    const insights = reportInsights(lines, month);
+    if (reportTitle) reportTitle.textContent = month <= 0 ? 'Rapport' : 'Rapport · ' + playLabel(month);
+    const marks = reportMarks();
+    const chips = marks.map((m) => (
+      `<button type="button" class="chip${m === month ? ' active' : ''}" data-report-month="${m}">${escapeHtml(yearsLabel(m))}</button>`
+    )).join('');
+    const kpis = month > 0 ? `
+      <div class="report-kpis">
+        <div><span>Entrées</span><b class="mono">${euro(C.inn * month)}</b></div>
+        <div><span>Dépenses</span><b class="mono">${euro(C.out * month)}</b></div>
+        <div><span>Mis de côté</span><b class="mono">${euro(C.saved * month)}</b></div>
+        <div><span>Patrimoine</span><b class="mono is-proj">${euro(playTotal(C))}</b></div>
+      </div>
+    ` : '';
+    const insightHtml = insights.length
+      ? `<div class="report-insights">${insights.map((row) => `<p class="report-insight"><strong>${escapeHtml(row.title)}</strong> : ${escapeHtml(row.text)}</p>`).join('')}</div>`
+      : '';
+    const lineHtml = lines.length && month > 0
+      ? `<div class="report-section">
+          <div class="eyebrow">Postes du mois, cumulés</div>
+          <div class="report-lines">
+            ${lines.map((row) => `<div class="report-line"><span>${escapeHtml(row.title)}</span><span class="is-month">${euro(row.monthly)}/mois</span><b>${euro(row.total)}</b></div>`).join('')}
+          </div>
+        </div>`
+      : '';
+    const emptyHtml = month <= 0
+      ? '<p class="report-empty">Avancez sur la frise, ou choisissez une durée. Rien n’est encore accumulé.</p>'
+      : (!lines.length
+        ? '<p class="report-empty">Aucun poste de dépense pour l’instant. Posez un bloc Dépense, ou chargez un scénario.</p>'
+        : '');
+    const lead = month <= 0
+      ? 'Le mois type, répété jusqu’à la durée choisie.'
+      : 'Le mois type, répété pendant ' + span + '. Les montants suivent le curseur de la frise.';
+    reportBody.innerHTML = `
+      <p class="report-lead">${escapeHtml(lead)}</p>
+      ${marks.length ? `<div class="chips report-chips">${chips}</div>` : ''}
+      ${kpis}
+      ${insightHtml}
+      ${lineHtml}
+      ${emptyHtml}
+      ${month > 0 ? '<div class="report-actions"><button type="button" class="btn btn-ghost" data-report-print>Imprimer</button></div>' : ''}
+    `;
+  }
+
+  function openReportModal() {
+    if (!reportModal) return;
+    if (currentMonth() <= 0 && state.horizon > 0) setPlayMonth(state.horizon, false);
+    fillReport();
+    reportModal.hidden = false;
+    document.body.classList.add('is-locked');
+  }
+
+  function closeReportModal() {
+    if (!reportModal) return;
+    reportModal.hidden = true;
+    if (!fullscreenModalOpen()) document.body.classList.remove('is-locked');
+  }
+
   const KIND_LAYER = { revenu: 0, compte: 1, repartiteur: 2, livret: 3, depense: 3 };
   const KIND_WEIGHT = { revenu: 0, compte: 1, depense: 2, repartiteur: 3, livret: 4 };
 
@@ -2925,6 +3062,29 @@
     const pick = e.target.closest('[data-scenario-load]');
     if (pick) applyScenario(pick.getAttribute('data-scenario-load'));
   });
+  document.querySelectorAll('[data-report-open]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openReportModal();
+    });
+  });
+  reportModal?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-report-dismiss]')) {
+      closeReportModal();
+      return;
+    }
+    const mark = e.target.closest('[data-report-month]');
+    if (mark) {
+      setPlayMonth(Number(mark.getAttribute('data-report-month')) || 0, true);
+      return;
+    }
+    if (e.target.closest('[data-report-print]')) {
+      document.body.classList.add('is-print-report');
+      window.print();
+      window.setTimeout(() => document.body.classList.remove('is-print-report'), 400);
+    }
+  });
   if (setupOpen() && !readonly) {
     document.body.classList.add('is-locked');
     requestAnimationFrame(() => {
@@ -2939,6 +3099,7 @@
       if (propsForm?.querySelector('.prop-color.is-open')) { closeTintMenus(); return; }
       if (setupOpen()) { closeSetupModal(); return; }
       if (scenarioOpen()) { closeScenarioModal(); return; }
+      if (reportOpen()) { closeReportModal(); return; }
       if (modal && !modal.hidden) { closePresetModal(); return; }
       if (state.connectFrom) { cancelLink(); return; }
       if (dismissLinkCoach()) return;

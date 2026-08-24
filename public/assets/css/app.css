@@ -352,6 +352,9 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .palette-flyout::before { content: ""; position: absolute; left: -5px; top: 50%; width: 8px; height: 8px; background: var(--paper); border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); transform: translateY(-50%) rotate(45deg); }
 .palette-flyout.is-below { transform: none; }
 .palette-flyout.is-below::before { left: 18px; top: -5px; transform: rotate(135deg); }
+.builder-month-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 8px; }
+.builder-report-cta { padding: 3px 8px; min-height: 0; border-radius: 7px; border: 1px solid oklch(0.9 0.02 152); background: oklch(0.96 0.012 152); color: var(--teal-ink); font-size: 11.5px; font-weight: 650; letter-spacing: -.01em; cursor: pointer; }
+.builder-report-cta:hover { background: oklch(0.93 0.02 152); }
 .builder-proj { margin-top: auto; padding: 15px; border-radius: 12px; background: oklch(0.96 0.012 152); border: 1px solid oklch(0.9 0.02 152); display: flex; flex-direction: column; gap: 8px; }
 .builder-proj-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .builder-proj-row strong { font-size: 17px; color: var(--teal-ink); }
@@ -665,6 +668,37 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .setup-horizon > span { font-size: 13.5px; color: var(--muted); }
 .setup-horizon-chips { margin-top: 2px; }
 .setup-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.report-modal-card { width: min(560px, 100%); }
+.report-lead { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.report-chips { margin: 2px 0 4px; }
+.report-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.report-kpis > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line-soft); }
+.report-kpis span { font-size: 11px; font-weight: 600; color: var(--muted); }
+.report-kpis b { font-size: 15px; font-weight: 650; color: var(--ink); }
+.report-kpis b.is-proj { color: var(--teal-ink); }
+.report-insights { display: flex; flex-direction: column; gap: 8px; }
+.report-insight { margin: 0; padding: 10px 12px; border-radius: 10px; background: oklch(0.96 0.012 152); border: 1px solid oklch(0.9 0.02 152); font-size: 13px; line-height: 1.5; color: oklch(0.32 0.06 195); }
+.report-insight strong { font-weight: 750; color: var(--teal-ink); }
+.report-section { display: flex; flex-direction: column; gap: 4px; }
+.report-lines { display: flex; flex-direction: column; }
+.report-line { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; color: var(--muted); }
+.report-line:first-child { border-top: 0; }
+.report-line b { font-family: var(--mono); font-weight: 550; color: var(--ink); }
+.report-line .is-month { font-size: 12px; color: var(--faint); }
+.report-empty { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.report-actions { display: flex; justify-content: flex-end; padding-top: 4px; }
+.report-actions .btn { min-height: 36px; padding: 8px 14px; font-size: 13px; }
+@media print {
+  body.is-print-report * { visibility: hidden; }
+  body.is-print-report [data-report-modal],
+  body.is-print-report [data-report-modal] * { visibility: visible; }
+  body.is-print-report [data-report-modal] { position: static; inset: auto; padding: 0; background: none; }
+  body.is-print-report .builder-modal-backdrop,
+  body.is-print-report .builder-modal-close,
+  body.is-print-report .report-chips,
+  body.is-print-report .report-actions { display: none !important; }
+  body.is-print-report .report-modal-card { box-shadow: none; border: 0; max-height: none; width: 100%; }
+}
 .scenario-modal-card { width: min(860px, 100%); max-height: min(90vh, 880px); }
 .scenario-chips { align-items: center; position: sticky; top: -4px; z-index: 1; background: var(--paper); padding: 4px 0 8px; }
 .scenario-count { margin-left: auto; font-size: 11.5px; color: var(--faint); }

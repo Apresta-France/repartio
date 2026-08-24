@@ -17,7 +17,10 @@ $horizon = (int) ($payload['horizon'] ?? $share['horizon'] ?? 60);
       <div class="builder-project-name"><?= e($share['title']) ?></div>
     </div>
     <div>
-      <div class="eyebrow" style="padding-bottom:8px;">Chaque mois</div>
+      <div class="builder-month-head">
+        <span class="eyebrow">Chaque mois</span>
+        <button type="button" class="builder-report-cta" data-report-open aria-label="Voir le rapport de projection">Rapport</button>
+      </div>
       <div class="kv">
         <div><span>Entrées</span><strong class="mono" data-stat="in">0 €</strong></div>
         <div><span>Dépenses</span><strong class="mono" data-stat="out">0 €</strong></div>
@@ -68,3 +71,4 @@ $horizon = (int) ($payload['horizon'] ?? $share['horizon'] ?? 60);
   </main>
   </div>
 </div>
+<?php require BASE_PATH . '/resources/views/partials/builder-report-modal.php'; ?>

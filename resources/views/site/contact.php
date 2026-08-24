@@ -21,7 +21,7 @@
           <?php endforeach; ?>
         </div>
         <div class="fields-2">
-          <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>" placeholder="Julien"></label>
+          <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>" placeholder="Camille"></label>
           <label class="field"><span>E-mail</span><input type="email" name="email" required value="<?= e((string) old('email')) ?>" placeholder="vous@exemple.fr"></label>
         </div>
         <label class="field"><span>Votre message</span><textarea name="message" rows="7" required placeholder="Décrivez votre situation. N’envoyez jamais de relevé bancaire."><?= e((string) old('message')) ?></textarea></label>

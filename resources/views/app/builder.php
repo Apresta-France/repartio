@@ -59,7 +59,10 @@ $readonly = !$canEdit;
       </div>
     </div>
     <div>
-      <div class="eyebrow" style="padding-bottom:8px;">Chaque mois</div>
+      <div class="builder-month-head">
+        <span class="eyebrow">Chaque mois</span>
+        <button type="button" class="builder-report-cta" data-report-open aria-label="Voir le rapport de projection">Rapport</button>
+      </div>
       <div class="kv">
         <div><span>Entrées</span><strong class="mono" data-stat="in">0 €</strong></div>
         <div><span>Dépenses</span><strong class="mono" data-stat="out">0 €</strong></div>
@@ -289,6 +292,8 @@ foreach ($scenarios as $key => $t) {
   </div>
 </div>
 <script type="application/json" data-scenarios><?= json_encode($scenarioCatalog, JSON_UNESCAPED_UNICODE) ?></script>
+
+<?php require BASE_PATH . '/resources/views/partials/builder-report-modal.php'; ?>
 
 <?php if ($canManage): ?>
 <div class="builder-modal" data-share-modal hidden>
