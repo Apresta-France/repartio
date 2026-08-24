@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" hint-size="100%,78px"></dc-import>
+  <dc-import name="Legal Doc" eyebrow="Mentions légales" title="Mentions légales" lede="{{ lede }}" meta="{{ meta }}" sections="{{ sections }}" hint-size="100%,900px"></dc-import>
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      lede: 'Informations légales relatives à l’éditeur du site repartio.fr et du service de répartition de revenus qui y est accessible, conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique.',
+      meta: ['Version 1.2', 'À jour au 1ᵉʳ août 2026', 'Droit français'],
+      sections: [
+        { h: 'Éditeur du site',
+          ps: ['Le site repartio.fr et le service qu’il héberge sont édités par la société ci-dessous. Les mentions marquées « à compléter » doivent être renseignées avec les informations réelles de la société avant toute mise en ligne.'],
+          rows: [
+            { k: 'Dénomination', v: 'Repartio SAS (à compléter)' },
+            { k: 'Forme juridique', v: 'Société par actions simplifiée' },
+            { k: 'Capital social', v: '10 000 € (à compléter)' },
+            { k: 'Siège social', v: 'Adresse à compléter, France' },
+            { k: 'RCS', v: 'À compléter — numéro et ville d’immatriculation' },
+            { k: 'SIREN', v: 'À compléter' },
+            { k: 'TVA intracommunautaire', v: 'FR + numéro à compléter' },
+            { k: 'Contact', v: 'bonjour@repartio.fr' }
+          ] },
+        { h: 'Direction de la publication',
+          ps: ['Le directeur de la publication est le représentant légal de la société éditrice. Toute demande relative au contenu éditorial du site peut lui être adressée par e-mail à l’adresse de contact indiquée ci-dessus.'],
+          rows: [
+            { k: 'Directeur de publication', v: 'À compléter' },
+            { k: 'Responsable éditorial', v: 'À compléter' }
+          ] },
+        { h: 'Hébergement',
+          ps: ['Le site et les données du service sont hébergés au sein de l’Union européenne. L’hébergeur n’intervient ni dans la production ni dans la modération des contenus publiés.'],
+          rows: [
+            { k: 'Hébergeur', v: 'Prestataire d’infrastructure européen (à compléter)' },
+            { k: 'Localisation', v: 'Centre de données situé en France' },
+            { k: 'Contact hébergeur', v: 'À compléter' }
+          ] },
+        { h: 'Nature du service',
+          ps: ['repartio est un outil de simulation. Il permet de décrire des flux d’argent déclarés par l’utilisateur et d’en projeter les conséquences dans le temps selon des règles explicites.'],
+          list: [
+            'repartio ne dispose d’aucun accès aux comptes bancaires de ses utilisateurs et n’exerce aucune activité d’agrégation de comptes.',
+            'repartio ne fournit ni conseil en investissement, ni recommandation personnalisée, ni service de paiement au sens du code monétaire et financier.',
+            'Les résultats affichés dépendent intégralement des montants et des règles saisis par l’utilisateur.'
+          ] },
+        { h: 'Propriété intellectuelle',
+          ps: ['L’ensemble des éléments composant le site — structure, textes, interfaces, identité visuelle, logo, code — est protégé au titre du droit d’auteur et du droit des marques. Toute reproduction ou représentation, totale ou partielle, sans autorisation écrite préalable est interdite.', 'Les circuits créés par un utilisateur restent la propriété de cet utilisateur. La société éditrice n’acquiert aucun droit d’exploitation sur ces contenus, hormis les opérations techniques strictement nécessaires à la fourniture du service.'] },
+        { h: 'Liens hypertextes',
+          ps: ['Le site peut contenir des liens vers des ressources externes, notamment réglementaires. La société éditrice n’exerce aucun contrôle sur ces ressources et décline toute responsabilité quant à leur contenu ou leur disponibilité.'] },
+        { h: 'Signalement d’un contenu',
+          ps: ['Tout contenu manifestement illicite constaté sur le site peut être signalé par e-mail à bonjour@repartio.fr, en précisant l’URL concernée et le motif du signalement. Un accusé de réception est adressé sous 72 heures ouvrées.'] },
+        { h: 'Droit applicable',
+          ps: ['Les présentes mentions légales sont soumises au droit français. En cas de litige, et à défaut de résolution amiable, les tribunaux français sont seuls compétents.'] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

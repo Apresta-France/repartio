@@ -1,0 +1,13 @@
+.env
+/storage/logs/*
+/storage/mail/*
+/storage/cache/*
+/storage/installed.lock
+!/storage/**/.gitkeep
+/vendor/
+Thumbs.db
+.DS_Store
+*.log
+.idea/
+.vscode/
+php_errors.log

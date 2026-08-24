@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  button { font: inherit; }
+</style>
+</helmet>
+<div style="display: flex; min-height: 100vh; font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="App Sidebar" active="dashboard" hint-size="252px,100vh"></dc-import>
+
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="display: flex; align-items: center; gap: 16px; padding: 20px 28px 18px; border-bottom: 1px solid oklch(0.91 0.012 255); background: oklch(0.985 0.003 250);">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">Bonjour Julien</h1>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.58 0.045 265);">Circuit familial 2026 · modifié il y a 2 jours</span>
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 9px;">
+        <div style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: oklch(0.94 0.01 255);">
+          <sc-for list="{{ horizons }}" as="h" hint-placeholder-count="3">
+            <button style="cursor: pointer; border: none; padding: 7px 13px; border-radius: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; color: {{ h.fg }}; background: {{ h.bg }}; box-shadow: {{ h.shadow }};" onClick="{{ h.onClick }}">{{ h.label }}</button>
+          </sc-for>
+        </div>
+        <a href="Circuit%20Builder.dc.html" style="padding: 10px 16px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 13.5px; font-weight: 700;">Ouvrir le builder</a>
+      </div>
+    </header>
+
+    <section style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border-bottom: 1px solid oklch(0.91 0.012 255);">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background: oklch(1 0 0); padding: 20px 24px 22px; display: flex; flex-direction: column; gap: 7px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.6 0.045 265);">{{ k.k }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 27px; font-weight: 500; letter-spacing: -0.04em; color: {{ k.c }};">{{ k.v }}</span>
+          <span style="font-size: 12.5px; line-height: 1.4; color: oklch(0.52 0.045 265);">{{ k.d }}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 0; border-bottom: 1px solid oklch(0.91 0.012 255);">
+      <div style="padding: 24px 28px 28px; border-right: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <h2 style="margin: 0; font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">Trajectoire du patrimoine</h2>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.6 0.045 265);">{{ chartLabel }}</span>
+          <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.5 0.11 195);">+{{ chartGain }} sur la période</span>
+        </div>
+        <svg viewBox="0 0 720 240" width="100%" height="240" style="display: block;">
+          <sc-for list="{{ grid }}" as="g" hint-placeholder-count="5">
+            <line x1="0" y1="{{ g.y }}" x2="720" y2="{{ g.y }}" stroke="oklch(0.93 0.01 255)" stroke-width="1"></line>
+          </sc-for>
+          <path d="{{ areaPath }}" fill="oklch(0.62 0.12 192 / 0.13)" stroke="none"></path>
+          <path d="{{ linePath }}" fill="none" stroke="oklch(0.5 0.12 192)" stroke-width="2.4" stroke-linecap="round"></path>
+          <sc-for list="{{ markers }}" as="m" hint-placeholder-count="3">
+            <circle cx="{{ m.x }}" cy="{{ m.y }}" r="4" fill="oklch(1 0 0)" stroke="oklch(0.68 0.18 38)" stroke-width="2.2"></circle>
+          </sc-for>
+        </svg>
+        <div style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.6 0.045 265);">
+          <sc-for list="{{ ticks }}" as="t" hint-placeholder-count="5">
+            <span>{{ t }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <h2 style="margin: 0; font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">Répartition du mois</h2>
+        <div style="display: flex; height: 12px; border-radius: 6px; overflow: hidden; gap: 2px;">
+          <sc-for list="{{ split }}" as="s" hint-placeholder-count="4">
+            <span style="width: {{ s.pct }}%; background: {{ s.c }};"></span>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ split }}" as="s" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid oklch(0.95 0.008 255);">
+              <span style="width: 8px; height: 8px; border-radius: 3px; flex: none; background: {{ s.c }};"></span>
+              <span style="font-size: 13px; color: oklch(0.38 0.05 265);">{{ s.k }}</span>
+              <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: oklch(0.6 0.045 265);">{{ s.pctLabel }}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: -0.02em; width: 76px; text-align: right;">{{ s.v }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid oklch(0.91 0.012 255);">
+      <div style="padding: 24px 28px 28px; border-right: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <h2 style="margin: 0; font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">Livrets et plafonds</h2>
+          <a href="Circuit%20Builder.dc.html" style="margin-left: auto; font-size: 12.5px; font-weight: 600;">Modifier →</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 13px;">
+          <sc-for list="{{ livrets }}" as="l" hint-placeholder-count="6">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <span style="font-size: 13.5px; font-weight: 600;">{{ l.name }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ l.statusColor }};">{{ l.status }}</span>
+                <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; letter-spacing: -0.02em;">{{ l.amount }}</span>
+              </div>
+              <div style="height: 6px; border-radius: 3px; background: oklch(0.94 0.01 255); overflow: hidden;">
+                <div style="width: {{ l.pct }}%; height: 6px; background: {{ l.barColor }};"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 14px;">
+        <h2 style="margin: 0; font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">À traiter</h2>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4">
+            <div style="display: flex; gap: 12px; padding: 14px 15px; border-radius: 11px; background: {{ a.bg }}; border: 1px solid {{ a.border }};">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ a.tagColor }}; padding-top: 2px; flex: none;">{{ a.tag }}</span>
+              <span style="display: flex; flex-direction: column; gap: 3px;">
+                <span style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.015em;">{{ a.t }}</span>
+                <span style="font-size: 12.5px; line-height: 1.45; color: oklch(0.47 0.045 265); text-wrap: pretty;">{{ a.d }}</span>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <h2 style="margin: 0; font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">Activité récente</h2>
+        <a href="Projets.dc.html" style="margin-left: auto; font-size: 12.5px; font-weight: 600;">Tous mes circuits →</a>
+      </div>
+      <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 13px; overflow: hidden; background: oklch(1 0 0);">
+        <sc-for list="{{ activity }}" as="a" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 132px 1fr 190px; gap: 14px; padding: 12px 18px; border-bottom: 1px solid oklch(0.95 0.008 255); align-items: baseline;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.6 0.045 265);">{{ a.when }}</span>
+            <span style="font-size: 13.5px; color: oklch(0.32 0.06 265);">{{ a.what }}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.5 0.045 265); text-align: right;">{{ a.where }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const TEAL = 'oklch(0.5 0.12 192)';
+const NAVY = 'oklch(0.24 0.075 265)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const BLUE = 'oklch(0.48 0.11 240)';
+const RED = 'oklch(0.55 0.16 25)';
+
+const SERIES = {
+  '12 mois': [0, 5.2, 10.5, 15.9, 21.3, 26.8, 32.4, 38.1, 43.9, 49.8, 55.8, 61.9, 68.1],
+  '60 mois': [0, 12, 24.4, 37.2, 50.4, 63.9, 77.6, 84.2, 90.1, 95.6, 100.6, 103.4, 105.6],
+  '120 mois': [0, 21, 43, 66, 89, 112, 134, 155, 174, 190, 203, 213, 219]
+};
+const TICKS = {
+  '12 mois': ['M0', 'M3', 'M6', 'M9', 'M12'],
+  '60 mois': ['M0', 'M12', 'M24', 'M36', 'M60'],
+  '120 mois': ['M0', 'M24', 'M48', 'M84', 'M120']
+};
+
+class Component extends DCLogic {
+  state = { h: '60 mois' };
+
+  renderVals() {
+    const data = SERIES[this.state.h];
+    const max = Math.max.apply(null, data) * 1.08;
+    const pts = data.map((v, i) => ({
+      x: (i / (data.length - 1)) * 720,
+      y: 240 - (v / max) * 220
+    }));
+    const line = pts.map((p, i) => `${i ? 'L' : 'M'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+
+    return {
+      horizons: Object.keys(SERIES).map(label => ({
+        label,
+        onClick: () => this.setState({ h: label }),
+        bg: this.state.h === label ? 'oklch(1 0 0)' : 'transparent',
+        fg: this.state.h === label ? NAVY : 'oklch(0.48 0.045 265)',
+        shadow: this.state.h === label ? '0 1px 3px oklch(0.3 0.06 265 / 0.14)' : 'none'
+      })),
+      chartLabel: 'horizon ' + this.state.h,
+      chartGain: Math.round(data[data.length - 1]).toLocaleString('fr-FR') + ' k€',
+      linePath: line,
+      areaPath: line + ` L 720 240 L 0 240 Z`,
+      grid: [0, 1, 2, 3, 4].map(i => ({ y: 20 + i * 55 })),
+      markers: [pts[4], pts[8], pts[12]].map(p => ({ x: p.x.toFixed(1), y: p.y.toFixed(1) })),
+      ticks: TICKS[this.state.h],
+      kpis: [
+        { k: 'Entrées / mois', v: '12 338 €', c: NAVY, d: '5 sources, dont 2 variables' },
+        { k: 'Épargné / mois', v: '5 234 €', c: TEAL, d: '42 % des entrées' },
+        { k: 'Non affecté', v: '0 €', c: TEAL, d: 'circuit complet et valide' },
+        { k: 'Dans 5 ans', v: '105 615 €', c: BLUE, d: 'plafonds réglementaires inclus' }
+      ],
+      split: [
+        { k: 'Prélèvements', v: '3 254 €', pct: 26.4, pctLabel: '26 %', c: RED },
+        { k: 'Dépenses courantes', v: '2 510 €', pct: 20.3, pctLabel: '20 %', c: 'oklch(0.66 0.13 40)' },
+        { k: 'Cotisations URSSAF', v: '1 340 €', pct: 10.9, pctLabel: '11 %', c: 'oklch(0.62 0.09 60)' },
+        { k: 'Épargne', v: '5 234 €', pct: 42.4, pctLabel: '42 %', c: TEAL }
+      ],
+      livrets: [
+        { name: 'LEP Julien', status: 'plein', statusColor: TEAL, amount: '10 000 € / 10 000 €', pct: 100, barColor: TEAL },
+        { name: 'LDDS Julien', status: 'plein en 10 mois', statusColor: 'oklch(0.6 0.045 265)', amount: '1 750 € / 12 000 €', pct: 15, barColor: BLUE },
+        { name: 'Livret A Julien', status: 'plein en 16 mois', statusColor: 'oklch(0.6 0.045 265)', amount: '0 € / 22 950 €', pct: 2, barColor: BLUE },
+        { name: 'LEP Malorie', status: 'plein', statusColor: TEAL, amount: '10 000 € / 10 000 €', pct: 100, barColor: TEAL },
+        { name: 'LDDS Malorie', status: 'plein', statusColor: TEAL, amount: '12 000 € / 12 000 €', pct: 100, barColor: TEAL },
+        { name: 'Livret A Malorie', status: 'plein en 31 mois', statusColor: 'oklch(0.6 0.045 265)', amount: '4 750 € / 22 950 €', pct: 21, barColor: BLUE }
+      ],
+      alerts: [
+        { tag: 'Plafond', t: 'LDDS Julien sature dans 10 mois', d: 'Aucune destination de débordement n’est câblée : le surplus sera bloqué.', bg: 'oklch(0.98 0.02 38)', border: 'oklch(0.9 0.05 38)', tagColor: 'oklch(0.58 0.16 38)' },
+        { tag: 'Taux', t: 'Le taux du LEP a changé au 1ᵉʳ août', d: 'Votre circuit utilise encore 2,5 %. Mettez à jour pour recalculer la projection.', bg: 'oklch(0.98 0.02 38)', border: 'oklch(0.9 0.05 38)', tagColor: 'oklch(0.58 0.16 38)' },
+        { tag: 'Info', t: 'Auto-entreprise en hausse de 12 % sur 3 mois', d: 'Le montant saisi est peut-être sous-évalué par rapport à vos derniers relevés.', bg: 'oklch(0.975 0.012 195)', border: 'oklch(0.9 0.035 195)', tagColor: 'oklch(0.48 0.11 195)' },
+        { tag: 'Limite', t: '2 circuits sur 3 utilisés', d: 'Le plan Libre autorise trois circuits enregistrés.', bg: 'oklch(0.975 0.005 250)', border: 'oklch(0.92 0.012 255)', tagColor: 'oklch(0.5 0.045 265)' }
+      ],
+      activity: [
+        { when: 'il y a 2 jours', what: 'Montant du bloc « Auto-entreprise » porté à 5 000 €', where: 'Circuit familial 2026' },
+        { when: 'il y a 2 jours', what: 'Fil ajouté : Compte Julien → Répartiteur épargne', where: 'Circuit familial 2026' },
+        { when: 'il y a 5 jours', what: 'Circuit dupliqué pour tester un apport de 60 k€', where: 'Objectif apport 60 k€' },
+        { when: 'il y a 1 semaine', what: 'Bloc « Livrets des enfants » créé avec 8 000 € de départ', where: 'Circuit familial 2026' },
+        { when: 'il y a 2 semaines', what: 'Export CSV de la projection à 60 mois', where: 'Circuit familial 2026' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

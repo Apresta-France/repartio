@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="fonctionnement" hint-size="100%,78px"></dc-import>
+
+  <section style="padding: 66px 32px 56px; border-bottom: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 18px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">Fonctionnement</span>
+    <h1 style="margin: 0; max-width: 24ch; font-size: 48px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; text-wrap: balance;">Un circuit se lit comme un plan de plomberie</h1>
+    <p style="margin: 0; max-width: 66ch; font-size: 16.5px; line-height: 1.6; color: oklch(0.44 0.045 265); text-wrap: pretty;">Vous ne remplissez pas des catégories, vous branchez des tuyaux. Chaque bloc reçoit un montant, en garde une part s’il veut, et fait sortir le reste. Quand tous les tuyaux sont raccordés, le compteur « non affecté » tombe à zéro&nbsp;: le mois est décrit entièrement, et repartio peut le dérouler dans le temps.</p>
+  </section>
+
+  <section style="border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+      <div style="display: grid; grid-template-columns: minmax(340px, 0.85fr) 1.15fr; border-bottom: 1px solid oklch(0.93 0.01 255);">
+        <div style="padding: 44px 44px 46px 32px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid oklch(0.93 0.01 255);">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 9px; background: {{ s.chipBg }}; color: {{ s.chipFg }};">{{ s.n }}</span>
+            <span style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">{{ s.t }}</span>
+          </div>
+          <p style="margin: 0; max-width: 46ch; font-size: 15px; line-height: 1.6; color: oklch(0.45 0.045 265); text-wrap: pretty;">{{ s.d }}</p>
+          <div style="display: flex; flex-direction: column; gap: 7px; padding-top: 6px;">
+            <sc-for list="{{ s.bullets }}" as="b" hint-placeholder-count="3">
+              <div style="display: flex; gap: 10px; font-size: 13.5px; line-height: 1.5; color: oklch(0.38 0.05 265);">
+                <span style="color: oklch(0.68 0.18 38); font-weight: 700;">—</span>
+                <span style="text-wrap: pretty;">{{ b }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position: relative; padding: 38px 32px 40px 44px; background: oklch(0.965 0.006 250); overflow: hidden;">
+          <div style="position: absolute; inset: 0; opacity: .6; background-image: radial-gradient(oklch(0.84 0.016 255) 1px, transparent 1px); background-size: 24px 24px;"></div>
+          <div style="position: relative; display: flex; flex-direction: column; gap: 12px; max-width: 520px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(0.5 0.05 265);">{{ s.panelLabel }}</span>
+            <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 12px; overflow: hidden;">
+              <sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: oklch(1 0 0);">
+                  <span style="width: 9px; height: 9px; border-radius: 3px; flex: none; background: {{ r.c }};"></span>
+                  <span style="font-size: 13.5px; font-weight: 500;">{{ r.k }}</span>
+                  <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: -0.02em; color: {{ r.vc }};">{{ r.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <span style="font-size: 12.5px; line-height: 1.5; color: oklch(0.52 0.045 265); text-wrap: pretty;">{{ s.caption }}</span>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </section>
+
+  <section style="padding: 64px 32px 60px; background: oklch(1 0 0); border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 10px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">Vocabulaire</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em;">Les cinq types de blocs</h2>
+    </div>
+    <p style="margin: 0 0 26px; max-width: 64ch; font-size: 15px; line-height: 1.55; color: oklch(0.46 0.045 265);">Tout circuit, quelle que soit sa taille, n’utilise que ces cinq briques.</p>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden;">
+      <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="5">
+        <div style="background: oklch(1 0 0); display: flex; flex-direction: column;">
+          <div style="height: 4px; background: {{ b.c }};"></div>
+          <div style="padding: 20px 20px 22px; display: flex; flex-direction: column; gap: 9px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: {{ b.c }};">{{ b.k }}</span>
+            <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">{{ b.t }}</span>
+            <p style="margin: 0; font-size: 13px; line-height: 1.5; color: oklch(0.47 0.045 265); text-wrap: pretty;">{{ b.d }}</p>
+            <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.55 0.04 265);">
+              <sc-for list="{{ b.ex }}" as="e" hint-placeholder-count="2">
+                <span>{{ e }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: minmax(320px, 0.8fr) 1.2fr; border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="padding: 62px 44px 62px 32px; display: flex; flex-direction: column; gap: 16px; border-right: 1px solid oklch(0.91 0.012 255);">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">Le moteur</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em; line-height: 1.1;">Ce que repartio calcule pour vous</h2>
+      <p style="margin: 0; max-width: 42ch; font-size: 15px; line-height: 1.6; color: oklch(0.45 0.045 265); text-wrap: pretty;">Les règles sont explicites et vérifiables&nbsp;: aucun rendement caché, aucune hypothèse d’inflation imposée. Vous voyez la formule appliquée à chaque bloc.</p>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+      <sc-for list="{{ rules }}" as="r" hint-placeholder-count="5">
+        <div style="display: flex; gap: 20px; padding: 22px 32px 22px 44px; border-bottom: 1px solid oklch(0.93 0.01 255); align-items: baseline;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.62 0.11 195); width: 132px; flex: none;">{{ r.k }}</span>
+          <span style="font-size: 14.5px; line-height: 1.55; color: oklch(0.32 0.06 265); text-wrap: pretty;">{{ r.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const NAVY = 'oklch(0.32 0.09 265)';
+const TEAL = 'oklch(0.62 0.12 192)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const BLUE = 'oklch(0.48 0.11 240)';
+const RED = 'oklch(0.55 0.16 25)';
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      steps: [
+        {
+          n: '01', t: 'Poser les entrées', chipBg: 'oklch(0.95 0.03 192)', chipFg: 'oklch(0.45 0.11 195)',
+          d: 'Un bloc par source d’argent. Vous indiquez un montant mensuel — net, brut provisionné, ou variable moyenné.',
+          bullets: ['Un revenu peut alimenter plusieurs comptes.', 'Les revenus irréguliers se saisissent en moyenne lissée.', 'Les provisions (URSSAF, impôt) se posent comme des dépenses dédiées.'],
+          panelLabel: 'Entrées du mois type',
+          rows: [
+            { k: 'Salaire Julien', v: '1 500 €', c: TEAL, vc: 'oklch(0.28 0.08 265)' },
+            { k: 'Auto-entreprise', v: '5 000 €', c: TEAL, vc: 'oklch(0.28 0.08 265)' },
+            { k: 'Loyers du local', v: '2 000 €', c: TEAL, vc: 'oklch(0.28 0.08 265)' },
+            { k: 'Salaire Malorie', v: '3 073 €', c: TEAL, vc: 'oklch(0.28 0.08 265)' },
+            { k: 'Total entrées', v: '12 338 €', c: NAVY, vc: 'oklch(0.45 0.13 195)' }
+          ],
+          caption: 'Le total des entrées est la seule valeur que le circuit doit intégralement redistribuer.'
+        },
+        {
+          n: '02', t: 'Câbler les flux', chipBg: 'oklch(0.96 0.04 38)', chipFg: 'oklch(0.56 0.17 38)',
+          d: 'Vous tirez un fil du point de sortie d’un bloc vers le point d’entrée d’un autre, puis vous choisissez ce qui circule&nbsp;: un montant fixe, un pourcentage, ou tout le reste.',
+          bullets: ['« Tout le reste » évite de recalculer à la main après chaque changement.', 'Un répartiteur découpe en parts et signale si elles ne font pas 100 %.', 'Les fils se relisent&nbsp;: chaque montant est écrit sur le tuyau.'],
+          panelLabel: 'Sortie du compte courant',
+          rows: [
+            { k: '→ Joint Factures', v: '3 254 €', c: NAVY, vc: 'oklch(0.28 0.08 265)' },
+            { k: '→ Joint Quotidien', v: '2 110 €', c: NAVY, vc: 'oklch(0.28 0.08 265)' },
+            { k: '→ Répartiteur épargne', v: 'tout le reste', c: ORANGE, vc: 'oklch(0.56 0.17 38)' },
+            { k: 'Non affecté', v: '0 €', c: TEAL, vc: 'oklch(0.45 0.13 195)' }
+          ],
+          caption: 'Tant que le compteur « non affecté » n’est pas à zéro, le circuit est signalé comme incomplet.'
+        },
+        {
+          n: '03', t: 'Dérouler le temps', chipBg: 'oklch(0.94 0.02 265)', chipFg: 'oklch(0.36 0.09 265)',
+          d: 'Le mois type est répété sur l’horizon choisi. Les livrets capitalisent à leur taux, saturent à leur plafond, et le surplus part vers la destination que vous avez câblée.',
+          bullets: ['Horizons prêts&nbsp;: 12, 60 et 120 mois.', 'Chaque livret affiche sa date de saturation en mois.', 'La projection se recalcule à chaque modification du circuit.'],
+          panelLabel: 'Projection à 60 mois',
+          rows: [
+            { k: 'Épargné par mois', v: '5 234 €', c: BLUE, vc: 'oklch(0.28 0.08 265)' },
+            { k: 'Patrimoine dans 5 ans', v: '105 615 €', c: BLUE, vc: 'oklch(0.45 0.13 195)' },
+            { k: 'Livret A Julien plein en', v: '16 mois', c: BLUE, vc: 'oklch(0.28 0.08 265)' },
+            { k: 'Dépenses cumulées', v: '426 240 €', c: RED, vc: 'oklch(0.28 0.08 265)' }
+          ],
+          caption: 'Les intérêts sont capitalisés une fois par an, au taux en vigueur que vous pouvez surcharger.'
+        }
+      ],
+      blocks: [
+        { k: 'Revenu', c: TEAL, t: 'Revenu', d: 'Fait entrer de l’argent dans le circuit. N’a pas d’entrée, seulement une sortie.', ex: ['salaire', 'loyers perçus'] },
+        { k: 'Compte', c: NAVY, t: 'Compte', d: 'Reçoit, peut garder un matelas, et fait ressortir le reste vers d’autres blocs.', ex: ['courant', 'joint quotidien'] },
+        { k: 'Répartiteur', c: ORANGE, t: 'Répartiteur', d: 'Découpe ce qu’il reçoit en parts fixes ou en pourcentages. Ne conserve rien.', ex: ['épargne 60/30/10', 'apport'] },
+        { k: 'Livret', c: BLUE, t: 'Livret', d: 'Accumule, porte un taux et un plafond, et vous dit quand il sature.', ex: ['Livret A', 'LEP, LDDS'] },
+        { k: 'Dépense', c: RED, t: 'Dépense', d: 'Sortie définitive du circuit. Cumulée sur l’horizon de projection.', ex: ['prélèvements', 'URSSAF'] }
+      ],
+      rules: [
+        { k: 'Conservation', v: 'Ce qui entre dans un bloc en sort, sauf la part que le bloc conserve explicitement. Aucune fuite silencieuse.' },
+        { k: 'Ordre des fils', v: 'Les montants fixes sont servis avant les pourcentages, et « tout le reste » passe en dernier.' },
+        { k: 'Plafonds', v: 'Un livret saturé refuse les versements suivants et renvoie le surplus vers sa destination de débordement.' },
+        { k: 'Capitalisation', v: 'Intérêts calculés sur le solde moyen et versés une fois par an, taux modifiable par livret.' },
+        { k: 'Validation', v: 'Un circuit est valide quand le non-affecté vaut zéro et qu’aucun répartiteur ne dépasse 100 %.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

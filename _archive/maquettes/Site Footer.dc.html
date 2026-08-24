@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; background: oklch(0.985 0.003 250);">
+  <section style="padding: 76px 32px 80px; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; background: oklch(1 0 0); border-top: 1px solid oklch(0.91 0.012 255); border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.16 38);">Gratuit jusqu’à 3 circuits · sans carte</span>
+    <h2 style="margin: 0; max-width: 22ch; font-size: 42px; font-weight: 800; letter-spacing: -0.036em; line-height: 1.05; color: oklch(0.24 0.075 265); text-wrap: balance;">Votre premier circuit tient en dix minutes</h2>
+    <p style="margin: 0; max-width: 52ch; font-size: 15.5px; line-height: 1.55; color: oklch(0.46 0.045 265); text-wrap: pretty;">Posez vos revenus, branchez vos livrets, et voyez la première projection à 60 mois avant d’avoir fini votre café.</p>
+    <div style="display: flex; gap: 10px; padding-top: 8px;">
+      <a href="#" style="font-size: 15px; font-weight: 700; color: oklch(1 0 0); background: oklch(0.68 0.18 38); padding: 14px 24px; border-radius: 11px; box-shadow: 0 2px 6px oklch(0.5 0.16 38 / 0.28); text-decoration: none;">Ouvrir le builder</a>
+      <a href="Circuits%20Types.dc.html" style="font-size: 15px; font-weight: 600; color: oklch(0.28 0.08 265); background: oklch(1 0 0); border: 1px solid oklch(0.89 0.014 255); padding: 14px 22px; border-radius: 11px; text-decoration: none;">Explorer les modèles</a>
+    </div>
+  </section>
+
+  <footer style="padding: 36px 32px 40px; display: flex; flex-wrap: wrap; gap: 30px 60px; align-items: flex-start;">
+    <div style="display: flex; flex-direction: column; gap: 9px; margin-right: auto;">
+      <a href="Site%20Vitrine.dc.html" style="align-self: flex-start;"><img src="assets/repartio-mark.png" alt="repartio.fr" style="height: 38px; width: auto; display: block;"></a>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.6 0.04 265);">Répartiteur de revenus</span>
+    </div>
+    <sc-for list="{{ cols }}" as="col" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 9px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.62 0.04 265);">{{ col.h }}</span>
+        <sc-for list="{{ col.items }}" as="i" hint-placeholder-count="4">
+          <a href="{{ i.href }}" style="font-size: 13.5px; color: oklch(0.4 0.05 265); text-decoration: none;">{{ i.t }}</a>
+        </sc-for>
+      </div>
+    </sc-for>
+    <div style="width: 100%; padding-top: 22px; border-top: 1px solid oklch(0.92 0.012 255); display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: oklch(0.58 0.04 265);">
+      <span>© 2026 repartio.fr</span>
+      <span style="margin-left: auto;">repartio est un outil de simulation, pas un conseil en investissement.</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:560}}">
+class Component extends DCLogic {
+  renderVals() {
+    const i = (t, href) => ({ t, href });
+    return {
+      cols: [
+        { h: 'Produit', items: [i('Fonctionnement', 'Fonctionnement.dc.html'), i('Circuits types', 'Circuits%20Types.dc.html'), i('Capacités', 'Capacites.dc.html'), i('Tarifs', 'Tarifs.dc.html')] },
+        { h: 'Ressources', items: [i('Notes de terrain', 'Ressources.dc.html'), i('FAQ', 'FAQ.dc.html'), i('Guide des livrets', 'Ressources.dc.html'), i('Journal des versions', 'Ressources.dc.html')] },
+        { h: 'Société', items: [i('Vos données', 'Vos%20Donnees.dc.html'), i('Contact', 'Contact.dc.html'), i('Mentions légales', 'Mentions%20Legales.dc.html'), i('CGU & CGV', 'Conditions%20Generales.dc.html'), i('Confidentialité', 'Politique%20de%20Confidentialite.dc.html')] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

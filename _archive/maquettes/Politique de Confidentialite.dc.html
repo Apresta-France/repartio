@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="donnees" hint-size="100%,78px"></dc-import>
+
+  <section style="padding: 26px 32px 0;">
+    <div style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap; padding: 20px 24px; border-radius: 14px; background: oklch(0.24 0.075 265);">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.75 0.12 192);">En une phrase</span>
+      <span style="font-size: 15px; line-height: 1.5; color: oklch(0.94 0.015 250); max-width: 74ch; text-wrap: pretty;">Nous ne lisons pas vos comptes, nous ne revendons rien, et tout ce que vous saisissez est exportable et supprimable en un clic.</span>
+      <a href="Vos%20Donnees.dc.html" style="margin-left: auto; font-size: 13.5px; font-weight: 700; color: oklch(0.82 0.12 192);">Voir la page « Vos données » →</a>
+    </div>
+  </section>
+
+  <dc-import name="Legal Doc" eyebrow="Politique de confidentialité" title="Politique de confidentialité" lede="{{ lede }}" meta="{{ meta }}" sections="{{ sections }}" hint-size="100%,900px"></dc-import>
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      lede: 'Comment repartio traite les données personnelles de ses utilisateurs, pour quelles finalités, pendant combien de temps, et comment exercer vos droits. Rédigée en application du règlement (UE) 2016/679 (RGPD).',
+      meta: ['Version 1.4', 'À jour au 1ᵉʳ août 2026', 'Responsable de traitement : Repartio SAS'],
+      sections: [
+        { h: 'Responsable du traitement',
+          ps: ['Le responsable du traitement est la société éditrice du service, dont les coordonnées figurent dans les mentions légales. Toute demande relative aux données personnelles peut être adressée à bonjour@repartio.fr.'],
+          rows: [
+            { k: 'Responsable', v: 'Repartio SAS (à compléter)' },
+            { k: 'Contact données', v: 'bonjour@repartio.fr' },
+            { k: 'Délégué à la protection', v: 'Non désigné — traitement ne l’exigeant pas' }
+          ] },
+        { h: 'Principe directeur : pas d’accès bancaire',
+          ps: ['repartio ne se connecte à aucun établissement bancaire et n’utilise aucun agrégateur de comptes. Les montants présents dans le service sont exclusivement ceux saisis par l’utilisateur, ce qui exclut par construction la détention d’un historique de transactions.'],
+          list: [
+            'Aucun mandat DSP2 n’est demandé ni conservé.',
+            'Aucun identifiant bancaire (IBAN, numéro de carte) n’est stocké par l’éditeur.',
+            'Les données de paiement sont traitées exclusivement par un prestataire certifié PCI-DSS.'
+          ] },
+        { h: 'Données collectées et finalités',
+          ps: ['Seules les données nécessaires au fonctionnement du service sont collectées. Chaque catégorie répond à une finalité déterminée et à une base légale identifiée.'],
+          rows: [
+            { k: 'Adresse e-mail', v: 'Identification du compte, envoi des liens de connexion et des factures — exécution du contrat' },
+            { k: 'Prénom', v: 'Personnalisation de l’interface — exécution du contrat' },
+            { k: 'Structure des circuits', v: 'Fourniture du service de simulation — exécution du contrat' },
+            { k: 'Montants saisis', v: 'Calcul du mois type et de la projection — exécution du contrat' },
+            { k: 'Historique de versions', v: 'Restauration d’un état antérieur, plans payants — exécution du contrat' },
+            { k: 'Journal de connexion', v: 'Sécurité du compte et détection d’accès anormaux — intérêt légitime' },
+            { k: 'Mesure d’usage agrégée', v: 'Amélioration du produit, sans identifiant publicitaire — intérêt légitime' },
+            { k: 'Données de facturation', v: 'Obligations comptables et fiscales — obligation légale' }
+          ] },
+        { h: 'Durées de conservation',
+          rows: [
+            { k: 'Compte et circuits', v: 'Toute la durée de vie du compte, puis suppression immédiate' },
+            { k: 'Historique de versions', v: '24 mois glissants' },
+            { k: 'Journal de connexion', v: '12 mois' },
+            { k: 'Mesure d’usage', v: '6 mois, sous forme agrégée' },
+            { k: 'Factures', v: '10 ans, au titre des obligations comptables' }
+          ] },
+        { h: 'Absence de profilage et de revente',
+          ps: ['Aucune décision automatisée produisant des effets juridiques n’est prise à l’égard des utilisateurs. Les données ne sont ni vendues, ni louées, ni transmises à des courtiers en données, ni utilisées pour du ciblage publicitaire.'],
+          list: [
+            'Pas de traceur publicitaire ni de pixel tiers sur le site.',
+            'Pas de croisement des données de circuits entre utilisateurs.',
+            'Pas d’enrichissement auprès de sources externes.'
+          ] },
+        { h: 'Sous-traitants et localisation',
+          ps: ['Les données sont hébergées au sein de l’Union européenne. Les sous-traitants intervenant dans la fourniture du service sont limités au strict nécessaire et encadrés par des clauses conformes à l’article 28 du RGPD.'],
+          rows: [
+            { k: 'Hébergement', v: 'Infrastructure européenne, centre de données en France' },
+            { k: 'Paiement', v: 'Prestataire certifié PCI-DSS, Union européenne' },
+            { k: 'E-mails transactionnels', v: 'Prestataire d’envoi, Union européenne' },
+            { k: 'Transferts hors UE', v: 'Aucun transfert hors Union européenne' }
+          ] },
+        { h: 'Sécurité',
+          list: [
+            'Chiffrement des données en transit (TLS) et au repos.',
+            'Mots de passe stockés sous forme de condensats à dérivation lente, jamais en clair.',
+            'Accès aux bases de production restreint, journalisé et soumis à double authentification.',
+            'Sauvegardes chiffrées quotidiennes, restauration testée trimestriellement.'
+          ] },
+        { h: 'Vos droits',
+          ps: ['Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité. La plupart s’exercent directement dans l’application, sans intervention de notre part.'],
+          rows: [
+            { k: 'Accès', v: 'Toutes vos données sont visibles dans l’interface, à tout moment' },
+            { k: 'Portabilité', v: 'Export JSON et CSV immédiat depuis les réglages' },
+            { k: 'Rectification', v: 'Modification directe des montants, blocs et informations de compte' },
+            { k: 'Effacement', v: 'Suppression du compte et des circuits, sans période de rétention' },
+            { k: 'Réclamation', v: 'Saisine possible de la CNIL après demande préalable auprès de nous' }
+          ] },
+        { h: 'Cookies',
+          ps: ['Le site n’utilise qu’un cookie de session strictement nécessaire au maintien de la connexion, et une mesure d’audience agrégée sans identifiant individuel. Aucun consentement publicitaire n’est requis, faute de traceur publicitaire.'] },
+        { h: 'Modifications de la politique',
+          ps: ['Toute modification substantielle de la présente politique est notifiée par e-mail au moins trente jours avant son entrée en vigueur. Les versions antérieures sont conservées et communicables sur demande.'] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  input, button { font: inherit; }
+  input::placeholder { color: oklch(0.68 0.03 265); }
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 34px 32px 40px; gap: 40px; font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <a href="Site%20Vitrine.dc.html" style="align-self: flex-start;"><img src="assets/repartio-mark.png" alt="repartio.fr" style="height: 32px; width: auto; display: block;"></a>
+
+  <div style="margin: auto 0; width: 100%; max-width: 468px; display: flex; flex-direction: column; gap: 20px;">
+    <div style="display: flex; flex-direction: column; gap: 18px; padding: 30px 32px 32px; background: oklch(1 0 0); border: 1px solid oklch(0.91 0.012 255); border-radius: 16px; box-shadow: 0 4px 18px oklch(0.3 0.06 265 / 0.06);">
+      <sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">Réinitialisation</span>
+          <h1 style="margin: 0; font-size: 27px; font-weight: 800; letter-spacing: -0.032em;">Mot de passe oublié</h1>
+          <p style="margin: 0; font-size: 14px; line-height: 1.55; color: oklch(0.45 0.045 265); text-wrap: pretty;">Indiquez l’adresse de votre compte&nbsp;: nous vous envoyons un lien valable une heure. Vos circuits ne bougent pas d’un pouce entre-temps.</p>
+        </div>
+        <label style="display: flex; flex-direction: column; gap: 7px;">
+          <span style="font-size: 12.5px; font-weight: 600; color: oklch(0.36 0.05 265);">Adresse e-mail du compte</span>
+          <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="vous@exemple.fr" style="padding: 12px 14px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: oklch(1 0 0); font-size: 14px; color: oklch(0.24 0.075 265); outline: none;" style-focus="border-color: oklch(0.68 0.18 38); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14);">
+        </label>
+        <button style="cursor: pointer; border: none; padding: 13px 20px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 14.5px; font-weight: 700; box-shadow: 0 2px 6px oklch(0.5 0.16 38 / 0.26);" onClick="{{ send }}">Envoyer le lien</button>
+      </sc-if>
+      <sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <span style="width: 38px; height: 38px; border-radius: 12px; background: oklch(0.95 0.03 192); color: oklch(0.45 0.12 192); display: grid; place-items: center; font-size: 17px;">✓</span>
+          <h1 style="margin: 0; font-size: 25px; font-weight: 800; letter-spacing: -0.03em;">Lien envoyé</h1>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: oklch(0.45 0.045 265); text-wrap: pretty;">Si un compte existe pour <strong style="font-family: 'IBM Plex Mono', monospace; font-weight: 500;">{{ shownEmail }}</strong>, un lien de réinitialisation vient d’y arriver. Il expire dans une heure et ne fonctionne qu’une fois.</p>
+          <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(0.93 0.01 255); border: 1px solid oklch(0.93 0.01 255); border-radius: 11px; overflow: hidden;">
+            <sc-for list="{{ tips }}" as="t" hint-placeholder-count="3">
+              <span style="background: oklch(0.978 0.005 250); padding: 11px 14px; font-size: 13px; line-height: 1.45; color: oklch(0.42 0.05 265);">{{ t }}</span>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: 9px;">
+            <button style="cursor: pointer; padding: 11px 16px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: oklch(1 0 0); font-size: 13.5px; font-weight: 600; color: oklch(0.3 0.07 265);" onClick="{{ back }}">Corriger l’adresse</button>
+            <a href="Connexion.dc.html" style="padding: 11px 16px; border-radius: 10px; background: oklch(0.24 0.075 265); color: oklch(0.97 0.01 250); font-size: 13.5px; font-weight: 600;">Retour à la connexion</a>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="display: flex; align-items: baseline; gap: 12px; padding: 0 4px;">
+      <span style="font-size: 13.5px; color: oklch(0.46 0.045 265);">Vous préférez éviter les mots de passe&nbsp;?</span>
+      <a href="Connexion.dc.html" style="font-size: 13.5px; font-weight: 700;">Connexion par lien e-mail</a>
+    </div>
+  </div>
+
+  <span style="font-size: 12px; color: oklch(0.6 0.04 265);">Nous ne révélons jamais si une adresse a un compte chez nous.</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:760}}">
+class Component extends DCLogic {
+  state = { sent: false, email: '' };
+
+  renderVals() {
+    return {
+      isForm: !this.state.sent,
+      isSent: this.state.sent,
+      email: this.state.email,
+      shownEmail: this.state.email || 'vous@exemple.fr',
+      onEmail: (e) => this.setState({ email: e.target.value }),
+      send: () => this.setState({ sent: true }),
+      back: () => this.setState({ sent: false }),
+      tips: [
+        'Regardez dans les indésirables : l’expéditeur est bonjour@repartio.fr.',
+        'Le lien ouvre une page où vous choisissez un nouveau mot de passe.',
+        'Aucune session active n’est déconnectée avant que vous ayez terminé.'
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

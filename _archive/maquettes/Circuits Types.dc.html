@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  button { font: inherit; }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="circuits" hint-size="100%,78px"></dc-import>
+
+  <section style="padding: 66px 32px 44px; border-bottom: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 18px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">Circuits types</span>
+    <h1 style="margin: 0; max-width: 26ch; font-size: 48px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; text-wrap: balance;">Neuf circuits déjà câblés, à reprendre tels quels</h1>
+    <p style="margin: 0; max-width: 66ch; font-size: 16.5px; line-height: 1.6; color: oklch(0.44 0.045 265); text-wrap: pretty;">Chaque modèle est un circuit complet, avec ses blocs, ses fils et ses montants d’exemple. Vous l’ouvrez, vous remplacez les chiffres par les vôtres, et la projection se recalcule&nbsp;: c’est presque toujours plus rapide que de partir d’un canvas vide.</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 6px;">
+      <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+        <button style="cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.04em; padding: 7px 13px; border-radius: 8px; border: 1px solid {{ f.border }}; background: {{ f.bg }}; color: {{ f.fg }};" onClick="{{ f.onClick }}">{{ f.label }}</button>
+      </sc-for>
+      <span style="margin-left: auto; align-self: center; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.6 0.04 265);">{{ count }}</span>
+    </div>
+  </section>
+
+  <section style="padding: 34px 32px 62px;">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+      <sc-for list="{{ shown }}" as="t" hint-placeholder-count="9">
+        <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden; background: oklch(1 0 0); display: flex; flex-direction: column; transition: box-shadow .18s, transform .18s, border-color .18s;" style-hover="box-shadow: 0 8px 26px oklch(0.3 0.06 265 / 0.1); transform: translateY(-2px); border-color: oklch(0.82 0.05 255);">
+          <div style="position: relative; height: 148px; background: oklch(0.965 0.006 250); border-bottom: 1px solid oklch(0.93 0.01 255); overflow: hidden;">
+            <div style="position: absolute; inset: 0; opacity: .6; background-image: radial-gradient(oklch(0.84 0.016 255) 1px, transparent 1px); background-size: 18px 18px;"></div>
+            <svg viewBox="0 0 300 148" width="100%" height="148" style="position: relative; display: block;">
+              <sc-for list="{{ t.wires }}" as="w" hint-placeholder-count="3">
+                <path d="{{ w }}" fill="none" stroke="oklch(0.75 0.09 195)" stroke-width="1.5"></path>
+              </sc-for>
+              <sc-for list="{{ t.dots }}" as="d" hint-placeholder-count="5">
+                <rect x="{{ d.x }}" y="{{ d.y }}" width="{{ d.w }}" height="17" rx="5" fill="oklch(1 0 0)" stroke="{{ d.c }}" stroke-width="1.6"></rect>
+              </sc-for>
+            </svg>
+            <span style="position: absolute; top: 10px; left: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(0.5 0.05 265); background: oklch(1 0 0 / 0.9); border: 1px solid oklch(0.9 0.014 255); border-radius: 6px; padding: 3px 7px;">{{ t.cat }}</span>
+          </div>
+          <div style="padding: 17px 18px 19px; display: flex; flex-direction: column; gap: 10px; flex: 1;">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+              <span style="font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">{{ t.name }}</span>
+              <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.6 0.04 265);">{{ t.meta }}</span>
+            </div>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.5; color: oklch(0.47 0.045 265); text-wrap: pretty;">{{ t.desc }}</p>
+            <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid oklch(0.94 0.01 255); display: flex; align-items: center; gap: 10px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.52 0.045 265);">{{ t.stat }}</span>
+              <a href="#" style="margin-left: auto; font-size: 12.5px; font-weight: 700; color: oklch(0.6 0.17 38);">Ouvrir →</a>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 44px 32px 52px; background: oklch(1 0 0); border-top: 1px solid oklch(0.91 0.012 255); display: flex; align-items: center; gap: 28px; flex-wrap: wrap;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 21px; font-weight: 800; letter-spacing: -0.025em;">Aucun modèle ne ressemble à votre situation&nbsp;?</span>
+      <span style="font-size: 14.5px; color: oklch(0.47 0.045 265);">Le canvas vide est là pour ça — et vous pouvez toujours partir d’un modèle proche puis débrancher ce qui gêne.</span>
+    </div>
+    <a href="#" style="margin-left: auto; font-size: 14.5px; font-weight: 700; color: oklch(1 0 0); background: oklch(0.68 0.18 38); padding: 13px 22px; border-radius: 11px;">Partir d’un canvas vide</a>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const NAVY = 'oklch(0.32 0.09 265)';
+const TEAL = 'oklch(0.62 0.12 192)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const BLUE = 'oklch(0.48 0.11 240)';
+const RED = 'oklch(0.55 0.16 25)';
+
+const T = [
+  { cat: 'Couple', name: 'Couple, comptes séparés', meta: '11 blocs', stat: '12 338 € / mois', desc: 'Deux salaires, un joint pour les factures, un joint pour le quotidien, épargne ventilée par personne.',
+    wires: ['M40 34 C80 34 80 74 120 74', 'M40 112 C80 112 80 78 120 78', 'M164 76 C200 76 200 38 240 38', 'M164 80 C200 80 200 112 240 112'],
+    dots: [{ x: 8, y: 26, w: 32, c: TEAL }, { x: 8, y: 104, w: 32, c: TEAL }, { x: 120, y: 66, w: 44, c: NAVY }, { x: 240, y: 30, w: 52, c: RED }, { x: 240, y: 104, w: 52, c: BLUE }] },
+  { cat: 'Indépendant', name: 'Auto-entrepreneur', meta: '9 blocs', stat: '7 000 € de CA', desc: 'Chiffre d’affaires, provision URSSAF, rémunération vers le compte perso, épargne de précaution.',
+    wires: ['M40 74 C80 74 80 34 120 34', 'M40 78 C80 78 80 112 120 112', 'M164 36 C200 36 210 74 240 74'],
+    dots: [{ x: 8, y: 66, w: 32, c: TEAL }, { x: 120, y: 26, w: 44, c: NAVY }, { x: 120, y: 104, w: 44, c: RED }, { x: 240, y: 66, w: 52, c: BLUE }] },
+  { cat: 'Épargne', name: 'Épargne de précaution', meta: '6 blocs', stat: '3 mois de charges', desc: 'Un seul revenu, une règle de trois mois de charges, saturation du LEP puis du Livret A.',
+    wires: ['M40 74 C80 74 80 46 120 46', 'M164 48 C200 48 200 28 240 28', 'M164 52 C200 52 200 106 240 106'],
+    dots: [{ x: 8, y: 66, w: 32, c: TEAL }, { x: 120, y: 38, w: 44, c: ORANGE }, { x: 240, y: 20, w: 52, c: BLUE }, { x: 240, y: 98, w: 52, c: BLUE }] },
+  { cat: 'Projet', name: 'Objectif apport', meta: '10 blocs', stat: 'cible 60 000 €', desc: 'Tout ce qui n’est pas dépensé va vers l’apport ; repartio affiche la date d’atteinte du montant cible.',
+    wires: ['M40 46 C80 46 80 74 120 74', 'M40 112 C80 112 80 78 120 78', 'M164 76 C210 76 210 46 240 46'],
+    dots: [{ x: 8, y: 38, w: 32, c: TEAL }, { x: 8, y: 104, w: 32, c: TEAL }, { x: 120, y: 66, w: 44, c: ORANGE }, { x: 240, y: 38, w: 52, c: BLUE }] },
+  { cat: 'Famille', name: 'Famille avec enfants', meta: '13 blocs', stat: '2 livrets enfants', desc: 'Allocations, livrets des enfants, dépenses courantes indexées, deux répartiteurs distincts.',
+    wires: ['M40 32 C80 32 80 72 120 72', 'M40 110 C80 110 80 76 120 76', 'M164 74 C200 74 200 32 240 32', 'M164 78 C200 78 200 110 240 110'],
+    dots: [{ x: 8, y: 24, w: 32, c: TEAL }, { x: 8, y: 102, w: 32, c: TEAL }, { x: 120, y: 64, w: 44, c: ORANGE }, { x: 240, y: 24, w: 52, c: BLUE }, { x: 240, y: 102, w: 52, c: RED }] },
+  { cat: 'Indépendant', name: 'Locatif + salaire', meta: '8 blocs', stat: '2 000 € de loyers', desc: 'Loyers perçus, charges du local, fiscalité provisionnée, surplus vers épargne longue.',
+    wires: ['M40 74 C80 74 80 42 120 42', 'M164 44 C200 44 200 26 240 26', 'M164 48 C200 48 200 106 240 106'],
+    dots: [{ x: 8, y: 66, w: 32, c: TEAL }, { x: 120, y: 34, w: 44, c: NAVY }, { x: 240, y: 18, w: 52, c: RED }, { x: 240, y: 98, w: 52, c: BLUE }] },
+  { cat: 'Solo', name: 'Premier salaire', meta: '5 blocs', stat: '1 800 € / mois', desc: 'Un salaire, un loyer, un forfait dépenses libres et un seul livret. Le circuit minimum viable.',
+    wires: ['M40 74 C80 74 80 40 120 40', 'M40 78 C80 78 80 108 120 108'],
+    dots: [{ x: 8, y: 66, w: 32, c: TEAL }, { x: 120, y: 32, w: 44, c: RED }, { x: 120, y: 100, w: 44, c: BLUE }] },
+  { cat: 'Couple', name: 'Un seul revenu, deux personnes', meta: '9 blocs', stat: '3 400 € / mois', desc: 'Un salaire qui alimente un compte joint unique, avec une part personnelle garantie pour chacun.',
+    wires: ['M40 74 C80 74 80 74 120 74', 'M164 72 C200 72 200 34 240 34', 'M164 76 C200 76 200 110 240 110'],
+    dots: [{ x: 8, y: 66, w: 32, c: TEAL }, { x: 120, y: 66, w: 44, c: NAVY }, { x: 240, y: 26, w: 52, c: ORANGE }, { x: 240, y: 102, w: 52, c: RED }] },
+  { cat: 'Épargne', name: 'Saturation des livrets réglementés', meta: '7 blocs', stat: '44 950 € de plafonds', desc: 'Un répartiteur qui remplit LEP, LDDS puis Livret A dans l’ordre, et déborde vers le suivant.',
+    wires: ['M40 74 C80 74 80 74 120 74', 'M164 70 C200 70 200 26 240 26', 'M164 74 C200 74 200 70 240 70', 'M164 78 C200 78 200 114 240 114'],
+    dots: [{ x: 8, y: 66, w: 32, c: TEAL }, { x: 120, y: 66, w: 44, c: ORANGE }, { x: 240, y: 18, w: 52, c: BLUE }, { x: 240, y: 62, w: 52, c: BLUE }, { x: 240, y: 106, w: 52, c: BLUE }] }
+];
+
+class Component extends DCLogic {
+  state = { filter: 'Tous' };
+
+  renderVals() {
+    const cats = ['Tous', 'Solo', 'Couple', 'Famille', 'Indépendant', 'Épargne', 'Projet'];
+    const f = this.state.filter;
+    const shown = f === 'Tous' ? T : T.filter(t => t.cat === f);
+    return {
+      shown,
+      count: shown.length + (shown.length > 1 ? ' circuits' : ' circuit'),
+      filters: cats.map(label => ({
+        label,
+        onClick: () => this.setState({ filter: label }),
+        bg: f === label ? 'oklch(0.24 0.075 265)' : 'oklch(1 0 0)',
+        fg: f === label ? 'oklch(0.97 0.01 250)' : 'oklch(0.42 0.05 265)',
+        border: f === label ? 'oklch(0.24 0.075 265)' : 'oklch(0.9 0.014 255)'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

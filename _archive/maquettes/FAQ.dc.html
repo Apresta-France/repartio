@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  input, button { font: inherit; }
+  input::placeholder { color: oklch(0.68 0.03 265); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" hint-size="100%,78px"></dc-import>
+
+  <section style="padding: 58px 32px 36px; border-bottom: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 16px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">Questions fréquentes</span>
+    <h1 style="margin: 0; max-width: 24ch; font-size: 46px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; text-wrap: balance;">Tout ce qu’on nous demande, rangé</h1>
+    <p style="margin: 0; max-width: 64ch; font-size: 16.5px; line-height: 1.6; color: oklch(0.44 0.045 265); text-wrap: pretty;">Vingt-cinq réponses, écrites par l’équipe qui construit le produit. Si la vôtre n’y est pas, écrivez-nous&nbsp;: la question finit souvent par rejoindre cette page.</p>
+    <div style="display: flex; align-items: center; gap: 10px; max-width: 420px; padding: 11px 14px; border-radius: 11px; border: 1px solid oklch(0.89 0.014 255); background: oklch(1 0 0); margin-top: 4px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: oklch(0.66 0.04 265);">/</span>
+      <input type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Chercher une question…" style="flex: 1; border: none; outline: none; background: transparent; font-size: 14px; color: oklch(0.24 0.075 265);">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.6 0.045 265);">{{ count }}</span>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: 262px 1fr; align-items: start;">
+    <nav style="position: sticky; top: 78px; padding: 32px 22px 40px 32px; display: flex; flex-direction: column; gap: 3px; border-right: 1px solid oklch(0.91 0.012 255);">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.64 0.04 265); padding: 0 8px 10px;">Catégories</span>
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+        <button style="cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 9px; border: none; font-size: 13.5px; font-weight: {{ c.weight }}; color: {{ c.fg }}; background: {{ c.bg }};" onClick="{{ c.onClick }}">
+          {{ c.label }}
+          <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.62 0.045 265);">{{ c.n }}</span>
+        </button>
+      </sc-for>
+      <a href="Contact.dc.html" style="margin-top: 16px; padding: 13px 15px; border-radius: 11px; background: oklch(0.24 0.075 265); color: oklch(0.97 0.01 250); display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 13.5px; font-weight: 700;">Poser votre question</span>
+        <span style="font-size: 12px; color: oklch(0.8 0.03 255);">Réponse sous 72 h ouvrées</span>
+      </a>
+    </nav>
+
+    <div style="padding: 32px 32px 56px 44px; max-width: 900px; display: flex; flex-direction: column; gap: 30px;">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: baseline; gap: 12px;">
+            <h2 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.026em;">{{ g.label }}</h2>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.62 0.045 265);">{{ g.n }}</span>
+          </div>
+          <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 13px; overflow: hidden; background: oklch(1 0 0);">
+            <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="4">
+              <div style="border-bottom: 1px solid oklch(0.95 0.008 255);">
+                <div style="display: flex; align-items: baseline; gap: 14px; padding: 15px 18px; cursor: pointer;" onClick="{{ i.toggle }}">
+                  <span style="font-size: 14.5px; font-weight: 700; letter-spacing: -0.018em; flex: 1; text-wrap: pretty;">{{ i.q }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: oklch(0.66 0.16 38);">{{ i.sign }}</span>
+                </div>
+                <sc-if value="{{ i.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 0 18px 18px; display: flex; flex-direction: column; gap: 10px;">
+                    <p style="margin: 0; padding-right: 40px; font-size: 14px; line-height: 1.65; color: oklch(0.4 0.05 265); text-wrap: pretty;">{{ i.a }}</p>
+                    <sc-if value="{{ i.hasLink }}" hint-placeholder-val="{{ false }}">
+                      <a href="{{ i.href }}" style="align-self: flex-start; font-size: 13px; font-weight: 700;">{{ i.linkLabel }} →</a>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 30px 28px; border: 1px dashed oklch(0.86 0.02 255); border-radius: 14px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start;">
+          <span style="font-size: 17px; font-weight: 700; letter-spacing: -0.022em;">Aucune réponse pour «&nbsp;{{ q }}&nbsp;»</span>
+          <span style="font-size: 14px; line-height: 1.55; color: oklch(0.47 0.045 265);">Essayez un mot plus court, ou posez directement la question à l’équipe.</span>
+          <a href="Contact.dc.html" style="margin-top: 4px; padding: 11px 18px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 13.5px; font-weight: 700;">Écrire à l’équipe</a>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const FAQ = [
+  ['Prise en main', 'Faut-il connecter ma banque ?', 'Non, et ce n’est pas prévu. repartio fonctionne uniquement avec les montants que vous saisissez : un salaire, un loyer, un versement mensuel. C’est cette contrainte qui permet de modéliser des situations qui n’existent pas encore.', 'Vos données', 'Vos%20Donnees.dc.html'],
+  ['Prise en main', 'Combien de temps pour un premier circuit ?', 'Dix minutes pour un foyer simple, une demi-heure pour un circuit à vingt blocs avec deux comptes joints. Le plus rapide est de partir d’un circuit type et de remplacer les montants.', 'Circuits types', 'Circuits%20Types.dc.html'],
+  ['Prise en main', 'Par quoi commencer : les revenus ou les dépenses ?', 'Par les revenus. Le compteur « non affecté » vous indique ensuite exactement combien il reste à câbler, et vous descendez vers les destinations jusqu’à tomber à zéro.', '', ''],
+  ['Prise en main', 'Puis-je importer un tableur existant ?', 'Pas encore d’import automatique. En pratique, recopier les lignes d’un tableur dans des blocs prend une quinzaine de minutes, et c’est l’occasion de repérer les montants oubliés.', '', ''],
+  ['Prise en main', 'repartio fonctionne-t-il sur mobile ?', 'Le tableau de bord et la lecture des circuits, oui. La construction au canvas demande un écran large : c’est un outil qu’on utilise assis, une fois par trimestre, pas tous les matins.', '', ''],
+
+  ['Le moteur', 'Que signifie « non affecté » ?', 'C’est l’argent entré dans le circuit qui n’a pas encore de destination. Tant que ce compteur n’est pas à zéro, votre mois type est incomplet, et la projection sous-estime vos dépenses ou votre épargne.', 'Le moteur en détail', 'Fonctionnement.dc.html'],
+  ['Le moteur', 'Comment sont gérés les plafonds réglementaires ?', 'Chaque livret porte son plafond et son taux. Quand il sature, repartio vous indique en combien de mois, et redirige le surplus vers la destination de débordement que vous avez câblée. Sans destination, le surplus est signalé comme bloqué.', '', ''],
+  ['Le moteur', 'Un fil peut-il porter un pourcentage ?', 'Oui : montant fixe, pourcentage, ou « tout le reste ». Les montants fixes sont servis d’abord, puis les pourcentages, et « tout le reste » passe en dernier.', '', ''],
+  ['Le moteur', 'Les intérêts sont-ils composés ?', 'Ils sont capitalisés une fois par an sur le solde moyen, au taux que porte le livret. Vous pouvez surcharger ce taux bloc par bloc si vous voulez tester une hypothèse.', '', ''],
+  ['Le moteur', 'Peut-on modéliser un revenu irrégulier ?', 'Oui, en moyenne lissée. Pour de fortes variations, la pratique la plus lisible est de créer deux scénarios : un mois bas et un mois haut, puis de les comparer.', '', ''],
+  ['Le moteur', 'L’inflation est-elle prise en compte ?', 'Non par défaut, et c’est volontaire : nous n’imposons aucune hypothèse macroéconomique. Vous pouvez indexer manuellement un bloc de dépenses si vous souhaitez ce comportement.', '', ''],
+
+  ['Situations', 'Peut-on modéliser un couple avec des comptes séparés ?', 'C’est le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts par personne. Le circuit type « Couple, comptes séparés » part de cette structure.', 'Voir le modèle', 'Circuits%20Types.dc.html'],
+  ['Situations', 'Comment provisionner l’URSSAF en auto-entreprise ?', 'Avec un bloc dépense dédié, alimenté depuis le compte professionnel. La provision sort du circuit chaque mois, ce qui rend le revenu réellement disponible immédiatement lisible.', '', ''],
+  ['Situations', 'Et les livrets des enfants ?', 'Un bloc livret par enfant, avec son solde de départ, son taux et son plafond. Ils apparaissent dans la projection comme n’importe quelle autre destination.', '', ''],
+  ['Situations', 'Peut-on suivre un objectif chiffré, comme un apport ?', 'Oui : vous posez la cible sur le bloc de destination, et repartio affiche le mois d’atteinte. Le circuit type « Objectif apport » est déjà câblé pour ça.', '', ''],
+  ['Situations', 'Comment gérer un crédit immobilier ?', 'Comme une dépense mensuelle fixe. La modélisation du capital restant dû n’est pas encore dans le moteur : elle est sur la feuille de route.', '', ''],
+
+  ['Compte & plans', 'Que contient la version gratuite ?', 'Trois circuits, les cinq types de blocs sans limite de nombre, les plafonds réglementaires à jour, la projection jusqu’à 60 mois et les exports JSON et CSV.', 'Comparer les plans', 'Tarifs.dc.html'],
+  ['Compte & plans', 'Faut-il une carte pour créer un compte ?', 'Non. Aucun moyen de paiement n’est demandé sur le plan Libre, et il n’y a pas de conversion automatique à l’issue d’une période d’essai — il n’y a pas de période d’essai.', '', ''],
+  ['Compte & plans', 'Que devient mon circuit si j’arrête de payer ?', 'Il reste consultable et exportable. Vous repassez sous la limite de trois circuits modifiables, et vous choisissez lesquels. Rien n’est supprimé du fait de la résiliation.', '', ''],
+  ['Compte & plans', 'Le plan Foyer, c’est deux abonnements ?', 'Non, un seul : deux accès nominatifs sur les mêmes circuits, chacun avec son journal de modifications.', '', ''],
+  ['Compte & plans', 'Puis-je changer de plan en cours de route ?', 'À tout moment, dans les deux sens. Le passage d’annuel à mensuel prend effet à la fin de la période déjà réglée.', '', ''],
+
+  ['Données & sécurité', 'Où sont hébergées mes données ?', 'Dans un centre de données situé en France, au sein de l’Union européenne, chiffrées en transit et au repos. Aucun transfert hors UE.', 'Politique de confidentialité', 'Politique%20de%20Confidentialite.dc.html'],
+  ['Données & sécurité', 'Vendez-vous les données ?', 'Jamais. Pas de revente, pas de courtier en données, pas de ciblage publicitaire, et aucun traceur publicitaire sur le site.', '', ''],
+  ['Données & sécurité', 'Comment supprimer définitivement mon compte ?', 'Depuis les réglages, en un clic. La suppression est immédiate et sans période de rétention : pensez à exporter vos circuits avant.', '', ''],
+  ['Données & sécurité', 'repartio est-il un conseil en investissement ?', 'Non. C’est un outil de simulation : il calcule ce que vous décrivez, ne recommande aucun produit et ne juge aucune allocation.', '', '']
+];
+
+class Component extends DCLogic {
+  state = { cat: 'Tout', q: '', open: {} };
+
+  renderVals() {
+    const cats = ['Tout', 'Prise en main', 'Le moteur', 'Situations', 'Compte & plans', 'Données & sécurité'];
+    const q = this.state.q.trim().toLowerCase();
+    const match = (r) => (this.state.cat === 'Tout' || r[0] === this.state.cat) &&
+      (!q || (r[1] + ' ' + r[2]).toLowerCase().includes(q));
+    const hits = FAQ.filter(match);
+
+    const groups = cats.slice(1).map(label => {
+      const items = hits.filter(r => r[0] === label).map((r) => {
+        const key = r[1];
+        return {
+          q: r[1], a: r[2],
+          open: !!this.state.open[key],
+          sign: this.state.open[key] ? '−' : '+',
+          hasLink: !!r[4], href: r[4], linkLabel: r[3],
+          toggle: () => this.setState(s => ({ open: Object.assign({}, s.open, { [key]: !s.open[key] }) }))
+        };
+      });
+      return { label, items, n: items.length + (items.length > 1 ? ' questions' : ' question') };
+    }).filter(g => g.items.length);
+
+    return {
+      groups,
+      empty: hits.length === 0,
+      q: this.state.q,
+      onQ: (e) => this.setState({ q: e.target.value }),
+      count: hits.length + ' / ' + FAQ.length,
+      cats: cats.map(label => ({
+        label,
+        n: label === 'Tout' ? FAQ.length : FAQ.filter(r => r[0] === label).length,
+        onClick: () => this.setState({ cat: label }),
+        bg: this.state.cat === label ? 'oklch(0.955 0.008 250)' : 'transparent',
+        fg: this.state.cat === label ? 'oklch(0.2 0.08 265)' : 'oklch(0.42 0.05 265)',
+        weight: this.state.cat === label ? 700 : 500
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

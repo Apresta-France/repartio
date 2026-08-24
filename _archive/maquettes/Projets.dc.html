@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  button, input { font: inherit; }
+</style>
+</helmet>
+<div style="display: flex; min-height: 100vh; font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="App Sidebar" active="projets" hint-size="252px,100vh"></dc-import>
+
+  <main style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="display: flex; align-items: center; gap: 16px; padding: 20px 28px 18px; border-bottom: 1px solid oklch(0.91 0.012 255);">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.03em;">Mes circuits</h1>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.58 0.045 265);">2 actifs · 1 archivé · plan Libre 2/3</span>
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 9px;">
+        <div style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: oklch(0.94 0.01 255);">
+          <sc-for list="{{ views }}" as="v" hint-placeholder-count="2">
+            <button style="cursor: pointer; border: none; padding: 7px 13px; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: {{ v.fg }}; background: {{ v.bg }}; box-shadow: {{ v.shadow }};" onClick="{{ v.onClick }}">{{ v.label }}</button>
+          </sc-for>
+        </div>
+        <a href="Circuit%20Builder.dc.html" style="padding: 10px 16px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 13.5px; font-weight: 700;">Nouveau circuit</a>
+      </div>
+    </header>
+
+    <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
+      <section style="padding: 24px 28px 34px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+        <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+          <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden; background: oklch(1 0 0); display: flex; flex-direction: column; transition: box-shadow .18s, transform .18s;" style-hover="box-shadow: 0 8px 26px oklch(0.3 0.06 265 / 0.1); transform: translateY(-2px);">
+            <a href="Circuit%20Builder.dc.html" style="position: relative; display: block; height: 150px; background: oklch(0.965 0.006 250); border-bottom: 1px solid oklch(0.93 0.01 255); overflow: hidden;">
+              <div style="position: absolute; inset: 0; opacity: .6; background-image: radial-gradient(oklch(0.84 0.016 255) 1px, transparent 1px); background-size: 18px 18px;"></div>
+              <svg viewBox="0 0 300 150" width="100%" height="150" style="position: relative; display: block; opacity: {{ p.opacity }};">
+                <sc-for list="{{ p.wires }}" as="w" hint-placeholder-count="3">
+                  <path d="{{ w }}" fill="none" stroke="oklch(0.75 0.09 195)" stroke-width="1.5"></path>
+                </sc-for>
+                <sc-for list="{{ p.dots }}" as="d" hint-placeholder-count="5">
+                  <rect x="{{ d.x }}" y="{{ d.y }}" width="{{ d.w }}" height="17" rx="5" fill="oklch(1 0 0)" stroke="{{ d.c }}" stroke-width="1.6"></rect>
+                </sc-for>
+              </svg>
+              <span style="position: absolute; top: 10px; right: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ p.stateFg }}; background: {{ p.stateBg }}; border: 1px solid {{ p.stateBorder }}; border-radius: 6px; padding: 3px 7px;">{{ p.state }}</span>
+            </a>
+            <div style="padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 11px; flex: 1;">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <a href="Circuit%20Builder.dc.html" style="font-size: 16px; font-weight: 700; letter-spacing: -0.022em; color: oklch(0.26 0.07 265);">{{ p.name }}</a>
+                <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.62 0.045 265);">{{ p.blocks }}</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(0.94 0.01 255); border: 1px solid oklch(0.94 0.01 255); border-radius: 10px; overflow: hidden;">
+                <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="3">
+                  <div style="display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; background: oklch(0.99 0.003 250); font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;">
+                    <span style="color: oklch(0.54 0.045 265);">{{ r.k }}</span>
+                    <span style="color: {{ r.c }}; font-weight: 500;">{{ r.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top: auto; padding-top: 10px; border-top: 1px solid oklch(0.95 0.008 255); display: flex; align-items: center; gap: 10px;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.6 0.045 265);">{{ p.updated }}</span>
+                <span style="margin-left: auto; display: flex; gap: 6px;">
+                  <sc-for list="{{ p.actions }}" as="a" hint-placeholder-count="3">
+                    <button style="cursor: pointer; padding: 5px 10px; border-radius: 7px; border: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0); font-size: 12px; font-weight: 600; color: oklch(0.4 0.05 265);" style-hover="background: oklch(0.97 0.005 250);">{{ a }}</button>
+                  </sc-for>
+                </span>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+
+        <a href="Circuit%20Builder.dc.html" style="border: 1px dashed oklch(0.85 0.02 255); border-radius: 14px; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; color: oklch(0.4 0.05 265); background: oklch(0.99 0.003 250);" style-hover="border-color: oklch(0.68 0.18 38); background: oklch(0.99 0.008 38);">
+          <span style="width: 34px; height: 34px; border-radius: 11px; background: oklch(0.96 0.03 38); color: oklch(0.6 0.17 38); display: grid; place-items: center; font-size: 18px;">+</span>
+          <span style="font-size: 14.5px; font-weight: 700;">Nouveau circuit</span>
+          <span style="font-size: 12.5px; color: oklch(0.55 0.045 265);">1 emplacement restant sur le plan Libre</span>
+        </a>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+      <section style="padding: 24px 28px 34px;">
+        <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 13px; overflow: hidden; background: oklch(1 0 0);">
+          <div style="display: grid; grid-template-columns: 1.5fr 0.6fr 0.8fr 0.9fr 0.8fr 0.6fr; background: oklch(0.975 0.005 250); border-bottom: 1px solid oklch(0.91 0.012 255); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.55 0.045 265);">
+            <sc-for list="{{ headers }}" as="h" hint-placeholder-count="6">
+              <span style="padding: 12px 16px;">{{ h }}</span>
+            </sc-for>
+          </div>
+          <sc-for list="{{ projects }}" as="p" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 1.5fr 0.6fr 0.8fr 0.9fr 0.8fr 0.6fr; border-bottom: 1px solid oklch(0.95 0.008 255); align-items: center;">
+              <a href="Circuit%20Builder.dc.html" style="padding: 13px 16px; font-size: 13.5px; font-weight: 600; color: oklch(0.26 0.07 265);">{{ p.name }}</a>
+              <span style="padding: 13px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: oklch(0.5 0.045 265);">{{ p.blocks }}</span>
+              <span style="padding: 13px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;">{{ p.entries }}</span>
+              <span style="padding: 13px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: oklch(0.45 0.11 195);">{{ p.projection }}</span>
+              <span style="padding: 13px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.58 0.045 265);">{{ p.updated }}</span>
+              <span style="padding: 13px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: {{ p.stateFg }};">{{ p.state }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <section style="margin: 0 28px 40px; padding: 20px 24px 22px; border-radius: 14px; background: oklch(1 0 0); border: 1px solid oklch(0.91 0.012 255); display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+      <div style="display: flex; flex-direction: column; gap: 5px;">
+        <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.022em;">Besoin d’un quatrième circuit&nbsp;?</span>
+        <span style="font-size: 13.5px; color: oklch(0.47 0.045 265);">Le plan Complet lève la limite et débloque les scénarios comparés.</span>
+      </div>
+      <a href="Forfait.dc.html" style="margin-left: auto; padding: 11px 18px; border-radius: 10px; background: oklch(0.24 0.075 265); color: oklch(0.97 0.01 250); font-size: 13.5px; font-weight: 700;">Voir les forfaits</a>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const TEAL = 'oklch(0.62 0.12 192)';
+const NAVY = 'oklch(0.32 0.09 265)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const BLUE = 'oklch(0.48 0.11 240)';
+const RED = 'oklch(0.55 0.16 25)';
+
+const P = [
+  {
+    name: 'Circuit familial 2026', blocks: '23 blocs', updated: 'il y a 2 jours', opacity: 1,
+    state: 'Actif', stateFg: 'oklch(0.45 0.12 192)', stateBg: 'oklch(0.96 0.03 192)', stateBorder: 'oklch(0.88 0.05 192)',
+    entries: '12 338 €', projection: '105 615 €',
+    rows: [
+      { k: 'Entrées / mois', v: '12 338 €', c: 'oklch(0.28 0.08 265)' },
+      { k: 'Non affecté', v: '0 €', c: 'oklch(0.45 0.12 192)' },
+      { k: 'Dans 60 mois', v: '105 615 €', c: 'oklch(0.28 0.08 265)' }
+    ],
+    actions: ['Dupliquer', 'Exporter', 'Archiver'],
+    wires: ['M40 34 C80 34 80 74 120 74', 'M40 116 C80 116 80 78 120 78', 'M164 76 C200 76 200 36 240 36', 'M164 80 C200 80 200 116 240 116'],
+    dots: [{ x: 8, y: 26, w: 32, c: TEAL }, { x: 8, y: 108, w: 32, c: TEAL }, { x: 120, y: 66, w: 44, c: NAVY }, { x: 240, y: 28, w: 52, c: RED }, { x: 240, y: 108, w: 52, c: BLUE }]
+  },
+  {
+    name: 'Objectif apport 60 k€', blocks: '14 blocs', updated: 'il y a 5 jours', opacity: 1,
+    state: 'Scénario', stateFg: 'oklch(0.58 0.16 38)', stateBg: 'oklch(0.97 0.03 38)', stateBorder: 'oklch(0.9 0.05 38)',
+    entries: '12 338 €', projection: '61 040 €',
+    rows: [
+      { k: 'Entrées / mois', v: '12 338 €', c: 'oklch(0.28 0.08 265)' },
+      { k: 'Non affecté', v: '210 €', c: 'oklch(0.58 0.16 38)' },
+      { k: 'Cible atteinte', v: 'M41', c: 'oklch(0.28 0.08 265)' }
+    ],
+    actions: ['Comparer', 'Exporter', 'Archiver'],
+    wires: ['M40 44 C80 44 80 74 120 74', 'M40 112 C80 112 80 78 120 78', 'M164 76 C210 76 210 44 240 44'],
+    dots: [{ x: 8, y: 36, w: 32, c: TEAL }, { x: 8, y: 104, w: 32, c: TEAL }, { x: 120, y: 66, w: 44, c: ORANGE }, { x: 240, y: 36, w: 52, c: BLUE }]
+  },
+  {
+    name: 'Auto-entreprise — test', blocks: '9 blocs', updated: 'il y a 1 mois', opacity: 0.45,
+    state: 'Archivé', stateFg: 'oklch(0.52 0.045 265)', stateBg: 'oklch(0.97 0.005 250)', stateBorder: 'oklch(0.91 0.012 255)',
+    entries: '7 000 €', projection: '38 900 €',
+    rows: [
+      { k: 'Entrées / mois', v: '7 000 €', c: 'oklch(0.45 0.045 265)' },
+      { k: 'Non affecté', v: '0 €', c: 'oklch(0.45 0.045 265)' },
+      { k: 'Dans 60 mois', v: '38 900 €', c: 'oklch(0.45 0.045 265)' }
+    ],
+    actions: ['Restaurer', 'Exporter', 'Supprimer'],
+    wires: ['M40 76 C80 76 80 40 120 40', 'M40 80 C80 80 80 114 120 114', 'M164 42 C200 42 210 76 240 76'],
+    dots: [{ x: 8, y: 68, w: 32, c: TEAL }, { x: 120, y: 32, w: 44, c: NAVY }, { x: 120, y: 106, w: 44, c: RED }, { x: 240, y: 68, w: 52, c: BLUE }]
+  }
+];
+
+class Component extends DCLogic {
+  state = { view: 'Grille' };
+
+  renderVals() {
+    return {
+      projects: P,
+      isGrid: this.state.view === 'Grille',
+      isList: this.state.view === 'Liste',
+      headers: ['Circuit', 'Blocs', 'Entrées / mois', 'À 60 mois', 'Modifié', 'État'],
+      views: ['Grille', 'Liste'].map(label => ({
+        label,
+        onClick: () => this.setState({ view: label }),
+        bg: this.state.view === label ? 'oklch(1 0 0)' : 'transparent',
+        fg: this.state.view === label ? 'oklch(0.24 0.075 265)' : 'oklch(0.48 0.045 265)',
+        shadow: this.state.view === label ? '0 1px 3px oklch(0.3 0.06 265 / 0.14)' : 'none'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="capacites" hint-size="100%,78px"></dc-import>
+
+  <section style="padding: 66px 32px 52px; border-bottom: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 18px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">Capacités</span>
+    <h1 style="margin: 0; max-width: 24ch; font-size: 48px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; text-wrap: balance;">Un moteur de flux, pas un agrégateur de dépenses</h1>
+    <p style="margin: 0; max-width: 66ch; font-size: 16.5px; line-height: 1.6; color: oklch(0.44 0.045 265); text-wrap: pretty;">repartio ne cherche pas à classer votre passé. Il décrit une mécanique&nbsp;: qui reçoit quoi, dans quel ordre, jusqu’à quel plafond — et ce que cela donne dans cinq ans.</p>
+  </section>
+
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+    <section style="border-bottom: 1px solid oklch(0.91 0.012 255); background: {{ g.bg }};">
+      <div style="display: grid; grid-template-columns: minmax(300px, 0.72fr) 1.28fr;">
+        <div style="padding: 46px 44px 48px 32px; display: flex; flex-direction: column; gap: 13px; border-right: 1px solid oklch(0.91 0.012 255);">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.62 0.11 195);">{{ g.n }}</span>
+          <h2 style="margin: 0; font-size: 27px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.12;">{{ g.t }}</h2>
+          <p style="margin: 0; max-width: 40ch; font-size: 14.5px; line-height: 1.6; color: oklch(0.45 0.045 265); text-wrap: pretty;">{{ g.d }}</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr);">
+          <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="4">
+            <div style="padding: 26px 28px 28px; border-bottom: 1px solid oklch(0.93 0.01 255); border-right: 1px solid oklch(0.93 0.01 255); display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 8px; height: 8px; border-radius: 3px; background: {{ i.c }};"></span>
+                <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.022em;">{{ i.t }}</span>
+                <sc-if value="{{ i.pro }}" hint-placeholder-val="{{ false }}">
+                  <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.58 0.16 38); border: 1px solid oklch(0.86 0.07 38); border-radius: 5px; padding: 2px 6px;">Payant</span>
+                </sc-if>
+              </div>
+              <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: oklch(0.46 0.045 265); max-width: 44ch; text-wrap: pretty;">{{ i.d }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </sc-for>
+
+  <section style="padding: 62px 32px 66px; background: oklch(0.24 0.075 265); border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 26px; flex-wrap: wrap;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.75 0.12 192);">Limites assumées</span>
+      <h2 style="margin: 0; font-size: 29px; font-weight: 800; letter-spacing: -0.032em; color: oklch(0.97 0.01 250);">Ce que repartio ne fait pas</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: oklch(0.32 0.07 265); border: 1px solid oklch(0.32 0.07 265); border-radius: 14px; overflow: hidden;">
+      <sc-for list="{{ limits }}" as="l" hint-placeholder-count="3">
+        <div style="background: oklch(0.24 0.075 265); padding: 24px 26px 26px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.022em; color: oklch(0.96 0.01 250);">{{ l.t }}</span>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: oklch(0.79 0.03 255); text-wrap: pretty;">{{ l.d }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const NAVY = 'oklch(0.32 0.09 265)';
+const TEAL = 'oklch(0.62 0.12 192)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const BLUE = 'oklch(0.48 0.11 240)';
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      groups: [
+        { n: 'C01 · Canvas', bg: 'oklch(1 0 0)', t: 'Construire sans se perdre', d: 'Un circuit réel dépasse vite les vingt blocs. Le canvas est fait pour rester lisible à cette échelle.',
+          items: [
+            { t: 'Glissé-déposé libre', c: NAVY, d: 'Chaque bloc se déplace à la souris ; les fils suivent et se recourbent automatiquement.' },
+            { t: 'Panoramique et zoom', c: NAVY, d: 'Fond glissable, zoom au ⌘/Ctrl + molette, bouton « ajuster » pour recadrer tout le circuit.' },
+            { t: 'Colonnes suggérées', c: NAVY, d: 'repartio propose un rangement par étage — revenus, comptes, répartiteurs, destinations.' },
+            { t: 'Survol traçant', c: TEAL, d: 'Survoler un bloc met en évidence tous les fils qui entrent et sortent, avec leurs montants.' }
+          ] },
+        { n: 'C02 · Moteur', bg: 'oklch(0.985 0.003 250)', t: 'Calculer juste, et le montrer', d: 'Les règles du moteur sont écrites noir sur blanc, et chaque bloc affiche le détail de son calcul.',
+          items: [
+            { t: 'Parts en pourcentage', c: ORANGE, d: 'Un répartiteur découpe en parts et signale immédiatement si la somme ne fait pas 100 %.' },
+            { t: '« Tout le reste »', c: ORANGE, d: 'Un fil peut emporter le solde d’un bloc, ce qui évite de recalculer après chaque changement.' },
+            { t: 'Plafonds et taux réels', c: BLUE, d: 'Livret A, LDDS, LEP, livrets jeunes préremplis, avec date de saturation calculée en mois.' },
+            { t: 'Débordement câblé', c: BLUE, d: 'Quand un livret sature, le surplus part vers la destination que vous avez désignée.' }
+          ] },
+        { n: 'C03 · Projection', bg: 'oklch(1 0 0)', t: 'Voir la suite, pas seulement le mois', d: 'Le mois type est déroulé sur l’horizon choisi, avec la valeur de fin de période sur chaque bloc.',
+          items: [
+            { t: 'Horizons 12 / 60 / 120 mois', c: BLUE, d: 'Change l’horizon et toute la lecture du circuit se met à jour, y compris les dates de saturation.' },
+            { t: 'Compteur de non-affecté', c: TEAL, d: 'L’euro qui traîne est affiché en permanence. Un circuit valide est un circuit à zéro.' },
+            { t: 'Scénarios comparés', c: ORANGE, pro: true, d: 'Dupliquez un circuit, changez un versement, lisez l’écart de patrimoine entre les deux variantes.' },
+            { t: 'Historique des versions', c: NAVY, pro: true, d: 'Chaque enregistrement est daté et restaurable, pour retrouver l’état d’avant une refonte.' }
+          ] },
+        { n: 'C04 · Sorties', bg: 'oklch(0.985 0.003 250)', t: 'Sortir du produit quand vous voulez', d: 'Vos circuits vous appartiennent&nbsp;: rien n’est enfermé dans un format propriétaire.',
+          items: [
+            { t: 'Export JSON', c: NAVY, d: 'La structure complète du circuit, blocs et fils compris, lisible et réimportable.' },
+            { t: 'Export CSV', c: NAVY, d: 'Le tableau des flux mensuels et la projection, prêts pour un tableur ou votre conseiller.' },
+            { t: 'Impression du circuit', c: TEAL, d: 'Une page A3 avec le schéma et la table des montants, utile pour une discussion à deux.' },
+            { t: 'Lien de partage en lecture', c: ORANGE, pro: true, d: 'Un lien qui montre le circuit sans donner accès au compte, révocable à tout moment.' }
+          ] }
+      ],
+      limits: [
+        { t: 'Pas de synchronisation bancaire', d: 'Aucun accès à vos comptes, aucun mandat DSP2. Les montants sont ceux que vous saisissez.' },
+        { t: 'Pas de conseil en placement', d: 'repartio calcule ce que vous décrivez. Il ne recommande aucun produit et ne juge aucune allocation.' },
+        { t: 'Pas de marchés financiers', d: 'Les supports à rendement variable ne sont pas simulés&nbsp;: on reste sur des taux connus et des plafonds réglementaires.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

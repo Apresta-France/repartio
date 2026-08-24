@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  button { font: inherit; }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="tarifs" hint-size="100%,78px"></dc-import>
+
+  <section style="padding: 66px 32px 40px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">Tarifs</span>
+    <h1 style="margin: 0; max-width: 22ch; font-size: 46px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.05; text-wrap: balance;">Le circuit est gratuit. Le confort est payant.</h1>
+    <p style="margin: 0; max-width: 58ch; font-size: 16px; line-height: 1.6; color: oklch(0.44 0.045 265); text-wrap: pretty;">Tous les types de blocs, tous les plafonds réglementaires et la projection à 60 mois sont dans la version gratuite. On ne facture pas le calcul, on facture ce qui fait gagner du temps quand on gère plusieurs circuits.</p>
+    <div style="display: flex; gap: 3px; padding: 4px; border-radius: 11px; background: oklch(0.94 0.01 255); margin-top: 6px;">
+      <sc-for list="{{ cycles }}" as="c" hint-placeholder-count="2">
+        <button style="cursor: pointer; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; color: {{ c.fg }}; background: {{ c.bg }}; box-shadow: {{ c.shadow }};" onClick="{{ c.onClick }}">{{ c.label }}</button>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 20px 32px 64px;">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch;">
+      <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+        <div style="display: flex; flex-direction: column; border: {{ p.borderW }} solid {{ p.border }}; border-radius: 16px; overflow: hidden; background: {{ p.cardBg }}; box-shadow: {{ p.shadow }};">
+          <div style="padding: 24px 26px 22px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid {{ p.divider }};">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.13em; text-transform: uppercase; color: {{ p.eyebrow }};">{{ p.tier }}</span>
+              <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
+                <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(1 0 0); background: oklch(0.68 0.18 38); border-radius: 5px; padding: 3px 7px;">{{ p.badgeText }}</span>
+              </sc-if>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 38px; font-weight: 500; letter-spacing: -0.045em; color: {{ p.priceColor }};">{{ p.price }}</span>
+              <span style="font-size: 13px; color: {{ p.muted }};">{{ p.unit }}</span>
+            </div>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.5; color: {{ p.muted }}; min-height: 40px; text-wrap: pretty;">{{ p.pitch }}</p>
+            <a href="#" style="margin-top: 4px; text-align: center; font-size: 14px; font-weight: 700; padding: 12px 18px; border-radius: 10px; color: {{ p.ctaFg }}; background: {{ p.ctaBg }}; border: 1px solid {{ p.ctaBorder }};">{{ p.cta }}</a>
+          </div>
+          <div style="padding: 20px 26px 26px; display: flex; flex-direction: column; gap: 10px;">
+            <sc-for list="{{ p.features }}" as="f" hint-placeholder-count="5">
+              <div style="display: flex; gap: 10px; align-items: baseline;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ p.check }};">✓</span>
+                <span style="font-size: 13.5px; line-height: 1.5; color: {{ p.featColor }}; text-wrap: pretty;">{{ f }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 0 32px 64px;">
+    <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden; background: oklch(1 0 0);">
+      <div style="display: grid; grid-template-columns: 1.6fr repeat(3, 0.8fr); background: oklch(0.975 0.005 250); border-bottom: 1px solid oklch(0.91 0.012 255);">
+        <span style="padding: 14px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.55 0.04 265);">Comparaison</span>
+        <sc-for list="{{ cols }}" as="c" hint-placeholder-count="3">
+          <span style="padding: 14px 16px; text-align: center; font-size: 13px; font-weight: 700;">{{ c }}</span>
+        </sc-for>
+      </div>
+      <sc-for list="{{ matrix }}" as="r" hint-placeholder-count="9">
+        <div style="display: grid; grid-template-columns: 1.6fr repeat(3, 0.8fr); border-bottom: 1px solid oklch(0.95 0.008 255);">
+          <span style="padding: 13px 20px; font-size: 13.5px; color: oklch(0.34 0.05 265);">{{ r.k }}</span>
+          <sc-for list="{{ r.vals }}" as="v" hint-placeholder-count="3">
+            <span style="padding: 13px 16px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{ v.c }};">{{ v.t }}</span>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 56px 32px 62px; background: oklch(1 0 0); border-top: 1px solid oklch(0.91 0.012 255);">
+    <h2 style="margin: 0 0 24px; font-size: 27px; font-weight: 800; letter-spacing: -0.03em;">Questions de facturation</h2>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 46px;">
+      <sc-for list="{{ faq }}" as="q" hint-placeholder-count="6">
+        <div style="border-top: 1px solid oklch(0.92 0.012 255);">
+          <div style="display: flex; align-items: center; gap: 14px; padding: 17px 0; cursor: pointer;" onClick="{{ q.toggle }}">
+            <span style="font-size: 15px; font-weight: 700; letter-spacing: -0.018em; flex: 1;">{{ q.q }}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: oklch(0.66 0.16 38);">{{ q.sign }}</span>
+          </div>
+          <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: -4px 0 18px; padding-right: 40px; font-size: 14px; line-height: 1.6; color: oklch(0.45 0.045 265); text-wrap: pretty;">{{ q.a }}</p>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const MUTED = 'oklch(0.48 0.045 265)';
+
+class Component extends DCLogic {
+  state = { cycle: 'Mensuel', open: 0 };
+
+  renderVals() {
+    const annual = this.state.cycle === 'Annuel';
+    const light = {
+      cardBg: 'oklch(1 0 0)', border: 'oklch(0.91 0.012 255)', borderW: '1px',
+      divider: 'oklch(0.93 0.01 255)', shadow: 'none',
+      eyebrow: 'oklch(0.55 0.04 265)', priceColor: 'oklch(0.24 0.075 265)',
+      muted: MUTED, featColor: 'oklch(0.34 0.05 265)', check: 'oklch(0.6 0.12 192)',
+      ctaFg: 'oklch(0.28 0.08 265)', ctaBg: 'oklch(1 0 0)', ctaBorder: 'oklch(0.88 0.014 255)'
+    };
+
+    const plans = [
+      Object.assign({}, light, {
+        tier: 'Libre', price: '0 €', unit: 'pour toujours', badge: false, badgeText: '',
+        pitch: 'De quoi décrire entièrement un budget familial et le projeter à cinq ans.',
+        cta: 'Créer un circuit',
+        features: ['3 circuits enregistrés', 'Les 5 types de blocs, sans limite de nombre', 'Plafonds et taux réglementaires à jour', 'Projection jusqu’à 60 mois', 'Export JSON et CSV']
+      }),
+      Object.assign({}, light, {
+        tier: 'Complet', price: annual ? '49 €' : '4,90 €', unit: annual ? 'par an — 2 mois offerts' : 'par mois',
+        badge: true, badgeText: 'Le plus pris',
+        border: 'oklch(0.68 0.18 38)', borderW: '2px', shadow: '0 10px 30px oklch(0.5 0.14 38 / 0.14)',
+        ctaFg: 'oklch(1 0 0)', ctaBg: 'oklch(0.68 0.18 38)', ctaBorder: 'oklch(0.62 0.17 38)',
+        pitch: 'Pour comparer des scénarios et suivre un circuit qui évolue dans le temps.',
+        cta: 'Passer en Complet',
+        features: ['Circuits illimités', 'Scénarios comparés côte à côte', 'Horizon jusqu’à 120 mois', 'Historique des versions restaurable', 'Lien de partage en lecture seule', 'Impression A3 du circuit']
+      }),
+      Object.assign({}, light, {
+        tier: 'Foyer', price: annual ? '79 €' : '7,90 €', unit: annual ? 'par an — 2 mois offerts' : 'par mois',
+        badge: false, badgeText: '',
+        pitch: 'Le même circuit, à deux, avec chacun son accès et ses blocs personnels.',
+        cta: 'Choisir Foyer',
+        features: ['Tout le plan Complet', '2 comptes liés sur les mêmes circuits', 'Blocs personnels masquables', 'Journal des modifications par personne', 'Assistance sous 24 h ouvrées']
+      })
+    ];
+
+    const yes = 'oklch(0.5 0.12 192)', no = 'oklch(0.72 0.02 265)', txt = 'oklch(0.34 0.05 265)';
+    const v = (t, c) => ({ t, c });
+    const matrix = [
+      { k: 'Circuits enregistrés', vals: [v('3', txt), v('illimité', yes), v('illimité', yes)] },
+      { k: 'Types de blocs', vals: [v('5 / 5', yes), v('5 / 5', yes), v('5 / 5', yes)] },
+      { k: 'Horizon de projection', vals: [v('60 mois', txt), v('120 mois', yes), v('120 mois', yes)] },
+      { k: 'Scénarios comparés', vals: [v('—', no), v('✓', yes), v('✓', yes)] },
+      { k: 'Historique des versions', vals: [v('—', no), v('✓', yes), v('✓', yes)] },
+      { k: 'Partage en lecture', vals: [v('—', no), v('✓', yes), v('✓', yes)] },
+      { k: 'Comptes liés', vals: [v('1', txt), v('1', txt), v('2', yes)] },
+      { k: 'Export JSON / CSV', vals: [v('✓', yes), v('✓', yes), v('✓', yes)] },
+      { k: 'Assistance', vals: [v('e-mail', txt), v('e-mail', txt), v('24 h ouvrées', yes)] }
+    ];
+
+    const faq = [
+      ['Que devient mon circuit si j’arrête de payer ?', 'Il reste consultable et exportable. Vous repassez simplement sous la limite de trois circuits actifs&nbsp;: c’est à vous de choisir lesquels rester modifiables.'],
+      ['Y a-t-il une période d’essai ?', 'Le plan Libre est l’essai&nbsp;: il n’expire pas. Vous ne passez au payant que le jour où vous avez besoin de comparer des scénarios ou de dépasser trois circuits.'],
+      ['Faut-il une carte pour créer un compte ?', 'Non. Aucun moyen de paiement n’est demandé sur le plan Libre, et il n’y a pas de conversion automatique.'],
+      ['Le plan Foyer, c’est deux abonnements ?', 'Non, un seul&nbsp;: deux accès distincts sur les mêmes circuits, chacun avec son propre journal de modifications.'],
+      ['Puis-je changer de plan en cours de route ?', 'À tout moment, dans les deux sens. Le passage annuel → mensuel prend effet à la fin de la période déjà payée.'],
+      ['Facturez-vous la TVA ?', 'Les prix affichés sont TTC pour les particuliers en France. Une facture nominative est disponible après chaque paiement.']
+    ].map(([q, a], i) => ({
+      q, a, open: this.state.open === i, sign: this.state.open === i ? '−' : '+',
+      toggle: () => this.setState(s => ({ open: s.open === i ? -1 : i }))
+    }));
+
+    return {
+      plans, matrix, faq,
+      cols: ['Libre', 'Complet', 'Foyer'],
+      cycles: ['Mensuel', 'Annuel'].map(label => ({
+        label,
+        onClick: () => this.setState({ cycle: label }),
+        bg: this.state.cycle === label ? 'oklch(1 0 0)' : 'transparent',
+        fg: this.state.cycle === label ? 'oklch(0.24 0.075 265)' : 'oklch(0.48 0.045 265)',
+        shadow: this.state.cycle === label ? '0 1px 3px oklch(0.3 0.06 265 / 0.14)' : 'none'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

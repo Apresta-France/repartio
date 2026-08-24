@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  input, button { font: inherit; }
+  input::placeholder { color: oklch(0.68 0.03 265); }
+</style>
+</helmet>
+<div style="display: grid; grid-template-columns: 1fr 0.92fr; min-height: 100vh; font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+
+  <div style="display: flex; flex-direction: column; padding: 34px 56px 44px; gap: 44px;">
+    <a href="Site%20Vitrine.dc.html" style="align-self: flex-start;"><img src="assets/repartio-mark.png" alt="repartio.fr" style="height: 32px; width: auto; display: block;"></a>
+
+    <div style="margin: auto 0; width: 100%; max-width: 396px; display: flex; flex-direction: column; gap: 22px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.035em;">Content de vous revoir</h1>
+        <p style="margin: 0; font-size: 14.5px; line-height: 1.55; color: oklch(0.45 0.045 265);">Vos circuits vous attendent, exactement là où vous les avez laissés.</p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <label style="display: flex; flex-direction: column; gap: 7px;">
+          <span style="font-size: 12.5px; font-weight: 600; color: oklch(0.36 0.05 265);">Adresse e-mail</span>
+          <input type="email" placeholder="vous@exemple.fr" style="padding: 12px 14px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: oklch(1 0 0); font-size: 14px; color: oklch(0.24 0.075 265); outline: none;" style-focus="border-color: oklch(0.68 0.18 38); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14);">
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 7px;">
+          <span style="display: flex; align-items: baseline; gap: 10px; font-size: 12.5px; font-weight: 600; color: oklch(0.36 0.05 265);">
+            Mot de passe
+            <a href="Mot%20de%20passe%20oublie.dc.html" style="margin-left: auto; font-size: 12px; font-weight: 600;">Oublié&nbsp;?</a>
+          </span>
+          <input type="password" placeholder="••••••••••" style="padding: 12px 14px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: oklch(1 0 0); font-size: 14px; color: oklch(0.24 0.075 265); outline: none;" style-focus="border-color: oklch(0.68 0.18 38); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14);">
+        </label>
+        <label style="display: flex; align-items: center; gap: 9px; font-size: 13px; color: oklch(0.42 0.05 265); cursor: pointer;">
+          <input type="checkbox" checked style="width: 15px; height: 15px; accent-color: oklch(0.68 0.18 38);">
+          Rester connecté 30 jours
+        </label>
+        <a href="Tableau%20de%20bord.dc.html" style="text-align: center; margin-top: 4px; padding: 13px 20px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 14.5px; font-weight: 700; box-shadow: 0 2px 6px oklch(0.5 0.16 38 / 0.26);">Se connecter</a>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="flex: 1; height: 1px; background: oklch(0.92 0.012 255);"></span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.64 0.04 265);">ou</span>
+        <span style="flex: 1; height: 1px; background: oklch(0.92 0.012 255);"></span>
+      </div>
+
+      <a href="Tableau%20de%20bord.dc.html" style="text-align: center; padding: 12px 20px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: oklch(1 0 0); color: oklch(0.28 0.08 265); font-size: 14px; font-weight: 600;">Recevoir un lien de connexion par e-mail</a>
+
+      <span style="font-size: 13.5px; color: oklch(0.46 0.045 265);">Pas encore de compte&nbsp;? <a href="Creer%20un%20compte.dc.html" style="font-weight: 700;">Créer un compte gratuit</a></span>
+    </div>
+
+    <span style="font-size: 12px; color: oklch(0.6 0.04 265);">repartio est un outil de simulation, pas un conseil en investissement.</span>
+  </div>
+
+  <div style="position: relative; overflow: hidden; background: oklch(0.24 0.075 265); padding: 44px 44px 48px; display: flex; flex-direction: column;">
+    <div style="position: absolute; inset: 0; opacity: .3; background-image: radial-gradient(oklch(0.5 0.06 265) 1px, transparent 1px); background-size: 26px 26px;"></div>
+    <div style="position: relative; margin-top: auto; display: flex; flex-direction: column; gap: 22px; max-width: 460px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.75 0.12 192);">Votre circuit, hier soir</span>
+      <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(0.34 0.07 265); border: 1px solid oklch(0.34 0.07 265); border-radius: 13px; overflow: hidden;">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; background: oklch(0.27 0.075 265);">
+            <span style="width: 8px; height: 8px; border-radius: 3px; flex: none; background: {{ r.c }};"></span>
+            <span style="font-size: 13.5px; color: oklch(0.9 0.02 255);">{{ r.k }}</span>
+            <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: -0.02em; color: {{ r.vc }};">{{ r.v }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin: 0; font-size: 14.5px; line-height: 1.6; color: oklch(0.8 0.03 255); text-wrap: pretty;">Aucune connexion bancaire, aucun agrégateur&nbsp;: repartio ne connaît que les montants que vous lui donnez.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      rows: [
+        { k: 'Entrées du mois', v: '12 338 €', c: 'oklch(0.62 0.12 192)', vc: 'oklch(0.96 0.01 250)' },
+        { k: 'Épargné', v: '5 234 €', c: 'oklch(0.48 0.11 240)', vc: 'oklch(0.96 0.01 250)' },
+        { k: 'Non affecté', v: '0 €', c: 'oklch(0.68 0.18 38)', vc: 'oklch(0.82 0.12 192)' },
+        { k: 'Patrimoine à 60 mois', v: '105 615 €', c: 'oklch(0.48 0.11 240)', vc: 'oklch(0.96 0.01 250)' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

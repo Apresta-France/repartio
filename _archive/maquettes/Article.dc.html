@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="ressources" hint-size="100%,78px"></dc-import>
+
+  <article>
+    <header style="padding: 44px 32px 38px; border-bottom: 1px solid oklch(0.91 0.012 255); display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;">
+        <a href="Ressources.dc.html" style="color: oklch(0.6 0.045 265);">Ressources</a>
+        <span style="color: oklch(0.78 0.02 265);">/</span>
+        <span style="color: oklch(0.52 0.13 195);">Étude de cas</span>
+      </div>
+      <h1 style="margin: 0; max-width: 30ch; font-size: 46px; font-weight: 800; letter-spacing: -0.042em; line-height: 1.04; text-wrap: balance;">Un couple, 12 338 € par mois, zéro euro non affecté</h1>
+      <p style="margin: 0; max-width: 72ch; font-size: 18px; line-height: 1.6; color: oklch(0.42 0.05 265); text-wrap: pretty;">Le circuit complet d’une famille de quatre&nbsp;: deux salaires, une auto-entreprise, un local loué, deux comptes joints et six livrets. On suit chaque euro depuis son entrée jusqu’à sa destination — et on regarde ce que la projection à soixante mois a fait changer dans les arbitrages.</p>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding-top: 4px;">
+        <span style="width: 34px; height: 34px; border-radius: 11px; background: oklch(0.24 0.075 265); color: oklch(0.97 0.01 250); display: grid; place-items: center; font-size: 12px; font-weight: 700;">ML</span>
+        <span style="display: flex; flex-direction: column;">
+          <span style="font-size: 13.5px; font-weight: 700;">Marion Lefèvre</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.58 0.045 265);">18 août 2026 · 12 min de lecture</span>
+        </span>
+        <div style="margin-left: auto; display: flex; gap: 7px;">
+          <sc-for list="{{ tags }}" as="t" hint-placeholder-count="3">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.42 0.05 265); border: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0); border-radius: 7px; padding: 5px 10px;">{{ t }}</span>
+          </sc-for>
+        </div>
+      </div>
+    </header>
+
+    <div style="display: grid; grid-template-columns: 244px minmax(0, 1fr) 268px; align-items: start;">
+      <nav style="position: sticky; top: 78px; padding: 34px 20px 40px 32px; display: flex; flex-direction: column; gap: 3px; border-right: 1px solid oklch(0.91 0.012 255);">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.64 0.04 265); padding: 0 8px 10px;">Sommaire</span>
+        <sc-for list="{{ toc }}" as="t" hint-placeholder-count="6">
+          <a href="{{ t.href }}" style="display: flex; gap: 9px; padding: 7px 8px; border-radius: 8px; font-size: 13px; line-height: 1.4; color: oklch(0.42 0.05 265);" style-hover="background: oklch(0.965 0.006 250); color: oklch(0.24 0.08 265);">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.68 0.04 265); flex: none;">{{ t.n }}</span>
+            {{ t.label }}
+          </a>
+        </sc-for>
+      </nav>
+
+      <div style="padding: 34px 40px 56px; max-width: 760px; display: flex; flex-direction: column; gap: 30px;">
+        <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="6">
+          <div id="{{ b.id }}" style="display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 96px;">
+            <sc-if value="{{ b.hasHeading }}" hint-placeholder-val="{{ true }}">
+              <h2 style="margin: 8px 0 0; font-size: 25px; font-weight: 800; letter-spacing: -0.03em;">{{ b.h }}</h2>
+            </sc-if>
+            <sc-for list="{{ b.ps }}" as="p" hint-placeholder-count="2">
+              <p style="margin: 0; font-size: 16px; line-height: 1.72; color: oklch(0.32 0.05 265); text-wrap: pretty;">{{ p }}</p>
+            </sc-for>
+            <sc-if value="{{ b.hasQuote }}" hint-placeholder-val="{{ false }}">
+              <blockquote style="margin: 4px 0; padding: 18px 22px; border-radius: 13px; background: oklch(0.24 0.075 265); display: flex; flex-direction: column; gap: 9px;">
+                <span style="font-size: 17px; line-height: 1.5; font-weight: 600; letter-spacing: -0.018em; color: oklch(0.96 0.01 250); text-wrap: pretty;">{{ b.quote }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.75 0.12 192);">{{ b.quoteBy }}</span>
+              </blockquote>
+            </sc-if>
+            <sc-if value="{{ b.hasTable }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(0.92 0.012 255); border: 1px solid oklch(0.92 0.012 255); border-radius: 12px; overflow: hidden;">
+                <div style="display: flex; gap: 14px; padding: 11px 16px; background: oklch(0.975 0.005 250); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.55 0.045 265);">
+                  <span style="flex: 1;">{{ b.tableHead }}</span>
+                  <span style="width: 110px; text-align: right;">Montant</span>
+                </div>
+                <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="4">
+                  <div style="display: flex; align-items: center; gap: 14px; padding: 11px 16px; background: oklch(1 0 0);">
+                    <span style="width: 8px; height: 8px; border-radius: 3px; flex: none; background: {{ r.c }};"></span>
+                    <span style="flex: 1; font-size: 13.5px; color: oklch(0.32 0.05 265);">{{ r.k }}</span>
+                    <span style="width: 110px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: -0.02em;">{{ r.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ b.hasList }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <sc-for list="{{ b.list }}" as="i" hint-placeholder-count="3">
+                  <div style="display: flex; gap: 11px; font-size: 15.5px; line-height: 1.65; color: oklch(0.32 0.05 265);">
+                    <span style="color: oklch(0.68 0.18 38); font-weight: 700; flex: none;">—</span>
+                    <span style="text-wrap: pretty;">{{ i }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+
+        <div style="margin-top: 6px; padding: 22px 24px; border-radius: 14px; background: oklch(1 0 0); border: 1px solid oklch(0.91 0.012 255); display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+          <span style="font-size: 15px; line-height: 1.5; color: oklch(0.36 0.05 265); max-width: 44ch; text-wrap: pretty;">Ce circuit est disponible comme modèle&nbsp;: ouvrez-le et remplacez les montants par les vôtres.</span>
+          <a href="Circuits%20Types.dc.html" style="margin-left: auto; padding: 12px 20px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 14px; font-weight: 700;">Ouvrir le modèle</a>
+        </div>
+      </div>
+
+      <aside style="position: sticky; top: 78px; padding: 34px 32px 40px 22px; display: flex; flex-direction: column; gap: 20px; border-left: 1px solid oklch(0.91 0.012 255);">
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.64 0.04 265);">Le circuit en chiffres</span>
+          <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 12px; overflow: hidden;">
+            <sc-for list="{{ figures }}" as="f" hint-placeholder-count="5">
+              <div style="background: oklch(1 0 0); padding: 11px 14px; display: flex; justify-content: space-between; gap: 10px;">
+                <span style="font-size: 12.5px; color: oklch(0.52 0.045 265);">{{ f.k }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 500; letter-spacing: -0.02em; color: {{ f.c }};">{{ f.v }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.64 0.04 265);">À lire ensuite</span>
+          <sc-for list="{{ next }}" as="n" hint-placeholder-count="3">
+            <a href="Ressources.dc.html" style="display: flex; flex-direction: column; gap: 4px; padding: 13px 14px; border-radius: 11px; border: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0); color: oklch(0.26 0.07 265);" style-hover="background: oklch(0.975 0.005 250); color: oklch(0.26 0.07 265);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.52 0.13 195);">{{ n.tag }}</span>
+              <span style="font-size: 13.5px; font-weight: 700; letter-spacing: -0.018em; line-height: 1.3; text-wrap: pretty;">{{ n.t }}</span>
+            </a>
+          </sc-for>
+        </div>
+
+        <div style="padding: 16px 18px; border-radius: 12px; background: oklch(0.975 0.005 250); border: 1px solid oklch(0.92 0.012 255); display: flex; flex-direction: column; gap: 7px;">
+          <span style="font-size: 13.5px; font-weight: 700;">Une note par mois</span>
+          <span style="font-size: 12.5px; line-height: 1.45; color: oklch(0.5 0.045 265);">Les nouvelles études de cas, sans autre e-mail.</span>
+          <a href="Ressources.dc.html" style="margin-top: 4px; text-align: center; padding: 9px 14px; border-radius: 9px; background: oklch(0.24 0.075 265); color: oklch(0.97 0.01 250); font-size: 13px; font-weight: 700;">S’inscrire</a>
+        </div>
+      </aside>
+    </div>
+  </article>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const TEAL = 'oklch(0.62 0.12 192)';
+const NAVY = 'oklch(0.32 0.09 265)';
+const BLUE = 'oklch(0.48 0.11 240)';
+const RED = 'oklch(0.55 0.16 25)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+
+const BLOCKS = [
+  { h: 'Le point de départ : un tableur qui ne tenait plus',
+    ps: [
+      'Julien et Malorie ont quatre sources de revenus, deux enfants, un local commercial loué et six livrets réglementés. Leur tableur fonctionnait très bien tant qu’il n’y avait qu’un salaire et un compte joint. Il a cessé de fonctionner le jour où l’auto-entreprise de Julien est devenue la première source du foyer.',
+      'Le problème n’était pas le calcul — un tableur calcule parfaitement — mais la lecture. Personne ne savait plus répondre à la question « si l’auto-entreprise baisse de mille euros, qu’est-ce qui s’arrête en premier ? ». La réponse existait, quelque part, dans une colonne masquée.'
+    ] },
+  { h: 'Les entrées, telles qu’elles ont été posées',
+    ps: ['Cinq blocs de revenus, dont deux variables. Les montants retenus sont des moyennes lissées sur les douze derniers mois, arrondies à l’euro inférieur — un choix conservateur assumé.'],
+    tableHead: 'Bloc de revenu',
+    rows: [
+      { k: 'Auto-entreprise (Julien)', v: '5 000 €', c: TEAL },
+      { k: 'Salaire (Malorie)', v: '3 073 €', c: TEAL },
+      { k: 'Loyers du local', v: '2 000 €', c: TEAL },
+      { k: 'Salaire (Julien)', v: '1 500 €', c: TEAL },
+      { k: 'Allocations', v: '765 €', c: TEAL }
+    ] },
+  { h: 'La première surprise : la provision URSSAF',
+    ps: [
+      'Dans le tableur, les cotisations étaient une ligne trimestrielle, donc invisible deux mois sur trois. En posant un bloc dépense alimenté chaque mois depuis le compte professionnel, le revenu réellement disponible a perdu mille trois cent quarante euros — et gagné en honnêteté.',
+      'C’est le genre de correction que le canvas rend inévitable : un fil doit partir quelque part, et le regarder partir vers une dépense change la perception du montant.'
+    ],
+    quote: 'On croyait gagner sept mille euros avec l’auto-entreprise. On en gagne cinq mille six cent soixante, et c’est très bien — au moins c’est vrai.',
+    quoteBy: 'Julien, sur le circuit terminé' },
+  { h: 'Deux comptes joints, pas un',
+    ps: ['La décision structurante du circuit n’est pas financière, elle est organisationnelle : séparer les prélèvements du quotidien. Le joint « Factures » ne reçoit que ce que les prélèvements consomment, au centime. Le joint « Quotidien » reçoit une enveloppe fixe.'],
+    list: [
+      'Joint Factures : 3 254 € par mois, entièrement consommé par les prélèvements.',
+      'Joint Quotidien : 3 128 € par mois, dont 400 € de dépenses libres non justifiées.',
+      'Aucun arbitrage mensuel n’est nécessaire tant que les deux enveloppes tiennent.'
+    ] },
+  { h: 'L’épargne : deux répartiteurs, six livrets',
+    ps: ['Chacun conserve son propre répartiteur, qui découpe ce qu’il reçoit entre ses trois livrets. C’est ce qui permet de dire « mon épargne » sans avoir à négocier chaque virement.'],
+    tableHead: 'Destination d’épargne',
+    rows: [
+      { k: 'Répartiteur Julien', v: '3 665 €', c: ORANGE },
+      { k: 'Répartiteur Malorie', v: '1 459 €', c: ORANGE },
+      { k: 'Livrets des enfants', v: '110 €', c: BLUE },
+      { k: 'Total épargné / mois', v: '5 234 €', c: TEAL }
+    ] },
+  { h: 'Ce que la projection a changé',
+    ps: [
+      'À soixante mois, le patrimoine atteint 105 615 €. Mais l’information utile n’est pas ce total : c’est la liste des dates de saturation. Trois livrets sont déjà pleins, un le sera dans dix mois, un autre dans seize.',
+      'Aucun débordement n’était câblé. Concrètement, à partir du dixième mois, mille cent euros par mois n’auraient plus eu de destination. Le compteur « non affecté » restait à zéro dans le mois type, mais la projection révélait le blocage à venir.'
+    ],
+    list: [
+      'Ajout d’un fil de débordement du LDDS vers le Livret A.',
+      'Ajout d’un second débordement du Livret A vers un bloc « épargne longue » à définir.',
+      'Décision reportée sur le support de cette épargne longue — hors du périmètre de repartio.'
+    ] },
+  { h: 'Ce qu’on retient',
+    ps: ['Un circuit ne rend pas les décisions plus faciles, il rend leurs conséquences visibles. Ici, la question de départ — « qu’est-ce qui s’arrête si l’auto-entreprise baisse ? » — a désormais une réponse d’une ligne : le répartiteur de Julien, avant toute autre chose.'] }
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    const blocks = BLOCKS.map((b, i) => ({
+      id: 'b' + (i + 1),
+      h: b.h, hasHeading: !!b.h,
+      ps: b.ps ?? [],
+      rows: b.rows ?? [], hasTable: !!(b.rows && b.rows.length), tableHead: b.tableHead ?? 'Bloc',
+      list: b.list ?? [], hasList: !!(b.list && b.list.length),
+      quote: b.quote ?? '', quoteBy: b.quoteBy ?? '', hasQuote: !!b.quote
+    }));
+    return {
+      blocks,
+      toc: blocks.map((b, i) => ({ n: String(i + 1).padStart(2, '0'), label: b.h, href: '#' + b.id })),
+      tags: ['Couple', 'Auto-entreprise', 'Livrets'],
+      figures: [
+        { k: 'Blocs', v: '23', c: 'oklch(0.28 0.08 265)' },
+        { k: 'Entrées / mois', v: '12 338 €', c: 'oklch(0.28 0.08 265)' },
+        { k: 'Épargné / mois', v: '5 234 €', c: 'oklch(0.45 0.12 192)' },
+        { k: 'Non affecté', v: '0 €', c: 'oklch(0.45 0.12 192)' },
+        { k: 'À 60 mois', v: '105 615 €', c: 'oklch(0.28 0.08 265)' }
+      ],
+      next: [
+        { tag: 'Méthode', t: 'Le compte joint « factures » change tout' },
+        { tag: 'Réglementaire', t: 'Ordre de remplissage des livrets réglementés' },
+        { tag: 'Méthode', t: 'Répartir en pourcentages, ou en montants fixes ?' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

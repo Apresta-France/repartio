@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</helmet>
+<aside style="width: 252px; flex: none; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; gap: 22px; padding: 20px 16px 18px; background: oklch(1 0 0); border-right: 1px solid oklch(0.91 0.012 255); font-family: 'Plus Jakarta Sans', Helvetica, sans-serif;">
+  <a href="Tableau%20de%20bord.dc.html" style="padding: 0 6px;"><img src="assets/repartio-mark.png" alt="repartio.fr" style="height: 30px; width: auto; display: block;"></a>
+
+  <a href="Circuit%20Builder.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; border-radius: 10px; background: oklch(0.68 0.18 38); color: oklch(1 0 0); font-size: 13.5px; font-weight: 700; box-shadow: 0 1px 2px oklch(0.5 0.16 38 / 0.3);">
+    <span style="font-size: 15px; line-height: 1;">+</span>
+    Nouveau circuit
+  </a>
+
+  <nav style="display: flex; flex-direction: column; gap: 2px;">
+    <sc-for list="{{ main }}" as="l" hint-placeholder-count="3">
+      <a href="{{ l.href }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; font-size: 13.5px; font-weight: {{ l.weight }}; color: {{ l.fg }}; background: {{ l.bg }};" style-hover="background: oklch(0.965 0.006 250);">
+        <span style="width: 7px; height: 7px; border-radius: 2px; flex: none; background: {{ l.dot }};"></span>
+        {{ l.label }}
+        <sc-if value="{{ l.badge }}" hint-placeholder-val="{{ false }}">
+          <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.58 0.045 265);">{{ l.badgeText }}</span>
+        </sc-if>
+      </a>
+    </sc-for>
+  </nav>
+
+  <div style="display: flex; flex-direction: column; gap: 2px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.64 0.04 265); padding: 4px 12px 8px;">Circuits récents</span>
+    <sc-for list="{{ recents }}" as="r" hint-placeholder-count="3">
+      <a href="Circuit%20Builder.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 9px; font-size: 13px; color: oklch(0.42 0.05 265);" style-hover="background: oklch(0.965 0.006 250);">
+        <span style="width: 7px; height: 7px; border-radius: 50%; flex: none; background: {{ r.c }};"></span>
+        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.t }}</span>
+      </a>
+    </sc-for>
+  </div>
+
+  <nav style="margin-top: auto; display: flex; flex-direction: column; gap: 2px; padding-top: 14px; border-top: 1px solid oklch(0.94 0.01 255);">
+    <sc-for list="{{ bottom }}" as="l" hint-placeholder-count="3">
+      <a href="{{ l.href }}" style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; font-size: 13.5px; font-weight: {{ l.weight }}; color: {{ l.fg }}; background: {{ l.bg }};" style-hover="background: oklch(0.965 0.006 250);">
+        <span style="width: 7px; height: 7px; border-radius: 2px; flex: none; background: {{ l.dot }};"></span>
+        {{ l.label }}
+      </a>
+    </sc-for>
+  </nav>
+
+  <a href="Forfait.dc.html" style="display: flex; flex-direction: column; gap: 7px; padding: 13px; border-radius: 11px; background: oklch(0.975 0.005 250); border: 1px solid oklch(0.92 0.012 255); color: oklch(0.26 0.07 265);">
+    <div style="display: flex; align-items: baseline; gap: 8px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.58 0.045 265);">Plan Libre</span>
+      <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: oklch(0.3 0.07 265);">2 / 3</span>
+    </div>
+    <div style="height: 5px; border-radius: 3px; background: oklch(0.92 0.012 255); overflow: hidden;">
+      <div style="width: 67%; height: 5px; background: oklch(0.68 0.18 38);"></div>
+    </div>
+    <span style="font-size: 12px; line-height: 1.4; color: oklch(0.5 0.045 265);">Un circuit restant. Passez en Complet pour l’illimité.</span>
+  </a>
+
+  <a href="Profil.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 8px 6px 0; color: oklch(0.26 0.07 265);">
+    <span style="width: 30px; height: 30px; flex: none; border-radius: 9px; background: oklch(0.24 0.075 265); color: oklch(0.97 0.01 250); display: grid; place-items: center; font-size: 12px; font-weight: 700;">JL</span>
+    <span style="display: flex; flex-direction: column; overflow: hidden;">
+      <span style="font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Julien Larzillière</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.6 0.045 265); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">julien@exemple.fr</span>
+    </span>
+  </a>
+</aside>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:252,&quot;height&quot;:900},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;dashboard&quot;,&quot;projets&quot;,&quot;builder&quot;,&quot;forfait&quot;,&quot;profil&quot;,&quot;reglages&quot;],&quot;default&quot;:&quot;dashboard&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const NAVY = 'oklch(0.32 0.09 265)';
+const TEAL = 'oklch(0.62 0.12 192)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const BLUE = 'oklch(0.48 0.11 240)';
+
+const MAIN = [
+  ['dashboard', 'Tableau de bord', 'Tableau%20de%20bord.dc.html', TEAL, false, ''],
+  ['projets', 'Mes circuits', 'Projets.dc.html', BLUE, true, '3'],
+  ['builder', 'Builder', 'Circuit%20Builder.dc.html', ORANGE, false, '']
+];
+const BOTTOM = [
+  ['forfait', 'Forfait & facturation', 'Forfait.dc.html', ORANGE],
+  ['profil', 'Mon profil', 'Profil.dc.html', NAVY],
+  ['reglages', 'Réglages', 'Reglages.dc.html', NAVY]
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.active ?? '';
+    const map = ([id, label, href, dot, badge, badgeText]) => ({
+      label, href, dot, badge, badgeText,
+      fg: id === a ? 'oklch(0.2 0.08 265)' : 'oklch(0.42 0.05 265)',
+      weight: id === a ? 700 : 500,
+      bg: id === a ? 'oklch(0.955 0.008 250)' : 'transparent'
+    });
+    return {
+      main: MAIN.map(map),
+      bottom: BOTTOM.map(x => map([x[0], x[1], x[2], x[3], false, ''])),
+      recents: [
+        { t: 'Circuit familial 2026', c: TEAL },
+        { t: 'Objectif apport 60 k€', c: ORANGE },
+        { t: 'Auto-entreprise — test', c: BLUE }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

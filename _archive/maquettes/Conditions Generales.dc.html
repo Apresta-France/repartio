@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  button { font: inherit; }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" hint-size="100%,78px"></dc-import>
+
+  <div style="display: flex; gap: 3px; padding: 22px 32px 0;">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+      <button style="cursor: pointer; border: 1px solid {{ t.border }}; padding: 9px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 700; color: {{ t.fg }}; background: {{ t.bg }};" onClick="{{ t.onClick }}">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <dc-import name="Legal Doc" eyebrow="{{ eyebrow }}" title="{{ title }}" lede="{{ lede }}" meta="{{ meta }}" sections="{{ sections }}" hint-size="100%,900px"></dc-import>
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const CGU = {
+  eyebrow: 'CGU · Conditions générales d’utilisation',
+  title: 'Conditions générales d’utilisation',
+  lede: 'Les règles d’usage du service repartio : ce que vous pouvez en faire, ce que nous nous engageons à fournir, et ce que nous ne garantissons pas. Elles s’appliquent à tout utilisateur, gratuit ou abonné.',
+  meta: ['Version 2.0', 'En vigueur au 1ᵉʳ août 2026', 'Applicable à tous les plans'],
+  sections: [
+    { h: 'Objet et acceptation',
+      ps: ['Les présentes conditions régissent l’accès au service repartio et son utilisation. La création d’un compte vaut acceptation sans réserve de ces conditions dans leur version en vigueur au jour de l’inscription.', 'Toute modification substantielle est notifiée par e-mail au moins trente jours avant son entrée en vigueur. La poursuite de l’utilisation du service après cette date vaut acceptation de la nouvelle version.'] },
+    { h: 'Description du service',
+      ps: ['repartio est un simulateur de flux financiers personnels. L’utilisateur décrit des blocs (revenus, comptes, répartiteurs, livrets, dépenses) et les relie par des fils portant des montants ou des pourcentages. Le service en déduit un mois type et une projection sur l’horizon choisi.'],
+      list: [
+        'Le service fonctionne exclusivement à partir des montants saisis par l’utilisateur.',
+        'Aucune connexion à un établissement bancaire n’est réalisée ni proposée.',
+        'Les taux et plafonds réglementaires préremplis sont fournis à titre indicatif et peuvent être modifiés par l’utilisateur.'
+      ] },
+    { h: 'Compte utilisateur',
+      ps: ['La création d’un compte requiert une adresse e-mail valide et un mot de passe de douze caractères minimum. L’utilisateur est responsable de la confidentialité de ses identifiants et de toute activité réalisée depuis son compte.'],
+      list: [
+        'Un compte est strictement personnel ; le plan Foyer autorise deux accès nominatifs distincts.',
+        'Tout usage frauduleux constaté doit être signalé sans délai à bonjour@repartio.fr.',
+        'L’éditeur peut suspendre un compte en cas d’atteinte à la sécurité ou à l’intégrité du service.'
+      ] },
+    { h: 'Usages interdits',
+      list: [
+        'Tenter d’accéder aux données d’un autre utilisateur, ou contourner les limitations du plan souscrit.',
+        'Extraire massivement le contenu du service par des moyens automatisés non autorisés.',
+        'Utiliser le service pour fournir un conseil financier rémunéré à des tiers sans accord écrit préalable.',
+        'Perturber le fonctionnement de l’infrastructure, notamment par des requêtes volumétriques anormales.'
+      ] },
+    { h: 'Disponibilité et évolutions',
+      ps: ['Le service est fourni en l’état, accessible en continu hors interruptions de maintenance annoncées et hors cas de force majeure. Aucun niveau de disponibilité contractuel n’est garanti sur les plans gratuits.', 'L’éditeur peut faire évoluer les fonctionnalités, y compris en retirer, sous réserve d’en informer les abonnés payants au moins trente jours à l’avance lorsque la modification réduit une fonctionnalité facturée.'] },
+    { h: 'Absence de conseil financier',
+      ps: ['repartio n’est ni conseiller en investissements financiers, ni intermédiaire en opérations de banque, ni prestataire de services de paiement. Les projections affichées sont des calculs déterministes appliqués aux données saisies, sans appréciation de leur pertinence.'],
+      list: [
+        'Les résultats ne constituent ni une recommandation, ni une garantie de performance.',
+        'L’utilisateur reste seul décideur de ses arbitrages financiers.',
+        'Les taux réglementaires peuvent évoluer indépendamment du service.'
+      ] },
+    { h: 'Responsabilité',
+      ps: ['La responsabilité de l’éditeur ne peut être engagée pour les décisions prises par l’utilisateur sur la base des simulations, ni pour les préjudices indirects tels que perte de chance ou manque à gagner. En tout état de cause, la responsabilité totale est limitée aux sommes effectivement versées par l’utilisateur au titre des douze mois précédant le fait générateur.'] },
+    { h: 'Résiliation',
+      ps: ['L’utilisateur peut supprimer son compte à tout moment depuis les réglages, sans motif ni préavis. La suppression entraîne l’effacement des circuits associés sans période de rétention ; il est recommandé de procéder à un export préalable.'] },
+    { h: 'Droit applicable et litiges',
+      ps: ['Les présentes conditions sont soumises au droit français. En cas de différend, les parties s’efforcent de trouver une solution amiable. À défaut, le litige relève des tribunaux français compétents ; le consommateur peut également saisir gratuitement un médiateur de la consommation.'] }
+  ]
+};
+
+const CGV = {
+  eyebrow: 'CGV · Conditions générales de vente',
+  title: 'Conditions générales de vente',
+  lede: 'Les règles applicables aux abonnements payants repartio : prix, paiement, durée, renouvellement, droit de rétractation et remboursement. Elles complètent les conditions générales d’utilisation.',
+  meta: ['Version 2.0', 'En vigueur au 1ᵉʳ août 2026', 'Prix TTC — clients particuliers'],
+  sections: [
+    { h: 'Champ d’application',
+      ps: ['Les présentes conditions s’appliquent à toute souscription d’un abonnement payant au service repartio par un consommateur ou un professionnel. Le plan gratuit n’entre pas dans leur champ, à l’exception des dispositions relatives aux données de facturation.'] },
+    { h: 'Offres et prix',
+      ps: ['Les prix sont indiqués en euros, toutes taxes comprises pour les particuliers résidant en France. Le prix applicable est celui affiché au moment de la souscription ; une évolution tarifaire ne s’applique qu’au renouvellement suivant, après information par e-mail trente jours à l’avance.'],
+      rows: [
+        { k: 'Plan Libre', v: '0 € — 3 circuits, projection jusqu’à 60 mois' },
+        { k: 'Plan Complet', v: '4,90 € par mois ou 49 € par an' },
+        { k: 'Plan Foyer', v: '7,90 € par mois ou 79 € par an, 2 accès nominatifs' },
+        { k: 'Engagement', v: 'Aucun — résiliable à tout moment' }
+      ] },
+    { h: 'Souscription et paiement',
+      ps: ['La souscription est réalisée en ligne. Le paiement est effectué par carte bancaire ou prélèvement SEPA via un prestataire certifié PCI-DSS ; aucune donnée de carte ne transite ni n’est conservée sur les serveurs de l’éditeur.'],
+      list: [
+        'Le premier paiement est prélevé au jour de la souscription.',
+        'Les paiements suivants sont prélevés à la date anniversaire, mensuelle ou annuelle.',
+        'Une facture nominative est mise à disposition dans l’espace « Forfait & facturation » après chaque paiement.'
+      ] },
+    { h: 'Durée et renouvellement',
+      ps: ['L’abonnement est conclu pour une durée d’un mois ou d’un an selon le cycle choisi, renouvelable tacitement. Le passage d’un cycle annuel à un cycle mensuel prend effet à la fin de la période déjà réglée.'] },
+    { h: 'Droit de rétractation',
+      ps: ['Le consommateur dispose d’un délai de quatorze jours à compter de la souscription pour exercer son droit de rétractation, sans motif ni pénalité, par simple demande à bonjour@repartio.fr ou depuis les réglages du compte.', 'Le service étant immédiatement accessible, l’utilisateur reconnaît que l’exécution commence dès la souscription ; le remboursement est alors calculé au prorata de la période non consommée.'] },
+    { h: 'Résiliation et effets',
+      ps: ['La résiliation est effective à la fin de la période en cours ; aucun prélèvement supplémentaire n’intervient. Les fonctionnalités payantes sont désactivées à cette date.'],
+      list: [
+        'Les circuits au-delà de la limite du plan gratuit deviennent consultables et exportables, mais non modifiables.',
+        'L’historique des versions reste accessible pendant trente jours après la fin de l’abonnement.',
+        'Aucune donnée n’est supprimée du fait de la seule résiliation.'
+      ] },
+    { h: 'Défaut de paiement',
+      ps: ['En cas de rejet de prélèvement, une nouvelle tentative est effectuée à trois et sept jours. Passé un délai de quinze jours, l’abonnement est suspendu et le compte repasse automatiquement au plan gratuit, sans frais additionnels.'] },
+    { h: 'Garanties et réclamations',
+      ps: ['Toute réclamation relative à une facturation doit être adressée dans un délai de soixante jours à bonjour@repartio.fr. L’éditeur s’engage à répondre sous cinq jours ouvrés et, en cas d’erreur constatée, à régulariser sous dix jours ouvrés.'] },
+    { h: 'Médiation de la consommation',
+      ps: ['Conformément au code de la consommation, le client consommateur peut recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable d’un litige, après réclamation écrite préalable auprès de l’éditeur. Les coordonnées du médiateur sont communiquées sur demande.'] }
+  ]
+};
+
+class Component extends DCLogic {
+  state = { doc: 'CGU' };
+
+  renderVals() {
+    const d = this.state.doc === 'CGU' ? CGU : CGV;
+    return {
+      eyebrow: d.eyebrow, title: d.title, lede: d.lede, meta: d.meta, sections: d.sections,
+      tabs: [
+        { key: 'CGU', label: 'Conditions d’utilisation' },
+        { key: 'CGV', label: 'Conditions de vente' }
+      ].map(t => ({
+        label: t.label,
+        onClick: () => this.setState({ doc: t.key }),
+        bg: this.state.doc === t.key ? 'oklch(0.24 0.075 265)' : 'oklch(1 0 0)',
+        fg: this.state.doc === t.key ? 'oklch(0.97 0.01 250)' : 'oklch(0.42 0.05 265)',
+        border: this.state.doc === t.key ? 'oklch(0.24 0.075 265)' : 'oklch(0.9 0.014 255)'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+  <dc-import name="Site Header" active="donnees" hint-size="100%,78px"></dc-import>
+
+  <section style="display: grid; grid-template-columns: 1.05fr 0.95fr; background: oklch(0.24 0.075 265);">
+    <div style="padding: 70px 44px 70px 32px; display: flex; flex-direction: column; gap: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.75 0.12 192);">Vos données</span>
+      <h1 style="margin: 0; max-width: 22ch; font-size: 46px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.04; color: oklch(0.97 0.01 250); text-wrap: balance;">Aucune connexion bancaire. Aucun agrégateur.</h1>
+      <p style="margin: 0; max-width: 52ch; font-size: 16px; line-height: 1.62; color: oklch(0.82 0.03 255); text-wrap: pretty;">repartio ne lit pas vos comptes. Vous saisissez les montants que vous voulez répartir&nbsp;: un salaire, un loyer, un versement mensuel. C’est une contrainte assumée — elle permet de modéliser des situations qui n’existent pas encore, et elle nous évite de détenir votre historique de transactions.</p>
+      <div style="display: flex; gap: 10px; padding-top: 8px;">
+        <a href="#" style="font-size: 14px; font-weight: 700; color: oklch(1 0 0); background: oklch(0.68 0.18 38); padding: 12px 20px; border-radius: 11px;">Politique de confidentialité</a>
+        <a href="#" style="font-size: 14px; font-weight: 600; color: oklch(0.95 0.01 250); border: 1px solid oklch(0.42 0.07 265); padding: 12px 20px; border-radius: 11px;">Demander une suppression</a>
+      </div>
+    </div>
+    <div style="padding: 54px 32px 54px 44px; display: flex; flex-direction: column; gap: 1px; background: oklch(0.32 0.07 265); border-left: 1px solid oklch(0.32 0.07 265);">
+      <sc-for list="{{ facts }}" as="t" hint-placeholder-count="5">
+        <div style="background: oklch(0.24 0.075 265); padding: 18px 4px 18px 0; display: flex; gap: 16px; align-items: baseline;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.72 0.11 192); width: 128px; flex: none;">{{ t.k }}</span>
+          <span style="font-size: 14px; line-height: 1.5; color: oklch(0.92 0.015 255); text-wrap: pretty;">{{ t.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 62px 32px 58px; border-bottom: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 10px; flex-wrap: wrap;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">Inventaire</span>
+      <h2 style="margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.032em;">Ce que nous stockons, exactement</h2>
+    </div>
+    <p style="margin: 0 0 26px; max-width: 64ch; font-size: 15px; line-height: 1.55; color: oklch(0.46 0.045 265);">La liste complète des données présentes sur nos serveurs, et la durée pendant laquelle elles y restent.</p>
+    <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: 1fr 1.5fr 0.7fr 0.7fr; background: oklch(0.975 0.005 250); border-bottom: 1px solid oklch(0.91 0.012 255); font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.55 0.04 265);">
+        <span style="padding: 13px 20px;">Donnée</span>
+        <span style="padding: 13px 16px;">Pourquoi</span>
+        <span style="padding: 13px 16px;">Conservation</span>
+        <span style="padding: 13px 16px;">Chiffrée</span>
+      </div>
+      <sc-for list="{{ inventory }}" as="r" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr 0.7fr 0.7fr; border-bottom: 1px solid oklch(0.95 0.008 255); align-items: baseline;">
+          <span style="padding: 14px 20px; font-size: 13.5px; font-weight: 600;">{{ r.k }}</span>
+          <span style="padding: 14px 16px; font-size: 13.5px; line-height: 1.5; color: oklch(0.45 0.045 265); text-wrap: pretty;">{{ r.why }}</span>
+          <span style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: oklch(0.34 0.05 265);">{{ r.keep }}</span>
+          <span style="padding: 14px 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{ r.encColor }};">{{ r.enc }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 60px 32px 58px; border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 26px; flex-wrap: wrap;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">Vos droits</span>
+      <h2 style="margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.032em;">Quatre boutons, pas quatre courriers</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden;">
+      <sc-for list="{{ rights }}" as="r" hint-placeholder-count="4">
+        <div style="background: oklch(1 0 0); padding: 24px 24px 26px; display: flex; flex-direction: column; gap: 9px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.6 0.11 195);">{{ r.n }}</span>
+          <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.022em;">{{ r.t }}</span>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: oklch(0.46 0.045 265); text-wrap: pretty;">{{ r.d }}</p>
+          <span style="margin-top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.6 0.16 38);">{{ r.where }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 58px 32px 62px; background: oklch(1 0 0);">
+    <h2 style="margin: 0 0 22px; font-size: 27px; font-weight: 800; letter-spacing: -0.03em;">Sous-traitants et hébergement</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+      <sc-for list="{{ vendors }}" as="v" hint-placeholder-count="3">
+        <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 13px; padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: oklch(0.6 0.04 265);">{{ v.role }}</span>
+          <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">{{ v.name }}</span>
+          <span style="font-size: 13.5px; line-height: 1.5; color: oklch(0.46 0.045 265); text-wrap: pretty;">{{ v.d }}</span>
+          <span style="margin-top: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.5 0.11 195);">{{ v.loc }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+class Component extends DCLogic {
+  renderVals() {
+    const yes = 'oklch(0.5 0.12 192)';
+    return {
+      facts: [
+        { k: 'Saisie manuelle', v: 'Aucun accès à vos comptes, aucun mandat DSP2, aucun agrégateur tiers.' },
+        { k: 'Hébergement', v: 'Serveurs en Union européenne, données chiffrées au repos et en transit.' },
+        { k: 'Aucune revente', v: 'Vos circuits ne sont ni vendus, ni partagés, ni utilisés pour du ciblage publicitaire.' },
+        { k: 'Export', v: 'JSON et CSV disponibles à tout moment, sans demande ni délai.' },
+        { k: 'Suppression', v: 'Un clic supprime le compte et les circuits associés, sans période de rétention.' }
+      ],
+      inventory: [
+        { k: 'Adresse e-mail', why: 'Identifier le compte, envoyer les liens de connexion et les factures.', keep: 'compte actif', enc: 'oui', encColor: yes },
+        { k: 'Structure des circuits', why: 'Les blocs, les fils et leurs montants — c’est le cœur du service.', keep: 'compte actif', enc: 'oui', encColor: yes },
+        { k: 'Montants saisis', why: 'Alimenter le calcul du mois type et la projection.', keep: 'compte actif', enc: 'oui', encColor: yes },
+        { k: 'Historique de versions', why: 'Restaurer un circuit à un état antérieur (plans payants).', keep: '24 mois', enc: 'oui', encColor: yes },
+        { k: 'Journal de connexion', why: 'Détecter les accès anormaux et sécuriser le compte.', keep: '12 mois', enc: 'oui', encColor: yes },
+        { k: 'Mesure d’usage', why: 'Compter les pages vues, sans identifiant publicitaire ni revente.', keep: '6 mois', enc: 'agrégée', encColor: 'oklch(0.5 0.045 265)' }
+      ],
+      rights: [
+        { n: 'D01', t: 'Accès', d: 'La totalité de vos données est visible dans l’application, sans passer par nous.', where: 'Réglages → Mon compte' },
+        { n: 'D02', t: 'Portabilité', d: 'Export JSON et CSV immédiat, format documenté et réimportable.', where: 'Réglages → Exporter' },
+        { n: 'D03', t: 'Rectification', d: 'Tout est modifiable directement&nbsp;: montants, blocs, e-mail de connexion.', where: 'Dans le builder' },
+        { n: 'D04', t: 'Effacement', d: 'Suppression définitive du compte et des circuits, sans période de rétention.', where: 'Réglages → Supprimer' }
+      ],
+      vendors: [
+        { role: 'Hébergement', name: 'Infrastructure européenne', d: 'Base de données et application hébergées dans un centre de données situé en France.', loc: 'Paris, FR' },
+        { role: 'Paiement', name: 'Prestataire PCI-DSS', d: 'Aucune donnée de carte ne transite par nos serveurs&nbsp;: nous ne voyons qu’un identifiant d’abonnement.', loc: 'Dublin, IE' },
+        { role: 'E-mails', name: 'Envoi transactionnel', d: 'Liens de connexion et factures uniquement. Pas de liste marketing par défaut.', loc: 'Union européenne' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

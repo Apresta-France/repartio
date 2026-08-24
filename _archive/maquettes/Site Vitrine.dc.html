@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: oklch(0.985 0.003 250); }
+  * { box-sizing: border-box; }
+  a { color: oklch(0.55 0.14 205); text-decoration: none; }
+  a:hover { color: oklch(0.45 0.13 210); }
+  button { font: inherit; }
+</style>
+</helmet>
+<div style="font-family: 'Plus Jakarta Sans', Helvetica, sans-serif; color: oklch(0.26 0.07 265); background: oklch(0.985 0.003 250); -webkit-font-smoothing: antialiased;">
+
+  <dc-import name="Site Header" hint-size="100%,78px"></dc-import>
+
+  <section style="display: grid; grid-template-columns: minmax(360px, 0.9fr) 1.1fr; border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="padding: 70px 44px 60px 32px; display: flex; flex-direction: column; gap: 22px; border-right: 1px solid oklch(0.91 0.012 255);">
+      <div style="display: flex; align-items: center; gap: 9px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.58 0.14 195);">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: oklch(0.7 0.13 192);"></span>
+        Répartiteur de revenus
+      </div>
+      <h1 style="margin: 0; font-size: 52px; line-height: 1.02; font-weight: 800; letter-spacing: -0.04em; text-wrap: balance;">Chaque euro a<br>une trajectoire.<br><span style="color: oklch(0.66 0.18 38);">Dessinez-la.</span></h1>
+      <p style="margin: 0; max-width: 40ch; font-size: 16.5px; line-height: 1.55; color: oklch(0.44 0.045 265); text-wrap: pretty;">repartio est un canvas de nœuds pour votre argent. Posez vos revenus, vos comptes, vos livrets, vos dépenses&nbsp;; reliez-les&nbsp;; lisez ce qui reste chaque mois et où vous en serez dans cinq ans.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px;">
+        <a href="#" style="font-size: 14.5px; font-weight: 700; color: oklch(1 0 0); background: oklch(0.68 0.18 38); padding: 13px 22px; border-radius: 11px; box-shadow: 0 2px 6px oklch(0.5 0.16 38 / 0.28);">Construire mon circuit</a>
+        <a href="Circuits%20Types.dc.html" style="font-size: 14.5px; font-weight: 600; color: oklch(0.28 0.08 265); background: oklch(1 0 0); border: 1px solid oklch(0.89 0.014 255); padding: 13px 20px; border-radius: 11px;">Voir un circuit rempli</a>
+      </div>
+      <div style="margin-top: auto; padding-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 12px; overflow: hidden;">
+        <sc-for list="{{ heroStats }}" as="s" hint-placeholder-count="3">
+          <div style="background: oklch(1 0 0); padding: 13px 14px; display: flex; flex-direction: column; gap: 3px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 17px; font-weight: 500; letter-spacing: -0.03em; color: oklch(0.28 0.08 265);">{{ s.v }}</span>
+            <span style="font-size: 11.5px; line-height: 1.3; color: oklch(0.56 0.04 265);">{{ s.k }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="position: relative; overflow: hidden; background: oklch(0.965 0.006 250); min-height: 570px;">
+      <div style="position: absolute; inset: 0; opacity: .7; background-image: radial-gradient(oklch(0.84 0.016 255) 1px, transparent 1px); background-size: 26px 26px;"></div>
+      <div style="position: absolute; top: 14px; left: 16px; right: 16px; display: flex; align-items: center; gap: 8px; z-index: 3;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(0.5 0.05 265); background: oklch(1 0 0 / 0.92); border: 1px solid oklch(0.9 0.014 255); border-radius: 7px; padding: 4px 9px;">mon-circuit · 60 mois</span>
+        <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(0.48 0.11 195); background: oklch(0.96 0.03 195); border: 1px solid oklch(0.88 0.05 195); border-radius: 7px; padding: 4px 9px;">non affecté · 0 €</span>
+      </div>
+      <div style="position: absolute; top: 0; left: 0; transform-origin: 0 0; transform: {{ heroTransform }};">
+        <svg width="1200" height="900" style="position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none;">
+          <sc-for list="{{ heroEdges }}" as="e" hint-placeholder-count="0">
+            <path d="{{ e.d }}" fill="none" stroke="{{ e.stroke }}" stroke-width="{{ e.w }}" stroke-linecap="round"></path>
+          </sc-for>
+        </svg>
+        <sc-for list="{{ heroNodes }}" as="n" hint-placeholder-count="0">
+          <div style="position: absolute; width: 232px; left: {{ n.x }}px; top: {{ n.y }}px; border-radius: 13px; background: oklch(1 0 0); border: 1px solid oklch(0.9 0.014 255); box-shadow: 0 2px 12px oklch(0.3 0.06 265 / 0.08); overflow: hidden;">
+            <div style="height: 3px; background: {{ n.color }};"></div>
+            <div style="padding: 10px 13px 6px;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: {{ n.color }};">{{ n.kind }}</span>
+            </div>
+            <div style="padding: 0 13px 9px; font-size: 15px; font-weight: 700; letter-spacing: -0.018em;">{{ n.title }}</div>
+            <sc-for list="{{ n.rows }}" as="r" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 13px; min-height: 27px; border-top: 1px solid oklch(0.955 0.008 255);">
+                <span style="font-size: 12px; color: oklch(0.56 0.04 265);">{{ r.k }}</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 500; letter-spacing: -0.02em;">{{ r.v }}</span>
+              </div>
+            </sc-for>
+            <div style="height: 11px;"></div>
+            <div style="position: absolute; left: -5px; top: 46px; width: 10px; height: 10px; border-radius: 50%; background: oklch(1 0 0); border: 2px solid {{ n.color }};"></div>
+            <div style="position: absolute; right: -5px; top: 46px; width: 10px; height: 10px; border-radius: 50%; background: {{ n.color }}; border: 2px solid oklch(1 0 0); box-shadow: 0 0 0 1px {{ n.color }};"></div>
+          </div>
+        </sc-for>
+        <sc-for list="{{ heroFlows }}" as="f" hint-placeholder-count="0">
+          <div style="position: absolute; transform: translate(-50%, -50%); left: {{ f.x }}px; top: {{ f.y }}px; padding: 2px 8px; border-radius: 20px; background: oklch(1 0 0 / 0.95); border: 1px solid oklch(0.9 0.014 255); font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; color: oklch(0.42 0.05 265); white-space: nowrap;">{{ f.t }}</div>
+        </sc-for>
+      </div>
+      <div style="position: absolute; inset: auto 0 0 0; height: 96px; background: linear-gradient(oklch(0.965 0.006 250 / 0), oklch(0.965 0.006 250));"></div>
+    </div>
+  </section>
+
+  <section style="display: flex; align-items: center; gap: 34px; padding: 16px 32px; border-bottom: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0);">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.62 0.04 265); flex: none;">Sait répartir</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="8">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(0.4 0.05 265); border: 1px solid oklch(0.92 0.012 255); border-radius: 7px; padding: 4px 10px;">{{ c }}</span>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="fonctionnement" style="padding: 66px 32px 62px; border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 34px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">01 · Fonctionnement</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em;">Trois gestes, pas de tableur</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden;">
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+        <div style="background: oklch(1 0 0); padding: 26px 26px 28px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 11px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 8px; background: {{ s.chipBg }}; color: {{ s.chipFg }};">{{ s.n }}</span>
+            <span style="font-size: 17.5px; font-weight: 700; letter-spacing: -0.022em;">{{ s.t }}</span>
+          </div>
+          <p style="margin: 0; font-size: 14px; line-height: 1.55; color: oklch(0.45 0.045 265); text-wrap: pretty;">{{ s.d }}</p>
+          <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 7px; padding: 13px; border-radius: 10px; background: oklch(0.975 0.005 250); border: 1px solid oklch(0.93 0.01 255);">
+            <sc-for list="{{ s.lines }}" as="l" hint-placeholder-count="3">
+              <div style="display: flex; justify-content: space-between; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;">
+                <span style="color: oklch(0.53 0.04 265);">{{ l.k }}</span>
+                <span style="color: oklch(0.28 0.08 265); font-weight: 500;">{{ l.v }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="galerie" style="padding: 66px 32px 62px; border-bottom: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0);">
+    <div style="display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">02 · Circuits types</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em;">Partez d’un circuit déjà câblé</h2>
+    </div>
+    <p style="margin: 0 0 28px; max-width: 62ch; font-size: 15px; line-height: 1.55; color: oklch(0.46 0.045 265);">Chaque modèle est un vrai circuit ouvrable&nbsp;: remplacez les montants par les vôtres, la projection se recalcule.</p>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+      <sc-for list="{{ templates }}" as="t" hint-placeholder-count="6">
+        <div style="border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden; background: oklch(1 0 0); transition: box-shadow .18s, transform .18s, border-color .18s;" style-hover="box-shadow: 0 8px 26px oklch(0.3 0.06 265 / 0.1); transform: translateY(-2px); border-color: oklch(0.82 0.05 255);">
+          <div style="position: relative; height: 136px; background: oklch(0.965 0.006 250); border-bottom: 1px solid oklch(0.93 0.01 255); overflow: hidden;">
+            <div style="position: absolute; inset: 0; opacity: .6; background-image: radial-gradient(oklch(0.84 0.016 255) 1px, transparent 1px); background-size: 18px 18px;"></div>
+            <svg viewBox="0 0 300 136" width="100%" height="136" style="position: relative; display: block;">
+              <sc-for list="{{ t.wires }}" as="w" hint-placeholder-count="3">
+                <path d="{{ w }}" fill="none" stroke="oklch(0.75 0.09 195)" stroke-width="1.5"></path>
+              </sc-for>
+              <sc-for list="{{ t.dots }}" as="d" hint-placeholder-count="5">
+                <rect x="{{ d.x }}" y="{{ d.y }}" width="{{ d.w }}" height="16" rx="5" fill="oklch(1 0 0)" stroke="{{ d.c }}" stroke-width="1.6"></rect>
+              </sc-for>
+            </svg>
+          </div>
+          <div style="padding: 16px 17px 18px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+              <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">{{ t.name }}</span>
+              <span style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.6 0.04 265);">{{ t.meta }}</span>
+            </div>
+            <p style="margin: 0; font-size: 13px; line-height: 1.5; color: oklch(0.48 0.045 265); text-wrap: pretty;">{{ t.desc }}</p>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="capacites" style="padding: 66px 32px 62px; border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 34px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">03 · Capacités</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em;">Ce que le moteur sait faire</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden;">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="6">
+        <div style="background: oklch(1 0 0); padding: 24px 26px; display: flex; gap: 16px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(0.7 0.06 195); padding-top: 4px;">{{ f.n }}</span>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-size: 16.5px; font-weight: 700; letter-spacing: -0.022em;">{{ f.t }}</span>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: oklch(0.46 0.045 265); max-width: 48ch; text-wrap: pretty;">{{ f.d }}</p>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="donnees" style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid oklch(0.91 0.012 255); background: oklch(0.24 0.075 265);">
+    <div style="padding: 64px 44px 64px 32px; display: flex; flex-direction: column; gap: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.75 0.12 192);">04 · Vos données</span>
+      <h2 style="margin: 0; font-size: 33px; font-weight: 800; letter-spacing: -0.034em; line-height: 1.1; color: oklch(0.97 0.01 250);">Aucune connexion bancaire.<br>Aucun agrégateur.</h2>
+      <p style="margin: 0; max-width: 46ch; font-size: 15px; line-height: 1.6; color: oklch(0.8 0.03 255); text-wrap: pretty;">repartio ne lit pas vos comptes&nbsp;: vous saisissez les montants que vous voulez répartir. Rien à autoriser, rien à révoquer, aucun historique de transactions sur nos serveurs.</p>
+      <a href="Vos%20Donnees.dc.html" style="align-self: flex-start; margin-top: 6px; font-size: 14px; font-weight: 700; color: oklch(1 0 0); background: oklch(0.68 0.18 38); padding: 12px 20px; border-radius: 11px;">Lire notre politique de données</a>
+    </div>
+    <div style="padding: 48px 32px 48px 44px; display: flex; flex-direction: column; gap: 1px; background: oklch(0.32 0.07 265); border-left: 1px solid oklch(0.32 0.07 265);">
+      <sc-for list="{{ trust }}" as="t" hint-placeholder-count="4">
+        <div style="background: oklch(0.24 0.075 265); padding: 18px 4px 18px 0; display: flex; gap: 16px; align-items: baseline;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.72 0.11 192); width: 118px; flex: none;">{{ t.k }}</span>
+          <span style="font-size: 14px; line-height: 1.5; color: oklch(0.92 0.015 255);">{{ t.v }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 66px 32px 62px; border-bottom: 1px solid oklch(0.91 0.012 255); background: oklch(1 0 0);">
+    <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 26px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">05 · Questions</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em;">Ce qu’on nous demande</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 46px; max-width: 1200px;">
+      <sc-for list="{{ faq }}" as="q" hint-placeholder-count="6">
+        <div style="border-top: 1px solid oklch(0.92 0.012 255);">
+          <div style="display: flex; align-items: center; gap: 14px; padding: 18px 0; cursor: pointer;" onClick="{{ q.toggle }}">
+            <span style="font-size: 15px; font-weight: 700; letter-spacing: -0.018em; flex: 1;">{{ q.q }}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: oklch(0.66 0.16 38);">{{ q.sign }}</span>
+          </div>
+          <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: -4px 0 18px; padding-right: 40px; font-size: 14px; line-height: 1.6; color: oklch(0.45 0.045 265); text-wrap: pretty;">{{ q.a }}</p>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="ressources" style="padding: 66px 32px 62px; border-bottom: 1px solid oklch(0.91 0.012 255);">
+    <div style="display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 28px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(0.6 0.04 265);">06 · Ressources</span>
+      <h2 style="margin: 0; font-size: 31px; font-weight: 800; letter-spacing: -0.032em;">Notes de terrain</h2>
+      <a href="Ressources.dc.html" style="margin-left: auto; font-size: 13.5px; font-weight: 600;">Tous les articles →</a>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: oklch(0.91 0.012 255); border: 1px solid oklch(0.91 0.012 255); border-radius: 14px; overflow: hidden;">
+      <sc-for list="{{ posts }}" as="p" hint-placeholder-count="3">
+        <a href="#" style="background: oklch(1 0 0); padding: 24px 26px 26px; display: flex; flex-direction: column; gap: 10px; color: oklch(0.26 0.07 265); transition: background .15s;" style-hover="background: oklch(0.978 0.005 250); color: oklch(0.26 0.07 265);">
+          <div style="display: flex; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.52 0.13 195);">
+            <span>{{ p.tag }}</span>
+            <span style="color: oklch(0.66 0.04 265); margin-left: auto;">{{ p.read }}</span>
+          </div>
+          <span style="font-size: 17.5px; font-weight: 700; letter-spacing: -0.024em; line-height: 1.25; text-wrap: pretty;">{{ p.t }}</span>
+          <span style="font-size: 13.5px; line-height: 1.55; color: oklch(0.48 0.045 265); text-wrap: pretty;">{{ p.d }}</span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+
+  <dc-import name="Site Footer" hint-size="100%,560px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const NAVY = 'oklch(0.32 0.09 265)';
+const TEAL = 'oklch(0.62 0.12 192)';
+const ORANGE = 'oklch(0.68 0.18 38)';
+const C = {
+  revenu: TEAL,
+  compte: NAVY,
+  repartiteur: ORANGE,
+  livret: 'oklch(0.48 0.11 240)',
+  depense: 'oklch(0.55 0.16 25)'
+};
+const LBL = { revenu: 'Revenu', compte: 'Compte', repartiteur: 'Répartiteur', livret: 'Livret', depense: 'Dépense' };
+
+const HERO_NODES = [
+  ['sal', 'revenu', 'Salaire Julien', 20, 60, [['Par mois', '1 500 €']]],
+  ['ae', 'revenu', 'Auto-entreprise', 20, 200, [['Par mois', '5 000 €']]],
+  ['loy', 'revenu', 'Loyers du local', 20, 340, [['Par mois', '2 000 €']]],
+  ['cj', 'compte', 'Compte courant', 320, 120, [['Reçoit', '7 160 €'], ['Reste', '0 €']]],
+  ['ep', 'repartiteur', 'Répartiteur épargne', 320, 320, [['Reçoit', '3 665 €'], ['Ventilé', '100 %']]],
+  ['fac', 'depense', 'Prélèvements', 630, 40, [['Reçoit', '3 254 €']]],
+  ['la', 'livret', 'Livret A', 630, 180, [['Reçoit', '1 466 €'], ['Dans 60 mois', '22 950 €']]],
+  ['ldds', 'livret', 'LDDS', 630, 350, [['Reçoit', '1 100 €'], ['Dans 60 mois', '12 000 €']]],
+  ['lep', 'livret', 'LEP', 630, 520, [['Reçoit', '1 100 €'], ['Dans 60 mois', '10 000 €']]]
+];
+const HERO_EDGES = [
+  ['sal', 'cj', '1 500 €'], ['ae', 'cj', '3 660 €'], ['loy', 'cj', '2 000 €'],
+  ['cj', 'fac', '3 254 €'], ['cj', 'ep', '3 665 €'],
+  ['ep', 'la', '1 466 €'], ['ep', 'ldds', '1 100 €'], ['ep', 'lep', '1 100 €']
+];
+
+class Component extends DCLogic {
+  state = { open: 0 };
+
+  renderVals() {
+    const pos = {}, kindOf = {};
+    HERO_NODES.forEach(n => { pos[n[0]] = { x: n[3], y: n[4] }; kindOf[n[0]] = n[1]; });
+
+    const heroNodes = HERO_NODES.map(([id, kind, title, x, y, rows]) => ({
+      id, x, y, title, kind: LBL[kind], color: C[kind],
+      rows: rows.map(([k, v]) => ({ k, v }))
+    }));
+
+    const heroEdges = [], heroFlows = [];
+    HERO_EDGES.forEach(([a, b, t]) => {
+      const p = pos[a], q = pos[b];
+      const ax = p.x + 232, ay = p.y + 51, bx = q.x, by = q.y + 51;
+      const dx = Math.max(56, Math.abs(bx - ax) * 0.45);
+      heroEdges.push({
+        d: `M ${ax} ${ay} C ${ax + dx} ${ay}, ${bx - dx} ${by}, ${bx} ${by}`,
+        stroke: C[kindOf[a]], w: 1.7
+      });
+      heroFlows.push({ x: Math.round((ax + bx) / 2), y: Math.round((ay + by) / 2 - 9), t });
+    });
+
+    const faq = [
+      ['Faut-il connecter ma banque ?', 'Non. repartio fonctionne uniquement avec les montants que vous saisissez : un salaire, un loyer, un versement mensuel. C’est ce qui permet de modéliser des situations qui n’existent pas encore.'],
+      ['Est-ce un outil de budget ou de projection ?', 'Les deux, dans le même canvas : le circuit décrit votre mois type, la projection déroule ce mois type sur l’horizon que vous choisissez, plafonds de livrets inclus.'],
+      ['Comment sont gérés les plafonds réglementaires ?', 'Chaque livret porte son plafond et son taux. Quand il sature, repartio vous dit en combien de mois et redirige le surplus vers la destination que vous avez câblée.'],
+      ['Peut-on modéliser un couple avec des comptes séparés ?', 'Oui — c’est même le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts par personne.'],
+      ['Que se passe-t-il si un euro n’est pas affecté ?', 'Le compteur « non affecté » reste visible en permanence. Tant qu’il n’est pas à zéro, vous savez que le circuit est incomplet.'],
+      ['Que contient la version gratuite ?', 'Trois circuits, tous les types de blocs et la projection jusqu’à 60 mois. Le payant ajoute les scénarios comparés, l’export et l’historique des versions.']
+    ].map(([q, a], i) => ({
+      q, a, open: this.state.open === i, sign: this.state.open === i ? '−' : '+',
+      toggle: () => this.setState(s => ({ open: s.open === i ? -1 : i }))
+    }));
+
+    const t = (name, meta, desc, wires, dots) => ({ name, meta, desc, wires, dots });
+
+    return {
+      heroNodes, heroEdges, heroFlows,
+      heroTransform: 'translate(30px, 46px) scale(0.62)',
+      heroStats: [
+        { v: '12 338 €', k: 'entrées réparties / mois' },
+        { v: '60', k: 'mois de projection' },
+        { v: '0 €', k: 'euro non affecté' }
+      ],
+      chips: ['Salaires', 'Auto-entreprise', 'Loyers perçus', 'URSSAF', 'Comptes joints', 'Livret A', 'LDDS', 'LEP', 'Livrets enfants', 'Prélèvements', 'Dépenses libres', 'Parts en %'],
+      steps: [
+        { n: '01', t: 'Posez vos blocs', chipBg: 'oklch(0.95 0.03 192)', chipFg: 'oklch(0.45 0.11 195)', d: 'Un bloc par revenu, compte, livret ou poste de dépense. Rien à catégoriser, rien à importer.', lines: [{ k: 'Salaire Julien', v: '1 500 €' }, { k: 'Auto-entreprise', v: '5 000 €' }, { k: 'Loyers du local', v: '2 000 €' }] },
+        { n: '02', t: 'Reliez les flux', chipBg: 'oklch(0.96 0.04 38)', chipFg: 'oklch(0.56 0.17 38)', d: 'Tirez un fil d’un bloc à l’autre, en montant fixe ou en pourcentage. Le solde de chaque bloc s’ajuste en direct.', lines: [{ k: 'Compte → Joint', v: '3 254 €' }, { k: 'Compte → Épargne', v: '3 665 €' }, { k: 'Non affecté', v: '0 €' }] },
+        { n: '03', t: 'Lisez la suite', chipBg: 'oklch(0.94 0.02 265)', chipFg: 'oklch(0.36 0.09 265)', d: 'repartio déroule votre mois type sur 60 mois, applique taux et plafonds, et vous dit quand chaque livret sature.', lines: [{ k: 'Épargné / mois', v: '5 234 €' }, { k: 'Dans 5 ans', v: '105 615 €' }, { k: 'Livret A plein en', v: '16 mois' }] }
+      ],
+      templates: [
+        t('Couple, comptes séparés', '11 blocs', 'Deux salaires, un joint pour les factures, un joint pour le quotidien, épargne par personne.',
+          ['M40 30 C80 30 80 68 120 68', 'M40 104 C80 104 80 72 120 72', 'M164 70 C200 70 200 34 240 34', 'M164 74 C200 74 200 104 240 104'],
+          [{ x: 8, y: 22, w: 32, c: C.revenu }, { x: 8, y: 96, w: 32, c: C.revenu }, { x: 120, y: 60, w: 44, c: C.compte }, { x: 240, y: 26, w: 52, c: C.depense }, { x: 240, y: 96, w: 52, c: C.livret }]),
+        t('Auto-entrepreneur', '9 blocs', 'Chiffre d’affaires, provision URSSAF, rémunération vers le compte perso, épargne de précaution.',
+          ['M40 68 C80 68 80 30 120 30', 'M40 72 C80 72 80 104 120 104', 'M164 32 C200 32 210 68 240 68'],
+          [{ x: 8, y: 60, w: 32, c: C.revenu }, { x: 120, y: 22, w: 44, c: C.compte }, { x: 120, y: 96, w: 44, c: C.depense }, { x: 240, y: 60, w: 52, c: C.livret }]),
+        t('Épargne de précaution', '6 blocs', 'Un seul revenu, une règle de trois mois de charges, saturation du LEP puis du Livret A.',
+          ['M40 68 C80 68 80 42 120 42', 'M164 44 C200 44 200 24 240 24', 'M164 48 C200 48 200 96 240 96'],
+          [{ x: 8, y: 60, w: 32, c: C.revenu }, { x: 120, y: 34, w: 44, c: C.repartiteur }, { x: 240, y: 16, w: 52, c: C.livret }, { x: 240, y: 88, w: 52, c: C.livret }]),
+        t('Objectif apport', '10 blocs', 'Tout ce qui n’est pas dépensé va vers l’apport ; repartio affiche la date d’atteinte du montant cible.',
+          ['M40 42 C80 42 80 68 120 68', 'M40 104 C80 104 80 72 120 72', 'M164 70 C210 70 210 42 240 42'],
+          [{ x: 8, y: 34, w: 32, c: C.revenu }, { x: 8, y: 96, w: 32, c: C.revenu }, { x: 120, y: 60, w: 44, c: C.repartiteur }, { x: 240, y: 34, w: 52, c: C.livret }]),
+        t('Famille avec enfants', '13 blocs', 'Allocations, livrets des enfants, dépenses courantes indexées, deux répartiteurs.',
+          ['M40 28 C80 28 80 64 120 64', 'M40 100 C80 100 80 68 120 68', 'M164 66 C200 66 200 28 240 28', 'M164 70 C200 70 200 100 240 100'],
+          [{ x: 8, y: 20, w: 32, c: C.revenu }, { x: 8, y: 92, w: 32, c: C.revenu }, { x: 120, y: 56, w: 44, c: C.repartiteur }, { x: 240, y: 20, w: 52, c: C.livret }, { x: 240, y: 92, w: 52, c: C.depense }]),
+        t('Locatif + salaire', '8 blocs', 'Loyers perçus, charges du local, fiscalité provisionnée, surplus vers épargne longue.',
+          ['M40 68 C80 68 80 36 120 36', 'M164 38 C200 38 200 22 240 22', 'M164 42 C200 42 200 96 240 96'],
+          [{ x: 8, y: 60, w: 32, c: C.revenu }, { x: 120, y: 28, w: 44, c: C.compte }, { x: 240, y: 14, w: 52, c: C.depense }, { x: 240, y: 88, w: 52, c: C.livret }])
+      ],
+      features: [
+        { n: 'F01', t: 'Répartiteurs en pourcentage', d: 'Un bloc qui découpe ce qu’il reçoit en parts, et qui vous prévient dès que la somme des parts ne fait pas 100 %.' },
+        { n: 'F02', t: 'Plafonds et taux réels', d: 'Livret A, LDDS, LEP, livrets jeunes : plafond et taux préremplis, capitalisation annuelle, date de saturation calculée.' },
+        { n: 'F03', t: 'Compteur de non-affecté', d: 'Le canvas affiche en permanence l’euro qui traîne. Un circuit valide est un circuit à zéro.' },
+        { n: 'F04', t: 'Projection à l’horizon choisi', d: '12, 60, 120 mois : le mois type est déroulé et chaque bloc porte sa valeur de fin de période.' },
+        { n: 'F05', t: 'Scénarios comparés', d: 'Dupliquez un circuit, changez un versement, et lisez l’écart de patrimoine entre les deux variantes.' },
+        { n: 'F06', t: 'Canvas navigable', d: 'Glissé-déposé des blocs, panoramique au fond, zoom au clavier. Un circuit à trente blocs reste lisible.' }
+      ],
+      trust: [
+        { k: 'Saisie manuelle', v: 'Aucun accès à vos comptes, aucun mandat DSP2, aucun agrégateur tiers.' },
+        { k: 'Hébergement', v: 'Données chiffrées au repos, serveurs en Union européenne.' },
+        { k: 'Export', v: 'Vos circuits s’exportent en JSON et CSV à tout moment, sans demande.' },
+        { k: 'Suppression', v: 'Un clic supprime le compte et les circuits associés, sans période de rétention.' }
+      ],
+      faq,
+      posts: [
+        { tag: 'Méthode', read: '6 min', t: 'Pourquoi votre budget ne tient pas dans un tableur', d: 'Un tableur décrit des totaux ; un circuit décrit des chemins. La différence se voit au troisième compte joint.' },
+        { tag: 'Réglementaire', read: '4 min', t: 'Ordre de remplissage des livrets réglementés', d: 'LEP, LDDS, Livret A : dans quel ordre saturer quand on épargne 1 500 € par mois.' },
+        { tag: 'Étude de cas', read: '9 min', t: 'Un couple, 12 338 € par mois, zéro euro non affecté', d: 'Le circuit complet d’une famille de quatre, commenté bloc par bloc.' }
+      ],
+      footer: [
+        { h: 'Produit', items: ['Le builder', 'Circuits types', 'Capacités', 'Tarifs'] },
+        { h: 'Ressources', items: ['Notes de terrain', 'Guide des livrets', 'Journal des versions'] },
+        { h: 'Société', items: ['À propos', 'Confidentialité', 'Conditions', 'Contact'] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

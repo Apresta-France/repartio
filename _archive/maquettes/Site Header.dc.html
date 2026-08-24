@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</helmet>
+<header style="position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 34px; height: 78px; padding: 0 32px; background: oklch(0.985 0.003 250 / 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid oklch(0.91 0.012 255); font-family: 'Plus Jakarta Sans', Helvetica, sans-serif;">
+  <a href="Site%20Vitrine.dc.html" style="display: block; flex: none;"><img src="assets/repartio-mark.png" alt="repartio.fr" style="height: 34px; width: auto; display: block;"></a>
+  <nav style="display: flex; gap: 22px; font-size: 13.5px; font-weight: 500;">
+    <sc-for list="{{ links }}" as="l" hint-placeholder-count="6">
+      <a href="{{ l.href }}" style="color: {{ l.color }}; font-weight: {{ l.weight }}; padding: 4px 0; border-bottom: 2px solid {{ l.underline }};">{{ l.label }}</a>
+    </sc-for>
+  </nav>
+  <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: oklch(0.58 0.04 265);">Gratuit jusqu’à 3 circuits</span>
+    <a href="#" style="font-size: 13px; font-weight: 600; color: oklch(0.32 0.08 265); padding: 8px 12px;">Se connecter</a>
+    <a href="#" style="font-size: 13px; font-weight: 700; color: oklch(1 0 0); background: oklch(0.68 0.18 38); padding: 9px 16px; border-radius: 10px; box-shadow: 0 1px 2px oklch(0.5 0.16 38 / 0.3);">Ouvrir le builder</a>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:78},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;fonctionnement&quot;,&quot;circuits&quot;,&quot;capacites&quot;,&quot;tarifs&quot;,&quot;donnees&quot;,&quot;ressources&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const NAV = [
+  ['fonctionnement', 'Fonctionnement', 'Fonctionnement.dc.html'],
+  ['circuits', 'Circuits types', 'Circuits%20Types.dc.html'],
+  ['capacites', 'Capacités', 'Capacites.dc.html'],
+  ['tarifs', 'Tarifs', 'Tarifs.dc.html'],
+  ['donnees', 'Vos données', 'Vos%20Donnees.dc.html'],
+  ['ressources', 'Ressources', 'Ressources.dc.html']
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? '';
+    return {
+      links: NAV.map(([id, label, href]) => ({
+        label, href,
+        color: id === active ? 'oklch(0.24 0.08 265)' : 'oklch(0.44 0.05 265)',
+        weight: id === active ? 700 : 500,
+        underline: id === active ? 'oklch(0.68 0.18 38)' : 'transparent'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
