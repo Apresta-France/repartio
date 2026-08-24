@@ -152,7 +152,7 @@
   <aside class="builder-props" data-props>
     <div class="builder-props-empty" data-props-empty>
       <div class="eyebrow">Propriétés</div>
-      <p>Sélectionnez un bloc pour modifier son nom, ses montants, son taux ou ses liens sortants.</p>
+      <p>Sélectionnez un bloc ou un groupe pour modifier son nom, sa couleur, ses montants ou ses liens.</p>
     </div>
     <div data-props-form hidden></div>
   </aside>

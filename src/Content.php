@@ -292,6 +292,7 @@ class Content
         ];
 
         foreach ($items as $key => &$item) {
+            $item['payload'] = self::layoutPayload($item['payload']);
             $item['key'] = $key;
             $item['blocks'] = count($item['payload']['nodes'] ?? []);
         }
@@ -303,6 +304,238 @@ class Content
     public static function templatePayload(string $key): ?array
     {
         return self::templates()[$key]['payload'] ?? null;
+    }
+
+    private static function layoutPayload(array $payload): array
+    {
+        $nodes = $payload['nodes'] ?? [];
+        $edges = $payload['edges'] ?? [];
+        if ($nodes === []) {
+            return $payload;
+        }
+
+        $kindLayer = ['revenu' => 0, 'compte' => 1, 'repartiteur' => 2, 'livret' => 3, 'depense' => 3];
+        $kindWeight = ['revenu' => 0, 'compte' => 1, 'depense' => 2, 'repartiteur' => 3, 'livret' => 4];
+        $heightOf = static function (array $n): float {
+            return match ($n['kind'] ?? '') {
+                'livret' => 176.0,
+                'depense' => 152.0,
+                'repartiteur' => 148.0,
+                default => 120.0,
+            };
+        };
+
+        $graph = [];
+        foreach ($nodes as $n) {
+            $kind = $n['kind'] ?? '';
+            if ($kind === 'groupe' || $kind === 'note') {
+                continue;
+            }
+            $graph[$n['id']] = $n;
+        }
+        if ($graph === []) {
+            return $payload;
+        }
+
+        $preds = [];
+        $succs = [];
+        foreach ($graph as $id => $_) {
+            $preds[$id] = [];
+            $succs[$id] = [];
+        }
+        foreach ($edges as $e) {
+            $from = (string) ($e['from'] ?? '');
+            $to = (string) ($e['to'] ?? '');
+            if (!isset($graph[$from], $graph[$to]) || $from === $to) {
+                continue;
+            }
+            $succs[$from][] = $to;
+            $preds[$to][] = $from;
+        }
+
+        $rank = [];
+        $indeg = [];
+        foreach ($graph as $id => $_) {
+            $indeg[$id] = count($preds[$id]);
+        }
+        $q = [];
+        foreach ($graph as $id => $_) {
+            if ($indeg[$id] === 0) {
+                $q[] = $id;
+                $rank[$id] = 0;
+            }
+        }
+        $seen = [];
+        while ($q !== []) {
+            $id = array_shift($q);
+            if (isset($seen[$id])) {
+                continue;
+            }
+            $seen[$id] = true;
+            $base = $rank[$id] ?? 0;
+            foreach ($succs[$id] as $to) {
+                $rank[$to] = max($rank[$to] ?? 0, $base + 1);
+                $indeg[$to]--;
+                if ($indeg[$to] === 0) {
+                    $q[] = $to;
+                }
+            }
+        }
+        foreach ($graph as $id => $n) {
+            if (isset($rank[$id])) {
+                continue;
+            }
+            $known = [];
+            foreach ($preds[$id] as $p) {
+                if (isset($rank[$p])) {
+                    $known[] = $rank[$p];
+                }
+            }
+            $rank[$id] = $known !== [] ? max($known) + 1 : ($kindLayer[$n['kind'] ?? ''] ?? 0);
+        }
+        foreach ($graph as $id => $n) {
+            if ($preds[$id] === [] && $succs[$id] === []) {
+                $rank[$id] = $kindLayer[$n['kind'] ?? ''] ?? 0;
+            }
+        }
+
+        $compactRanks = static function () use (&$rank, $graph): int {
+            $used = array_values(array_unique(array_values($rank)));
+            sort($used);
+            $remap = array_flip($used);
+            foreach ($rank as $id => $r) {
+                $rank[$id] = $remap[$r];
+            }
+
+            return count($used);
+        };
+        $compactRanks();
+        $byRank = [];
+        foreach ($graph as $id => $n) {
+            $byRank[$rank[$id]][] = $n;
+        }
+        foreach ($byRank as $list) {
+            if (count($list) <= 4) {
+                continue;
+            }
+            $hasD = false;
+            $hasL = false;
+            foreach ($list as $n) {
+                if (($n['kind'] ?? '') === 'depense') {
+                    $hasD = true;
+                }
+                if (($n['kind'] ?? '') === 'livret') {
+                    $hasL = true;
+                }
+            }
+            if (!$hasD || !$hasL) {
+                continue;
+            }
+            foreach ($list as $n) {
+                if (($n['kind'] ?? '') === 'livret') {
+                    $rank[$n['id']]++;
+                }
+            }
+        }
+        $layerCount = $compactRanks();
+        $maxRank = max(0, $layerCount - 1);
+
+        $layers = array_fill(0, $maxRank + 1, []);
+        $seed = array_values($graph);
+        usort($seed, static function (array $a, array $b) use ($kindWeight): int {
+            $dw = ($kindWeight[$a['kind'] ?? ''] ?? 0) <=> ($kindWeight[$b['kind'] ?? ''] ?? 0);
+            if ($dw !== 0) {
+                return $dw;
+            }
+            $dy = ($a['y'] ?? 0) <=> ($b['y'] ?? 0);
+
+            return $dy !== 0 ? $dy : strnatcasecmp((string) ($a['title'] ?? ''), (string) ($b['title'] ?? ''));
+        });
+        foreach ($seed as $n) {
+            $layers[$rank[$n['id']]][] = $n['id'];
+        }
+
+        $indexOf = static function (array $layers): array {
+            $idx = [];
+            foreach ($layers as $ids) {
+                foreach ($ids as $i => $id) {
+                    $idx[$id] = $i;
+                }
+            }
+
+            return $idx;
+        };
+        $sortByBary = static function (array $ids, array $neigh, array $layers) use ($indexOf): array {
+            $idx = $indexOf($layers);
+            usort($ids, static function (string $a, string $b) use ($neigh, $idx): int {
+                $bar = static function (string $id) use ($neigh, $idx): float {
+                    $ns = $neigh[$id] ?? [];
+                    if ($ns === []) {
+                        return (float) ($idx[$id] ?? 0);
+                    }
+                    $s = 0.0;
+                    foreach ($ns as $n) {
+                        $s += $idx[$n] ?? 0;
+                    }
+
+                    return $s / count($ns);
+                };
+                $d = $bar($a) <=> $bar($b);
+
+                return $d !== 0 ? $d : (($idx[$a] ?? 0) <=> ($idx[$b] ?? 0));
+            });
+
+            return $ids;
+        };
+
+        for ($iter = 0; $iter < 4; $iter++) {
+            for ($i = 1, $n = count($layers); $i < $n; $i++) {
+                $layers[$i] = $sortByBary($layers[$i], $preds, $layers);
+            }
+        }
+
+        $nodeW = 244.0;
+        $gapX = 168.0;
+        $gapY = 56.0;
+        $originX = 48.0;
+        $originY = 40.0;
+        $heights = [];
+        foreach ($graph as $id => $n) {
+            $heights[$id] = $heightOf($n);
+        }
+        $pos = [];
+        foreach ($layers as $li => $ids) {
+            $x = $originX + $li * ($nodeW + $gapX);
+            $y = $originY;
+            foreach ($ids as $id) {
+                $pos[$id] = ['x' => (int) round($x), 'y' => (int) round($y)];
+                $y += $heights[$id] + $gapY;
+            }
+            if (count($ids) !== 1) {
+                continue;
+            }
+            $id = $ids[0];
+            $ps = $preds[$id];
+            if ($ps === []) {
+                continue;
+            }
+            $sum = 0.0;
+            foreach ($ps as $pid) {
+                $sum += ($pos[$pid]['y'] ?? $originY) + $heights[$pid] / 2;
+            }
+            $pos[$id]['y'] = (int) round(max($originY, $sum / count($ps) - $heights[$id] / 2));
+        }
+
+        foreach ($payload['nodes'] as &$n) {
+            $id = $n['id'] ?? '';
+            if (isset($pos[$id])) {
+                $n['x'] = $pos[$id]['x'];
+                $n['y'] = $pos[$id]['y'];
+            }
+        }
+        unset($n);
+
+        return $payload;
     }
 
     public static function mentions(): array

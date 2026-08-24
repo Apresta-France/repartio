@@ -1063,14 +1063,34 @@
     return escapeHtml(s);
   }
 
-  function selectNode(id) {
+  function markSelected(id) {
     state.selected = id;
     state.openEdge = null;
     if (id) root.classList.add('is-props-open');
     else root.classList.remove('is-props-open');
     const toggle = root.querySelector('[data-props-toggle]');
     if (toggle) toggle.setAttribute('aria-expanded', id ? 'true' : 'false');
+  }
+
+  function paintSelection() {
+    layer?.querySelectorAll('.node').forEach((el) => {
+      el.classList.toggle('is-selected', el.dataset.node === state.selected);
+    });
+  }
+
+  function selectNode(id) {
+    markSelected(id);
     render();
+  }
+
+  function selectNodeLive(id) {
+    if (state.selected === id) {
+      paintSelection();
+      return;
+    }
+    markSelected(id);
+    paintSelection();
+    renderProps();
   }
 
   function addNode(kind, x, y, extra = {}) {
@@ -1395,6 +1415,18 @@
   let drag = null;
   let pan = null;
   let linkJustEnded = false;
+  let ignoreClick = false;
+
+  function swallowNextClick() {
+    ignoreClick = true;
+    setTimeout(() => { ignoreClick = false; }, 0);
+  }
+
+  function pointerMoved(from, x, y, threshold = 4) {
+    const dx = x - from.sx;
+    const dy = y - from.sy;
+    return (dx * dx) + (dy * dy) >= threshold * threshold;
+  }
 
   root.querySelectorAll('[data-add]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -1498,7 +1530,8 @@
       const id = resize.getAttribute('data-resize');
       const node = nodeById(id);
       if (!node) return;
-      drag = { type: 'resize', id, sx: e.clientX, sy: e.clientY, ow: node.w || 560, oh: node.h || 340, el: resize.closest('.node') };
+      selectNodeLive(id);
+      drag = { type: 'resize', id, sx: e.clientX, sy: e.clientY, ow: node.w || 560, oh: node.h || 340, el: resize.closest('.node'), moved: false };
       return;
     }
     const handle = e.target.closest('[data-drag]');
@@ -1508,10 +1541,11 @@
     if (!node) return;
     e.preventDefault();
     e.stopPropagation();
+    selectNodeLive(id);
     const riders = node.kind === 'groupe'
       ? nodesInside(node).map((n) => ({ id: n.id, ox: n.x, oy: n.y, el: layer.querySelector(`[data-node="${n.id}"]`) }))
       : [];
-    drag = { type: 'node', id, sx: e.clientX, sy: e.clientY, ox: node.x, oy: node.y, el: handle.closest('.node'), riders };
+    drag = { type: 'node', id, sx: e.clientX, sy: e.clientY, ox: node.x, oy: node.y, el: handle.closest('.node'), riders, moved: false };
   });
 
   canvas.addEventListener('mousedown', (e) => {
@@ -1522,6 +1556,8 @@
 
   document.addEventListener('mousemove', (e) => {
     if (drag && drag.type === 'resize') {
+      if (!drag.moved && !pointerMoved(drag, e.clientX, e.clientY)) return;
+      drag.moved = true;
       const node = nodeById(drag.id);
       if (!node) return;
       node.w = Math.max(280, Math.round(drag.ow + (e.clientX - drag.sx) / state.scale));
@@ -1533,6 +1569,8 @@
         drag.el.style.height = node.h + 'px';
       }
     } else if (drag && drag.type === 'node') {
+      if (!drag.moved && !pointerMoved(drag, e.clientX, e.clientY)) return;
+      drag.moved = true;
       const node = nodeById(drag.id);
       if (!node) return;
       const dx = (e.clientX - drag.sx) / state.scale;
@@ -1564,7 +1602,12 @@
   });
 
   document.addEventListener('mouseup', (e) => {
-    if (drag && (drag.type === 'node' || drag.type === 'resize')) render({ props: false });
+    if (drag && (drag.type === 'node' || drag.type === 'resize')) {
+      if (drag.moved) {
+        render({ props: false });
+        swallowNextClick();
+      }
+    }
     drag = null;
     pan = null;
     canvas.classList.remove('is-grabbing');
@@ -1577,7 +1620,7 @@
 
   layer.addEventListener('click', (e) => {
     if (readonly) return;
-    if (linkJustEnded) {
+    if (linkJustEnded || ignoreClick) {
       e.stopPropagation();
       return;
     }
@@ -1587,7 +1630,15 @@
     }
     const node = e.target.closest('[data-node]');
     if (node) {
-      selectNode(node.getAttribute('data-node'));
+      const id = node.getAttribute('data-node');
+      const already = state.selected === id;
+      selectNode(id);
+      const n = nodeById(id);
+      if (n && (n.kind === 'groupe' || n.kind === 'note') && (already || e.target.closest('.group-title, .group-label, .node-title'))) {
+        const field = propsForm?.querySelector('[data-prop="title"]');
+        field?.focus();
+        field?.select();
+      }
     }
   });
 
@@ -1605,6 +1656,7 @@
   });
 
   canvas.addEventListener('click', (e) => {
+    if (linkJustEnded || ignoreClick) return;
     if (e.target.closest('.node, .edge-pill, .port, .link-coach, button')) return;
     if (state.connectFrom) { cancelLink(); return; }
     if (state.selected) selectNode(null);
@@ -1836,6 +1888,145 @@
     document.body.classList.remove('is-locked');
   }
 
+  const KIND_LAYER = { revenu: 0, compte: 1, repartiteur: 2, livret: 3, depense: 3 };
+  const KIND_WEIGHT = { revenu: 0, compte: 1, depense: 2, repartiteur: 3, livret: 4 };
+
+  function nodeBox(n) {
+    return {
+      w: n.kind === 'groupe' ? (n.w || n._w || 560) : (n._w || 244),
+      h: n.kind === 'groupe' ? (n.h || n._h || 340) : (n._h || 118),
+    };
+  }
+
+  function layoutCircuit() {
+    const graph = state.nodes.filter((n) => !isAnnotation(n));
+    if (!graph.length) return;
+
+    const byId = {};
+    const preds = {};
+    const succs = {};
+    graph.forEach((n) => {
+      byId[n.id] = n;
+      preds[n.id] = [];
+      succs[n.id] = [];
+    });
+    state.edges.forEach((e) => {
+      if (!byId[e.from] || !byId[e.to] || e.from === e.to) return;
+      succs[e.from].push(e.to);
+      preds[e.to].push(e.from);
+    });
+
+    const rank = {};
+    const indeg = {};
+    graph.forEach((n) => { indeg[n.id] = preds[n.id].length; });
+    const q = graph.filter((n) => indeg[n.id] === 0).map((n) => n.id);
+    q.forEach((id) => { rank[id] = 0; });
+    const seen = {};
+    while (q.length) {
+      const id = q.shift();
+      if (seen[id]) continue;
+      seen[id] = 1;
+      (succs[id] || []).forEach((to) => {
+        rank[to] = Math.max(rank[to] || 0, (rank[id] || 0) + 1);
+        indeg[to] -= 1;
+        if (indeg[to] === 0) q.push(to);
+      });
+    }
+    graph.forEach((n) => {
+      if (rank[n.id] !== undefined) return;
+      const known = preds[n.id].map((id) => rank[id]).filter((r) => r !== undefined);
+      rank[n.id] = known.length ? Math.max(...known) + 1 : (KIND_LAYER[n.kind] || 0);
+    });
+    graph.forEach((n) => {
+      if (preds[n.id].length || succs[n.id].length) return;
+      rank[n.id] = KIND_LAYER[n.kind] ?? 0;
+    });
+
+    const compactRanks = () => {
+      const used = [...new Set(graph.map((n) => rank[n.id]))].sort((a, b) => a - b);
+      const remap = {};
+      used.forEach((r, i) => { remap[r] = i; });
+      graph.forEach((n) => { rank[n.id] = remap[rank[n.id]]; });
+      return used.length;
+    };
+    compactRanks();
+    const byRank = {};
+    graph.forEach((n) => { (byRank[rank[n.id]] ||= []).push(n); });
+    Object.keys(byRank).forEach((r) => {
+      const list = byRank[r];
+      if (list.length <= 4) return;
+      const hasD = list.some((n) => n.kind === 'depense');
+      const hasL = list.some((n) => n.kind === 'livret');
+      if (!hasD || !hasL) return;
+      list.filter((n) => n.kind === 'livret').forEach((n) => { rank[n.id] += 1; });
+    });
+    const layerCount = compactRanks();
+    const maxRank = Math.max(0, layerCount - 1);
+
+    const layers = [];
+    for (let i = 0; i <= maxRank; i += 1) layers.push([]);
+    graph.slice().sort((a, b) => {
+      const dw = (KIND_WEIGHT[a.kind] || 0) - (KIND_WEIGHT[b.kind] || 0);
+      if (dw) return dw;
+      return (a.y - b.y) || String(a.title || '').localeCompare(String(b.title || ''), 'fr');
+    }).forEach((n) => layers[rank[n.id]].push(n.id));
+
+    const indexOf = () => {
+      const idx = {};
+      layers.forEach((ids) => ids.forEach((id, i) => { idx[id] = i; }));
+      return idx;
+    };
+    const sortByBary = (ids, neigh) => {
+      const idx = indexOf();
+      return ids.slice().sort((a, b) => {
+        const bar = (id) => {
+          const ns = neigh[id] || [];
+          if (!ns.length) return idx[id] ?? 0;
+          return ns.reduce((s, nid) => s + (idx[nid] ?? 0), 0) / ns.length;
+        };
+        const d = bar(a) - bar(b);
+        if (Math.abs(d) > 1e-6) return d;
+        return (idx[a] ?? 0) - (idx[b] ?? 0);
+      });
+    };
+    for (let iter = 0; iter < 4; iter += 1) {
+      for (let i = 1; i < layers.length; i += 1) layers[i] = sortByBary(layers[i], preds);
+    }
+
+    const nodeW = 244;
+    const gapX = 168;
+    const gapY = 56;
+    const originX = 48;
+    const originY = 40;
+    const heights = {};
+    graph.forEach((n) => { heights[n.id] = nodeBox(n).h; });
+    layers.forEach((ids, li) => {
+      const x = originX + li * (nodeW + gapX);
+      let y = originY;
+      ids.forEach((id) => {
+        const n = byId[id];
+        n.x = Math.round(x);
+        n.y = Math.round(y);
+        y += heights[id] + gapY;
+      });
+      if (ids.length !== 1) return;
+      const id = ids[0];
+      const ps = preds[id];
+      if (!ps.length) return;
+      const avg = ps.reduce((s, nid) => s + byId[nid].y + heights[nid] / 2, 0) / ps.length;
+      byId[id].y = Math.round(Math.max(originY, avg - heights[id] / 2));
+    });
+
+    let y2 = 0;
+    graph.forEach((n) => {
+      y2 = Math.max(y2, n.y + nodeBox(n).h);
+    });
+    state.nodes.filter((n) => n.kind === 'note').forEach((n, i) => {
+      n.x = originX;
+      n.y = Math.round(y2 + 72 + i * 140);
+    });
+  }
+
   function applyScenario(key) {
     const pack = SCENARIOS[key];
     if (!pack || !pack.payload) return;
@@ -1854,6 +2045,8 @@
       document.title = pack.title + ' — repartio.fr';
     }
     closeScenarioModal();
+    render({ props: false });
+    layoutCircuit();
     render();
     requestAnimationFrame(fit);
   }
