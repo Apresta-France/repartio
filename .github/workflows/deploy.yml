@@ -26,11 +26,8 @@ jobs:
             **/.github/**
             **/.env
             **/storage/logs/**
-            !**/storage/logs/.gitkeep
             **/storage/mail/**
-            !**/storage/mail/.gitkeep
             **/storage/cache/**
-            !**/storage/cache/.gitkeep
             **/storage/installed.lock
             **/_archive/**
             **/*.dc.html
