@@ -183,7 +183,9 @@ document.querySelectorAll('[data-filter]').forEach((btn) => {
     const count = document.querySelector(`[data-filter-count="${group}"]`);
     if (count) {
       const n = [...document.querySelectorAll(`[data-filter-item][data-filter-group="${group}"]`)].filter((el) => !el.hidden).length;
-      count.textContent = n + (n > 1 ? ' éléments' : ' élément');
+      const one = count.getAttribute('data-filter-one') || 'élément';
+      const many = count.getAttribute('data-filter-many') || 'éléments';
+      count.textContent = n + ' ' + (n > 1 ? many : one);
     }
   });
 });

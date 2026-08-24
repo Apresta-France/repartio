@@ -8,6 +8,11 @@ declare(strict_types=1);
  *         php install.php --migrate
  */
 
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Cette installation se lance en ligne de commande : php install.php');
+}
+
 define('BASE_PATH', __DIR__);
 require BASE_PATH . '/src/bootstrap.php';
 
@@ -28,6 +33,7 @@ try {
     ]);
     $safe = preg_replace('/[^a-zA-Z0-9_]/', '', $name) ?: 'repartio';
     $pdo->exec('CREATE DATABASE IF NOT EXISTS `' . $safe . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+    \App\Core\Config::set('db.name', $safe);
     $applied = (new Migrator(Database::connect()))->run();
     echo 'Migrations : ' . (count($applied) ? implode(', ', $applied) : 'à jour') . PHP_EOL;
 

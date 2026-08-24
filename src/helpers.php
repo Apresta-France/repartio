@@ -52,7 +52,11 @@ function asset(string $path): string
 
 function env(string $key, mixed $default = null): mixed
 {
-    return $_ENV[$key] ?? $default;
+    if (array_key_exists($key, $_ENV)) {
+        return $_ENV[$key];
+    }
+    $value = getenv($key);
+    return $value !== false ? $value : $default;
 }
 
 function config(string $key, mixed $default = null): mixed
@@ -62,8 +66,63 @@ function config(string $key, mixed $default = null): mixed
 
 function old(string $key, mixed $default = ''): mixed
 {
-    $old = Session::get('_old', []);
+    static $old = null;
+    if ($old === null) {
+        $old = Session::flash('_old', []);
+        if (!is_array($old)) {
+            $old = [];
+        }
+    }
     return $old[$key] ?? $default;
+}
+
+function password_is_strong(string $password): bool
+{
+    return strlen($password) >= 12
+        && (bool) preg_match('/[a-z]/', $password)
+        && (bool) preg_match('/[A-Z]/', $password)
+        && (bool) preg_match('/[0-9\W]/', $password);
+}
+
+function wants_json(): bool
+{
+    $accept = (string) ($_SERVER['HTTP_ACCEPT'] ?? '');
+    $xhr = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? ''));
+    return str_contains($accept, 'application/json') || $xhr === 'xmlhttprequest';
+}
+
+function is_absolute_url(string $path): bool
+{
+    return str_starts_with($path, 'http://') || str_starts_with($path, 'https://');
+}
+
+function app_url(string $path = ''): string
+{
+    $configured = rtrim((string) config('app.url', ''), '/');
+    $base = $configured !== '' ? $configured : request_base_url();
+    $path = '/' . ltrim($path, '/');
+    if ($path === '/') {
+        return $base !== '' ? $base : '/';
+    }
+    return ($base !== '' ? $base : '') . $path;
+}
+
+function same_origin_url(?string $candidate, string $fallback = '/'): string
+{
+    if ($candidate === null || $candidate === '') {
+        return url($fallback);
+    }
+    if (str_starts_with($candidate, '/') && !str_starts_with($candidate, '//')) {
+        return $candidate;
+    }
+    $base = request_base_url();
+    $app = rtrim((string) config('app.url', ''), '/');
+    foreach ([$base, $app] as $origin) {
+        if ($origin !== '' && ($candidate === $origin || str_starts_with($candidate, $origin . '/'))) {
+            return $candidate;
+        }
+    }
+    return url($fallback);
 }
 
 function csrf_field(): string
@@ -83,14 +142,13 @@ function flash(string $key, mixed $default = null): mixed
 
 function redirect(string $path, int $code = 302): void
 {
-    header('Location: ' . (str_starts_with($path, 'http') ? $path : url($path)), true, $code);
+    header('Location: ' . (is_absolute_url($path) ? $path : url($path)), true, $code);
     exit;
 }
 
 function back(string $fallback = '/'): void
 {
-    $ref = $_SERVER['HTTP_REFERER'] ?? url($fallback);
-    header('Location: ' . $ref, true, 302);
+    header('Location: ' . same_origin_url($_SERVER['HTTP_REFERER'] ?? null, $fallback), true, 302);
     exit;
 }
 

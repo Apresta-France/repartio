@@ -10,7 +10,7 @@ $statuses = [
     <h1>Mes circuits</h1>
     <span class="eyebrow"><?= (int) $activeCount ?> actifs · plan <?= e(ucfirst($user['plan'])) ?> <?= (int) $activeCount ?>/<?= (int) $limit ?></span>
   </div>
-  <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;">Nouveau circuit</a>
+  <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
 </header>
 <section class="project-list">
   <?php foreach ($projects as $p):
@@ -69,11 +69,14 @@ $statuses = [
       </div>
     </article>
   <?php endforeach; ?>
-  <a href="<?= e(url('/app/circuits/nouveau')) ?>" class="card project-card project-card-new">
-    <span class="project-card-plus">+</span>
-    <strong>Nouveau circuit</strong>
-    <span>Partir de zéro, ou d’un circuit type</span>
-  </a>
+  <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>" class="card project-card project-card-new">
+    <?= csrf_field() ?>
+    <button type="submit">
+      <span class="project-card-plus">+</span>
+      <strong>Nouveau circuit</strong>
+      <span>Partir de zéro, ou d’un circuit type</span>
+    </button>
+  </form>
 </section>
 <section class="card project-upsell">
   <div>

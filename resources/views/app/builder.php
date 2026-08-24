@@ -134,8 +134,10 @@ $readonly = !$canEdit;
       </div>
       <div class="canvas-empty" data-empty>
         <strong>Le plan est vide</strong>
-        <span>Posez un bloc à gauche, ou chargez un scénario déjà câblé. Les montants sont des exemples : vous les remplacez ensuite.</span>
+        <span><?= $canEdit ? 'Posez un bloc à gauche, ou chargez un scénario déjà câblé. Les montants sont des exemples : vous les remplacez ensuite.' : 'Ce circuit n’a pas encore de blocs.' ?></span>
+        <?php if ($canEdit): ?>
         <button type="button" class="btn btn-orange" data-scenario-open>Charger un scénario</button>
+        <?php endif; ?>
       </div>
       <div class="canvas-zoom">
         <button type="button" class="btn btn-ghost" data-zoom-out>−</button>

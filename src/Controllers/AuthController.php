@@ -33,7 +33,7 @@ class AuthController
         $user = User::findByEmail($email);
         if (!$user || !password_verify($password, $user['password_hash'])) {
             Session::flashSet('error', 'Identifiants incorrects.');
-            Session::set('_old', ['email' => $email]);
+            Session::flashSet('_old', ['email' => $email]);
             redirect('/connexion');
         }
         Auth::login($user, $remember);
@@ -65,18 +65,18 @@ class AuthController
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Adresse e-mail invalide.';
         }
-        if (strlen($password) < 12 || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9\W]/', $password)) {
+        if (!password_is_strong($password)) {
             $errors[] = 'Le mot de passe ne respecte pas les règles.';
         }
         if (!$terms) {
             $errors[] = 'Acceptez les conditions pour continuer.';
         }
         if (User::findByEmail($email)) {
-            $errors[] = 'Un compte existe déjà pour cette adresse.';
+            $errors[] = 'Impossible d’utiliser cette adresse e-mail.';
         }
         if ($errors) {
             Session::flashSet('error', implode(' ', $errors));
-            Session::set('_old', ['first_name' => $first, 'email' => $email]);
+            Session::flashSet('_old', ['first_name' => $first, 'email' => $email]);
             redirect('/creer-un-compte');
         }
 
@@ -88,7 +88,7 @@ class AuthController
         $token = Token::create((int) $user['id'], 'verify', 60 * 24);
         (new Mailer())->send($email, 'Bienvenue sur repartio', 'welcome', [
             'first_name' => $first,
-            'verify_url' => url('/verifier-email/' . $token),
+            'verify_url' => app_url('/verifier-email/' . $token),
         ]);
         Auth::login($user);
         Project::log((int) $user['id'], 'Compte créé');
@@ -127,7 +127,7 @@ class AuthController
             $token = Token::create((int) $user['id'], 'reset', 60);
             (new Mailer())->send($user['email'], 'Réinitialiser votre mot de passe', 'reset', [
                 'first_name' => $user['first_name'],
-                'reset_url' => url('/reinitialiser-mot-de-passe/' . $token),
+                'reset_url' => app_url('/reinitialiser-mot-de-passe/' . $token),
             ]);
         }
         Session::flashSet('reset_sent', true);
@@ -137,6 +137,10 @@ class AuthController
 
     public function resetForm(string $token): void
     {
+        if (!Token::peek($token, 'reset')) {
+            Session::flashSet('error', 'Lien invalide ou expiré.');
+            redirect('/mot-de-passe-oublie');
+        }
         View::render('auth/reset', [
             'title' => 'Nouveau mot de passe',
             'token' => $token,
@@ -146,8 +150,8 @@ class AuthController
     public function reset(string $token): void
     {
         $password = (string) ($_POST['password'] ?? '');
-        if (strlen($password) < 12) {
-            Session::flashSet('error', '12 caractères minimum.');
+        if (!password_is_strong($password)) {
+            Session::flashSet('error', 'Le mot de passe ne respecte pas les règles.');
             redirect('/reinitialiser-mot-de-passe/' . $token);
         }
         $row = Token::consume($token, 'reset');
@@ -156,6 +160,10 @@ class AuthController
             redirect('/mot-de-passe-oublie');
         }
         User::updatePassword((int) $row['user_id'], $password);
+        Auth::revokeAllTokens((int) $row['user_id']);
+        if (Auth::id() === (int) $row['user_id']) {
+            Auth::logout();
+        }
         Session::flashSet('success', 'Mot de passe mis à jour. Connectez-vous.');
         redirect('/connexion');
     }
@@ -168,7 +176,7 @@ class AuthController
             $token = Token::create((int) $user['id'], 'magic', 30);
             (new Mailer())->send($user['email'], 'Votre lien de connexion', 'magic-link', [
                 'first_name' => $user['first_name'],
-                'login_url' => url('/connexion/lien/' . $token),
+                'login_url' => app_url('/connexion/lien/' . $token),
             ]);
         }
         Session::flashSet('success', 'Si un compte existe pour cette adresse, un lien vient d’y arriver.');
@@ -186,7 +194,7 @@ class AuthController
         if (!$user) {
             redirect('/connexion');
         }
-        Auth::login($user, true);
+        Auth::login($user, false);
         $this->afterAuth();
     }
 

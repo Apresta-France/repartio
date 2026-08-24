@@ -8,39 +8,12 @@ class Content
 {
     public static function posts(): array
     {
-        return [
-            ['slug' => 'budget-tableur', 'tag' => 'Méthode', 'read' => '6 min', 'date' => '12 août 2026', 't' => 'Pourquoi votre budget ne tient pas dans un tableur', 'd' => 'Un tableur décrit des totaux ; un circuit décrit des chemins. La différence se voit au troisième compte joint.'],
-            ['slug' => 'ordre-livrets', 'tag' => 'Réglementaire', 'read' => '4 min', 'date' => '4 août 2026', 't' => 'Ordre de remplissage des livrets réglementés', 'd' => 'LEP, LDDS, Livret A : dans quel ordre saturer quand on épargne 1 500 € par mois.'],
-            ['slug' => 'compte-joint-factures', 'tag' => 'Méthode', 'read' => '7 min', 'date' => '28 juillet 2026', 't' => 'Le compte joint « factures » change tout', 'd' => 'Séparer les prélèvements du quotidien supprime la moitié des arbitrages mensuels.'],
-            ['slug' => 'urssaf-auto-entrepreneur', 'tag' => 'Étude de cas', 'read' => '9 min', 'date' => '19 juillet 2026', 't' => 'Auto-entrepreneur : provisionner l’URSSAF comme une dépense', 'd' => 'Un bloc dépense dédié évite la mauvaise surprise trimestrielle, et rend le revenu net lisible.'],
-            ['slug' => 'plafond-atteint', 'tag' => 'Réglementaire', 'read' => '5 min', 'date' => '9 juillet 2026', 't' => 'Ce que « plafond atteint » veut vraiment dire', 'd' => 'Un livret plein continue de produire des intérêts au-delà du plafond. Ce que ça change dans une projection.'],
-            ['slug' => 'pourcentages-ou-fixes', 'tag' => 'Méthode', 'read' => '8 min', 'date' => '1 juillet 2026', 't' => 'Répartir en pourcentages, ou en montants fixes ?', 'd' => 'Les pourcentages encaissent les variations de revenu ; les montants fixes protègent les objectifs.'],
-            ['slug' => 'fil-tout-le-reste', 'tag' => 'Produit', 'read' => '3 min', 'date' => '24 juin 2026', 't' => 'Nouveau : le fil « tout le reste »', 'd' => 'Un fil qui emporte le solde d’un bloc, pour ne plus recalculer après chaque augmentation.'],
-            ['slug' => 'famille-de-quatre', 'tag' => 'Étude de cas', 'read' => '11 min', 'date' => '14 juin 2026', 't' => 'Famille de quatre, deux livrets enfants, un objectif apport', 'd' => 'Le circuit complet, avec les compromis assumés et ce que la projection à cinq ans a fait changer.'],
-            ['slug' => 'scenarios-compares', 'tag' => 'Produit', 'read' => '4 min', 'date' => '2 juin 2026', 't' => 'Les scénarios comparés, en pratique', 'd' => 'Deux variantes d’un même circuit côte à côte, et la lecture de l’écart de patrimoine.'],
-            ['slug' => 'couple-12338', 'tag' => 'Étude de cas', 'read' => '12 min', 'date' => '18 août 2026', 't' => 'Un couple, 12 338 € par mois, zéro euro non affecté', 'd' => 'Le circuit complet d’une famille de quatre : deux salaires, une auto-entreprise, un local loué, deux comptes joints et six livrets.'],
-        ];
+        return Articles::index();
     }
 
     public static function post(string $slug): ?array
     {
-        foreach (self::posts() as $post) {
-            if ($post['slug'] === $slug) {
-                $post['body'] = [
-                    $post['d'],
-                    'repartio sert à rendre ces chemins visibles : chaque euro entre par un bloc, circule le long d’un fil, et arrive quelque part. Si un montant reste « non affecté », le mois n’est pas encore décrit.',
-                    'Les chiffres cités dans cette note sont des exemples de simulation. Ils ne constituent pas un conseil en investissement.',
-                ];
-                if ($post['slug'] === 'couple-12338') {
-                    $post['cta'] = ['href' => '/circuit-rempli', 'label' => 'Voir le circuit commenté'];
-                    array_splice($post['body'], 2, 0, [
-                        'Le circuit commenté est en ligne : vous pouvez le parcourir, lancer la démo, puis le reprendre avec vos montants.',
-                    ]);
-                }
-                return $post;
-            }
-        }
-        return null;
+        return Articles::find($slug);
     }
 
     public static function faq(): array

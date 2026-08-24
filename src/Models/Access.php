@@ -281,12 +281,16 @@ class Access
         return $token;
     }
 
-    public static function accept(int $id, int $userId): void
+    public static function accept(int $id, int $userId): bool
     {
-        Database::query(
-            'UPDATE account_members SET member_id = ?, status = "active", accepted_at = NOW() WHERE id = ?',
-            [$userId, $id]
+        $spent = hash('sha256', 'spent:' . $id . ':' . bin2hex(random_bytes(16)));
+        $stmt = Database::query(
+            'UPDATE account_members
+             SET member_id = ?, status = "active", accepted_at = NOW(), token_hash = ?, expires_at = NULL
+             WHERE id = ? AND status = "pending"',
+            [$userId, $spent, $id]
         );
+        return $stmt->rowCount() > 0;
     }
 
     public static function revoke(int $id, int $ownerId): void

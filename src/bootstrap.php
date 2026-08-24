@@ -34,6 +34,7 @@ if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
     if (is_dir($sessionDir) && is_writable($sessionDir)) {
         session_save_path($sessionDir);
     }
+    ini_set('session.use_strict_mode', '1');
     session_name('repartio_session');
     session_set_cookie_params([
         'lifetime' => 0,

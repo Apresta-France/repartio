@@ -124,11 +124,19 @@
   };
 
   const readonly = root.hasAttribute('data-readonly');
-  const initial = JSON.parse(root.getAttribute('data-payload') || '{}');
+  let payloadBroken = false;
+  let initial = {};
+  try {
+    const parsed = JSON.parse(root.getAttribute('data-payload') || '{}');
+    initial = parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (err) {
+    initial = {};
+    payloadBroken = true;
+  }
   const state = {
     nodes: (initial.nodes || []).map(normalizeNode),
     edges: (initial.edges || []).map(normalizeEdge),
-    horizon: Number(initial.horizon) || 60,
+    horizon: clampHorizon(initial.horizon),
     scale: 0.85,
     tx: 24,
     ty: 24,
@@ -323,7 +331,7 @@
     const stats = nodeStats(n, C);
     const box = propsForm.querySelector('.prop-stats');
     if (box) {
-      box.innerHTML = stats.rows.map(([k, v, cls, key]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('');
+      box.innerHTML = statRowsHtml(stats.rows, 'prop-stat');
     }
     propsForm.querySelectorAll('[data-edge-value]').forEach((input) => {
       const edge = state.edges.find((x) => x.id === input.getAttribute('data-edge-value'));
@@ -340,8 +348,8 @@
       id: n.id || uid('n'),
       kind,
       title: n.title || KINDS[kind]?.label || 'Bloc',
-      x: Number(n.x) || 80,
-      y: Number(n.y) || 80,
+      x: Number.isFinite(Number(n.x)) ? Number(n.x) : 80,
+      y: Number.isFinite(Number(n.y)) ? Number(n.y) : 80,
       amount: Number(n.amount) || 0,
       start: Number(n.start) || 0,
       rate: Number(n.rate) || 0,
@@ -485,21 +493,26 @@
     const sat = [];
     const livrets = [];
     const usedColors = new Set();
+    const deposited = {};
     let proj = 0;
     graph.forEach((n) => {
       if (n.kind !== 'livret') return;
       let b = Math.max(0, n.start);
       const cap = n.cap > 0 ? n.cap : Infinity;
-      const add = (kept[n.id] > 0 ? kept[n.id] : (inflow[n.id] || 0));
+      const add = kept[n.id] || 0;
       const balances = [b];
       let when = null;
-      if (b >= cap - 0.5) when = 0;
+      if (Number.isFinite(cap) && b >= cap - 0.5) when = 0;
+      let firstDeposit = add;
       for (let m = 1; m <= state.horizon; m += 1) {
         b += b * (Math.max(0, n.rate) / 100) / 12;
-        b = Math.min(cap, b + add);
+        const deposit = Number.isFinite(cap) ? Math.min(add, Math.max(0, cap - b)) : add;
+        if (m === 1) firstDeposit = deposit;
+        b += deposit;
         balances.push(b);
-        if (when === null && b >= cap - 0.5) when = m;
+        if (when === null && Number.isFinite(cap) && b >= cap - 0.5) when = m;
       }
+      deposited[n.id] = firstDeposit;
       fin[n.id] = b;
       full[n.id] = when;
       proj += b;
@@ -532,7 +545,12 @@
       const outAmt = (outs[n.id] || []).reduce((s, e) => s + e._amt, 0);
       if (n.kind === 'revenu') inn += Math.max(0, n.amount);
       else if (n.kind === 'depense') out += (kept[n.id] || 0) + outAmt;
-      else if (n.kind === 'livret') saved += kept[n.id] || 0;
+      else if (n.kind === 'livret') {
+        const add = kept[n.id] || 0;
+        const deposit = deposited[n.id] ?? add;
+        saved += deposit;
+        leftover += Math.max(0, add - deposit);
+      }
       else leftover += kept[n.id] || 0;
     });
 
@@ -1106,7 +1124,7 @@
       el.style.left = n.x + 'px';
       el.style.top = n.y + 'px';
       const selected = state.selected === n.id ? ' is-selected' : '';
-      const kill = readonly ? '' : `<button type="button" class="node-kill" data-del="${n.id}" title="Supprimer">×</button>`;
+      const kill = readonly ? '' : `<button type="button" class="node-kill" data-del="${escapeAttr(n.id)}" title="Supprimer">×</button>`;
       if (!readonly) el.setAttribute('data-drag', n.id);
 
       if (n.kind === 'groupe') {
@@ -1122,7 +1140,7 @@
             ${kill}
           </div>
           ${n.note ? `<div class="group-note">${escapeHtml(n.note)}</div>` : ''}
-          ${readonly ? '' : `<div class="group-resize" data-resize="${n.id}" title="Redimensionner"></div>`}
+          ${readonly ? '' : `<div class="group-resize" data-resize="${escapeAttr(n.id)}" title="Redimensionner"></div>`}
         `;
       } else if (n.kind === 'note') {
         const tint = tintOf(n);
@@ -1155,13 +1173,13 @@
             </div>
             <div class="node-title">${escapeHtml(n.title)}</div>
             <div class="node-body">
-              ${stats.rows.map(([k, v, cls, key]) => `<div class="node-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
-              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}${stats.chip.full ? ' is-full' : ''}${stats.chip.pending ? ' is-pending' : ''}">${stats.chip.text}</div>` : ''}
+              ${statRowsHtml(stats.rows, 'node-stat')}
+              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}${stats.chip.full ? ' is-full' : ''}${stats.chip.pending ? ' is-pending' : ''}">${escapeHtml(stats.chip.text)}</div>` : ''}
               ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
             </div>
           </div>
-          ${readonly ? '' : (meta.hasIn ? `<div class="port port-in" data-port-in="${n.id}" style="border:2px solid ${color}" title="Entrée"></div>` : '')}
-          ${readonly ? '' : (meta.hasOut ? `<div class="port port-out" data-port-out="${n.id}" style="background:${color};border:2px solid #fff;box-shadow:0 0 0 1px ${color}" title="Sortie"></div>` : '')}
+          ${readonly ? '' : (meta.hasIn ? `<div class="port port-in" data-port-in="${escapeAttr(n.id)}" style="border:2px solid ${color}" title="Entrée"></div>` : '')}
+          ${readonly ? '' : (meta.hasOut ? `<div class="port port-out" data-port-out="${escapeAttr(n.id)}" style="background:${color};border:2px solid #fff;box-shadow:0 0 0 1px ${color}" title="Sortie"></div>` : '')}
         `;
       }
       layer.appendChild(el);
@@ -1320,10 +1338,10 @@
             </div>
             <div class="prop-items">
               ${(n.items || []).length ? (n.items || []).map((item) => `
-                <div class="prop-item" data-item-edit="${item.id}">
-                  <input data-item-title="${item.id}" type="text" placeholder="Essence, loyer, EDF…" value="${escapeAttr(item.title)}" aria-label="Titre du poste">
-                  <input data-item-amount="${item.id}" type="number" min="0" step="1" value="${item.amount}" aria-label="Montant du poste">
-                  <button type="button" class="btn btn-ghost" data-item-del="${item.id}" style="min-height:0;padding:4px 8px;font-size:12px;" title="Retirer ce poste" aria-label="Retirer ce poste">×</button>
+                <div class="prop-item" data-item-edit="${escapeAttr(item.id)}">
+                  <input data-item-title="${escapeAttr(item.id)}" type="text" placeholder="Essence, loyer, EDF…" value="${escapeAttr(item.title)}" aria-label="Titre du poste">
+                  <input data-item-amount="${escapeAttr(item.id)}" type="number" min="0" step="1" value="${item.amount}" aria-label="Montant du poste">
+                  <button type="button" class="btn btn-ghost" data-item-del="${escapeAttr(item.id)}" style="min-height:0;padding:4px 8px;font-size:12px;" title="Retirer ce poste" aria-label="Retirer ce poste">×</button>
                 </div>`).join('') : '<p class="builder-hint">Ajoutez loyer, EDF, essence… Le total alimente le bloc.</p>'}
             </div>
             ${(n.items || []).length ? `<div class="prop-items-total" data-items-total>${euro(n.amount)} / mois</div>` : ''}
@@ -1360,7 +1378,7 @@
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
-            ${stats.rows.map(([k, v, cls, key]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
+            ${statRowsHtml(stats.rows, 'prop-stat')}
           </div>
         </div>
         ${n.kind === 'depense' ? `
@@ -1527,6 +1545,14 @@
   function escapeAttr(s) {
     return escapeHtml(s);
   }
+  function clampHorizon(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 1) return 60;
+    return Math.min(360, Math.round(n));
+  }
+  function statRowsHtml(rows, clsPrefix) {
+    return (rows || []).map(([k, v, cls, key]) => `<div class="${clsPrefix}${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${escapeAttr(key)}"` : ''}><span>${escapeHtml(k)}</span><b${cls && cls !== 'is-line' ? ` class="${escapeAttr(cls)}"` : ''}>${escapeHtml(v)}</b></div>`).join('');
+  }
 
   function markSelected(id) {
     state.selected = id;
@@ -1605,8 +1631,18 @@
     const ins = state.edges.filter((e) => e.to === n.id);
     if (!ins.length) return;
     const driven = Array.isArray(n.items) && n.items.length > 0;
-    if (!driven && n.amount <= 0) return;
-    const edge = ins.length === 1 ? ins[0] : (ins.find((e) => e.mode === 'fixe') || ins[0]);
+    if (!driven && n.amount <= 0) {
+      ins.forEach((edge) => {
+        if (edge.mode === 'fixe') {
+          edge.mode = 'reste';
+          edge.value = 0;
+        }
+      });
+      return;
+    }
+    if (n.amount <= 0) return;
+    const edge = ins.length === 1 ? ins[0] : (ins.find((e) => e.mode === 'fixe') || null);
+    if (!edge) return;
     edge.mode = 'fixe';
     edge.value = n.amount;
   }
@@ -2269,6 +2305,7 @@
   });
 
   canvas.addEventListener('wheel', (e) => {
+    if (readonly && !e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
     const f = e.deltaY < 0 ? 1.12 : 1 / 1.12;
     const k = Math.min(1.8, Math.max(0.28, state.scale * f));
@@ -2442,6 +2479,10 @@
   });
 
   form?.addEventListener('submit', (e) => {
+    if (readonly) {
+      e.preventDefault();
+      return;
+    }
     syncPayload();
     if (!isDirty()) e.preventDefault();
   });
@@ -2679,12 +2720,14 @@
     render({ props: false });
     if (form) {
       const data = new FormData(form);
+      data.delete('payload');
+      data.set('horizon', String(horizon));
+      data.set('name', name);
       fetch(form.action, {
         method: 'POST',
         body: data,
+        redirect: 'manual',
         headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-      }).then((res) => {
-        if (res.ok) markSaved();
       }).catch(() => {});
     }
     closeSetupModal();
@@ -2838,9 +2881,19 @@
   }
 
   if (nameInput) nameInput.addEventListener('input', syncPayload);
+  window.addEventListener('beforeunload', (e) => {
+    if (readonly || !isDirty()) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
   bindTimeControls();
   render();
-  markSaved();
+  if (payloadBroken) {
+    savedSnap = '';
+    syncSaveButton();
+  } else {
+    markSaved();
+  }
   requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });
 
   root.repartioTour = {

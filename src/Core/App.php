@@ -18,8 +18,8 @@ class App
     public static function run(): void
     {
         $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
-        if ($method === 'POST' && isset($_POST['_method'])) {
-            $method = strtoupper((string) $_POST['_method']);
+        if ($method === 'HEAD') {
+            $method = 'GET';
         }
         $path = request_path();
 
@@ -35,17 +35,26 @@ class App
             }
         }
 
-        if ($method === 'POST' && $path !== '/install' && !str_starts_with($path, '/install')) {
-            if (!Csrf::check($_POST['_token'] ?? null)) {
-                http_response_code(419);
-                Session::flashSet('error', 'Session expirée. Merci de renvoyer le formulaire.');
-                back();
+        if ($method === 'POST' && !Csrf::check($_POST['_token'] ?? null)) {
+            http_response_code(419);
+            Session::flashSet('error', 'Session expirée. Merci de renvoyer le formulaire.');
+            if (wants_json()) {
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false, 'error' => 'csrf']);
+                exit;
             }
+            back();
+        }
+
+        if ($method !== 'GET' && $method !== 'POST') {
+            http_response_code(405);
+            header('Allow: GET, POST');
+            exit;
         }
 
         $router = new Router();
         self::routes($router);
-        $router->dispatch($method === 'POST' || $method === 'GET' ? $method : 'POST', $path);
+        $router->dispatch($method, $path);
     }
 
     private static function routes(Router $router): void
@@ -86,7 +95,8 @@ class App
         $router->get('/app', [AppController::class, 'dashboard']);
         $router->get('/app/circuits', [ProjectController::class, 'index']);
         $router->post('/app/circuits', [ProjectController::class, 'store']);
-        $router->get('/app/circuits/nouveau', [ProjectController::class, 'create']);
+        $router->post('/app/circuits/nouveau', [ProjectController::class, 'create']);
+        $router->get('/app/circuits/nouveau', [ProjectController::class, 'createPage']);
         $router->get('/app/circuits/{id}', [ProjectController::class, 'show']);
         $router->post('/app/circuits/{id}', [ProjectController::class, 'update']);
         $router->get('/app/circuits/{id}/partage', [ShareController::class, 'show']);

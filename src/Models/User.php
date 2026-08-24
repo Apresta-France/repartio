@@ -35,9 +35,13 @@ class User
 
     public static function updateProfile(int $id, string $firstName, string $email): void
     {
+        $firstName = mb_substr($firstName, 0, 120);
+        $email = mb_strtolower($email);
+        $current = self::find($id);
+        $changed = $current && mb_strtolower((string) $current['email']) !== $email;
         Database::query(
-            'UPDATE users SET first_name = ?, email = ?, updated_at = NOW() WHERE id = ?',
-            [$firstName, mb_strtolower($email), $id]
+            'UPDATE users SET first_name = ?, email = ?' . ($changed ? ', email_verified_at = NULL' : '') . ', updated_at = NOW() WHERE id = ?',
+            [$firstName, $email, $id]
         );
     }
 
@@ -61,6 +65,7 @@ class User
 
     public static function delete(int $id): void
     {
+        Database::query('DELETE FROM account_members WHERE member_id = ?', [$id]);
         Database::query('DELETE FROM users WHERE id = ?', [$id]);
     }
 

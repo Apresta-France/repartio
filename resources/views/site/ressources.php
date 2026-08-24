@@ -1,41 +1,95 @@
-<section class="section" style="padding-bottom:40px;">
+<?php
+$featuredSlug = \App\Articles::featuredSlug();
+$featured = null;
+$grid = [];
+foreach ($posts as $p) {
+    if ($p['slug'] === $featuredSlug) {
+        $featured = $p;
+        continue;
+    }
+    $grid[] = $p;
+}
+$guides = \App\Articles::guides();
+?>
+<section class="section ressources-intro">
   <span class="eyebrow eyebrow-live">Ressources</span>
-  <h1 class="page-title" style="font-size:48px;max-width:24ch;margin:12px 0;">Notes de terrain sur la répartition des revenus</h1>
-  <p class="lede">Des méthodes concrètes, des règles réglementaires vérifiées, et des circuits réels commentés. Pas de conseil en placement : de la mécanique.</p>
+  <h1 class="page-title">Notes de terrain sur la répartition des revenus</h1>
+  <p class="lede">Des méthodes concrètes, des barèmes vérifiés, et des circuits commentés. Chaque fiche porte un simulateur : vous touchez les montants, le récit se recalcule. Pas de conseil en placement — de la mécanique.</p>
 </section>
-<section class="page-split" style="border-bottom:1px solid var(--line);">
-  <a href="<?= e(url('/ressources/couple-12338')) ?>" style="padding:40px 44px 44px 32px;background:var(--paper);color:inherit;display:flex;flex-direction:column;gap:14px;">
-    <div class="eyebrow" style="display:flex;gap:12px;align-items:center;">
-      <span style="background:var(--orange);color:#fff;border-radius:6px;padding:4px 8px;">À la une</span>
-      <span style="color:var(--teal-ink);">Étude de cas</span>
-      <span style="color:var(--faint);">18 août 2026 · 12 min</span>
+
+<section class="page-split ressources-lead">
+  <?php if ($featured): ?>
+    <div class="ressources-feature">
+      <a class="ressources-feature-link" href="<?= e(url('/ressources/' . $featured['slug'])) ?>">
+        <div class="eyebrow ressources-feature-meta">
+          <span class="ressources-kicker">À la une</span>
+          <span class="ressources-tag"><?= e($featured['tag']) ?></span>
+          <span class="ressources-when"><?= e($featured['date']) ?> · <?= e($featured['read']) ?></span>
+        </div>
+        <strong class="ressources-feature-title"><?= e($featured['t']) ?></strong>
+        <p class="lede"><?= e($featured['d']) ?></p>
+        <?php if (!empty($featured['leadRows'])): ?>
+          <div class="kv ressources-feature-rows">
+            <?php foreach ($featured['leadRows'] as $row): ?>
+              <div><span><?= e($row['k']) ?></span><strong class="mono"><?= e($row['v']) ?></strong></div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+        <span class="ressources-more">Lire l’étude de cas →</span>
+      </a>
+      <div class="lab lab-teaser" data-lab="couple">
+        <div class="lab-head">
+          <span class="eyebrow">Essai immédiat</span>
+          <strong>Baissez l’auto-entreprise</strong>
+          <p>Le reste du foyer est figé. Seul le CA de Julien bouge.</p>
+        </div>
+        <div class="lab-field">
+          <div class="lab-field-top"><span>CA auto-entreprise</span><b data-out="ae">5 000 €</b></div>
+          <input type="range" min="0" max="5000" step="50" value="5000" data-in="ae">
+        </div>
+        <div class="lab-kpis lab-kpis-2">
+          <div><span>Épargne Julien</span><strong data-out="save">3 665 €</strong></div>
+          <div><span>Ce qui s’arrête</span><strong data-out="cut">Rien — circuit tenu</strong></div>
+        </div>
+      </div>
     </div>
-        <strong style="font-size:clamp(24px,5vw,34px);letter-spacing:-.035em;max-width:26ch;">Un couple, 12 338 € par mois, zéro euro non affecté</strong>
-    <p class="lede">Le circuit complet d’une famille de quatre : deux salaires, une auto-entreprise, un local loué, deux comptes joints et six livrets.</p>
-    <span style="font-weight:700;color:var(--orange-ink);">Lire l’étude de cas →</span>
-  </a>
-  <div style="padding:40px 32px;">
+  <?php endif; ?>
+  <div class="ressources-guides">
     <span class="eyebrow">Guides de référence</span>
-    <div class="kv" style="margin-top:16px;">
-      <?php foreach (['Taux et plafonds 2026','Anatomie d’un répartiteur','Passer d’un tableur à un circuit','Journal des versions'] as $g): ?>
-        <div><strong><?= e($g) ?></strong></div>
+    <div class="ressources-guide-list">
+      <?php foreach ($guides as $g): ?>
+        <a href="<?= e(url('/ressources/' . $g['slug'])) ?>">
+          <strong><?= e($g['t']) ?></strong>
+          <span class="mono"><?= e($g['guideMeta'] ?? $g['read']) ?></span>
+        </a>
       <?php endforeach; ?>
     </div>
+    <p class="ressources-guides-note">Chaque guide contient un simulateur : barèmes, parts d’un répartiteur, migration d’un tableur.</p>
   </div>
 </section>
+
 <section class="section">
-  <div class="chips" style="margin-bottom:26px;">
-    <?php foreach (['Tout','Méthode','Réglementaire','Étude de cas','Produit'] as $f): ?>
-      <button type="button" class="chip <?= $f === 'Tout' ? 'active' : '' ?>" data-filter="<?= e($f) ?>" data-group="posts"><?= e($f) ?></button>
-    <?php endforeach; ?>
+  <div class="ressources-filter">
+    <div class="chips">
+      <?php foreach (['Tout', 'Méthode', 'Réglementaire', 'Étude de cas', 'Produit'] as $f): ?>
+        <button type="button" class="chip <?= $f === 'Tout' ? 'active' : '' ?>" data-filter="<?= e($f) ?>" data-group="posts"><?= e($f) ?></button>
+      <?php endforeach; ?>
+    </div>
+    <span class="mono ressources-count" data-filter-count="posts" data-filter-one="note" data-filter-many="notes"><?= count($grid) ?> notes</span>
   </div>
-  <div class="split cols-3">
-    <?php foreach ($posts as $p): ?>
-      <a href="<?= e(url('/ressources/' . $p['slug'])) ?>" data-filter-item="<?= e($p['tag']) ?>" data-filter-group="posts" style="padding:24px 26px;color:inherit;display:flex;flex-direction:column;gap:10px;">
-        <div class="eyebrow" style="display:flex;"><span style="color:var(--teal-ink);"><?= e($p['tag']) ?></span><span style="margin-left:auto;color:var(--faint);"><?= e($p['read']) ?></span></div>
-        <strong style="font-size:17.5px;"><?= e($p['t']) ?></strong>
-        <span style="font-size:13.5px;color:var(--muted);"><?= e($p['d']) ?></span>
-        <span class="mono" style="margin-top:auto;padding-top:10px;font-size:11px;color:var(--faint);"><?= e($p['date']) ?></span>
+  <div class="split cols-3 ressources-grid">
+    <?php foreach ($grid as $p): ?>
+      <a href="<?= e(url('/ressources/' . $p['slug'])) ?>" data-filter-item="<?= e($p['tag']) ?>" data-filter-group="posts">
+        <div class="eyebrow">
+          <span><?= e($p['tag']) ?></span>
+          <span><?= e($p['read']) ?></span>
+        </div>
+        <strong><?= e($p['t']) ?></strong>
+        <span class="ressources-card-d"><?= e($p['d']) ?></span>
+        <span class="ressources-card-foot">
+          <span class="mono"><?= e($p['date']) ?></span>
+          <?php if (!empty($p['interactive'])): ?><span class="ressources-live">Interactif</span><?php endif; ?>
+        </span>
       </a>
     <?php endforeach; ?>
   </div>

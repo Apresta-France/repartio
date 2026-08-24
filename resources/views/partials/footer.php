@@ -25,8 +25,8 @@
     <span class="eyebrow">Ressources</span>
     <a href="<?= e(url('/ressources')) ?>">Notes de terrain</a>
     <a href="<?= e(url('/faq')) ?>">FAQ</a>
-    <a href="<?= e(url('/ressources')) ?>">Guide des livrets</a>
-    <a href="<?= e(url('/ressources')) ?>">Journal des versions</a>
+    <a href="<?= e(url('/ressources/taux-plafonds-2026')) ?>">Guide des livrets</a>
+    <a href="<?= e(url('/ressources/journal-versions')) ?>">Journal des versions</a>
   </div>
   <div class="footer-col">
     <span class="eyebrow">Société</span>

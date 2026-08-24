@@ -24,7 +24,7 @@ class Share
              FROM circuit_shares s
              INNER JOIN projects p ON p.id = s.project_id
              INNER JOIN users u ON u.id = s.user_id
-             WHERE s.slug = ? AND s.enabled = 1
+             WHERE s.slug = ? AND s.enabled = 1 AND p.status != "archive"
              LIMIT 1',
             [$slug]
         );
@@ -115,6 +115,6 @@ class Share
 
     public static function publicUrl(array $share): string
     {
-        return url('/p/' . $share['slug']);
+        return app_url('/p/' . $share['slug']);
     }
 }

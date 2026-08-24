@@ -57,8 +57,8 @@ class InstallController
         $password = (string) ($_POST['password'] ?? '');
         $mailDriver = trim((string) ($_POST['mail_driver'] ?? 'file'));
 
-        if ($firstName === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 12) {
-            Session::flashSet('error', 'Complétez le compte administrateur (mot de passe 12 caractères minimum).');
+        if ($firstName === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || !password_is_strong($password)) {
+            Session::flashSet('error', 'Complétez le compte administrateur (mot de passe 12 caractères, majuscule, minuscule et chiffre ou symbole).');
             redirect('/install');
         }
 

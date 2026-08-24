@@ -20,6 +20,18 @@ class Project
         'foyer' => 'Foyer',
     ];
 
+    public const HORIZON_MIN = 1;
+    public const HORIZON_MAX = 360;
+
+    public static function clampHorizon(mixed $horizon, int $fallback = 60): int
+    {
+        $value = (int) $horizon;
+        if ($value < self::HORIZON_MIN) {
+            return $fallback;
+        }
+        return min(self::HORIZON_MAX, $value);
+    }
+
     public static function planLimit(array $user): int
     {
         return self::PLAN_LIMITS[$user['plan'] ?? ''] ?? 3;
@@ -83,6 +95,8 @@ class Project
 
     public static function create(int $userId, string $name, array $payload, string $status = 'actif'): array
     {
+        $name = mb_substr($name, 0, 180);
+        $payload['horizon'] = self::clampHorizon($payload['horizon'] ?? 60);
         $totals = self::summarize($payload);
         Database::query(
             'INSERT INTO projects (user_id, name, slug, status, horizon, payload, monthly_in, monthly_out, monthly_saved, unassigned, projection, created_at, updated_at)
@@ -92,8 +106,8 @@ class Project
                 $name,
                 slugify($name) . '-' . bin2hex(random_bytes(3)),
                 $status,
-                (int) ($payload['horizon'] ?? 60),
-                json_encode($payload, JSON_UNESCAPED_UNICODE),
+                $payload['horizon'],
+                self::encodePayload($payload),
                 $totals['monthly_in'],
                 $totals['monthly_out'],
                 $totals['monthly_saved'],
@@ -114,14 +128,16 @@ class Project
 
     public static function updateById(int $id, string $name, array $payload): void
     {
+        $name = mb_substr($name, 0, 180);
+        $payload['horizon'] = self::clampHorizon($payload['horizon'] ?? 60);
         $totals = self::summarize($payload);
         Database::query(
             'UPDATE projects SET name = ?, horizon = ?, payload = ?, monthly_in = ?, monthly_out = ?, monthly_saved = ?, unassigned = ?, projection = ?, updated_at = NOW()
              WHERE id = ?',
             [
                 $name,
-                (int) ($payload['horizon'] ?? 60),
-                json_encode($payload, JSON_UNESCAPED_UNICODE),
+                $payload['horizon'],
+                self::encodePayload($payload),
                 $totals['monthly_in'],
                 $totals['monthly_out'],
                 $totals['monthly_saved'],
@@ -274,7 +290,7 @@ class Project
     {
         $nodes = $payload['nodes'] ?? [];
         $edges = $payload['edges'] ?? [];
-        $horizon = (int) ($payload['horizon'] ?? 60);
+        $horizon = self::clampHorizon($payload['horizon'] ?? 60);
 
         $legacyAmounts = false;
         foreach ($nodes as $node) {
@@ -407,16 +423,22 @@ class Project
             } elseif (in_array($kind, ['groupe', 'note'], true)) {
                 continue;
             } elseif ($kind === 'livret') {
-                $saved += $kept[$id] ?? 0;
+                $add = $kept[$id] ?? 0;
                 $balance = max(0.0, (float) ($node['start'] ?? 0));
                 $cap = (float) ($node['cap'] ?? 0);
-                $cap = $cap > 0 ? $cap : INF;
-                $add = $kept[$id] ?? 0;
+                $hasCap = $cap > 0;
                 $rate = max(0.0, (float) ($node['rate'] ?? 0));
+                $firstDeposit = $add;
                 for ($month = 1; $month <= $horizon; $month++) {
                     $balance += $balance * ($rate / 100) / 12;
-                    $balance = min($cap, $balance + $add);
+                    $deposit = $hasCap ? min($add, max(0.0, $cap - $balance)) : $add;
+                    if ($month === 1) {
+                        $firstDeposit = $deposit;
+                    }
+                    $balance += $deposit;
                 }
+                $saved += $firstDeposit;
+                $leftover += max(0.0, $add - $firstDeposit);
                 $projection += $balance;
             } else {
                 $leftover += $kept[$id] ?? 0;
@@ -460,7 +482,7 @@ class Project
                 $saved += $amount;
             }
         }
-        $horizon = (int) ($payload['horizon'] ?? 60);
+        $horizon = self::clampHorizon($payload['horizon'] ?? 60);
         return [
             'monthly_in' => $in,
             'monthly_out' => $out,
@@ -468,5 +490,14 @@ class Project
             'unassigned' => max(0, $in - $out - $saved),
             'projection' => $saved * $horizon,
         ];
+    }
+
+    private static function encodePayload(array $payload): string
+    {
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        if (!is_string($json)) {
+            throw new \RuntimeException('Impossible d’enregistrer le circuit.');
+        }
+        return $json;
     }
 }

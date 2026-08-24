@@ -11,6 +11,7 @@ use App\Core\View;
 use App\Models\Access;
 use App\Models\Project;
 use App\Models\Share;
+use App\Models\User;
 
 class ProjectController
 {
@@ -26,6 +27,12 @@ class ProjectController
             'activeCount' => Project::activeCount((int) $user['id']),
             'limit' => Project::PLAN_LIMITS[$user['plan']] ?? 3,
         ], 'layouts/app');
+    }
+
+    public function createPage(): void
+    {
+        Auth::requireUser();
+        redirect('/app/circuits');
     }
 
     public function create(): void
@@ -106,21 +113,39 @@ class ProjectController
         $user = Auth::requireUser();
         $project = Project::findById((int) $id);
         if (!$project || !Access::can((int) $user['id'], (int) $id, 'edition')) {
-            http_response_code(404);
-            echo json_encode(['ok' => false]);
-            return;
+            if (wants_json()) {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false]);
+                return;
+            }
+            Session::flashSet('error', 'Circuit introuvable.');
+            redirect('/app/circuits');
         }
-        $name = trim((string) ($_POST['name'] ?? $project['name'])) ?: $project['name'];
-        $raw = $_POST['payload'] ?? '';
-        $payload = is_array($raw) ? $raw : (json_decode((string) $raw, true) ?: []);
-        if (!$payload) {
-            Session::flashSet('error', 'Impossible d’enregistrer un circuit vide ou illisible.');
-            redirect('/app/circuits/' . $id);
+        $name = mb_substr(trim((string) ($_POST['name'] ?? $project['name'])) ?: $project['name'], 0, 180);
+        $raw = $_POST['payload'] ?? null;
+        if ($raw === null || $raw === '') {
+            $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
+            if (isset($_POST['horizon'])) {
+                $payload['horizon'] = Project::clampHorizon($_POST['horizon']);
+            }
+        } else {
+            $payload = is_array($raw) ? $raw : json_decode((string) $raw, true);
+            if (!is_array($payload) || $payload === []) {
+                if (wants_json()) {
+                    http_response_code(400);
+                    header('Content-Type: application/json');
+                    echo json_encode(['ok' => false]);
+                    return;
+                }
+                Session::flashSet('error', 'Impossible d’enregistrer un circuit vide ou illisible.');
+                redirect('/app/circuits/' . $id);
+            }
         }
         Project::updateById((int) $id, $name, $payload);
         Project::log((int) $user['id'], 'Circuit enregistré', (int) $id);
 
-        if (($this->wantsJson())) {
+        if (wants_json()) {
             header('Content-Type: application/json');
             echo json_encode(['ok' => true]);
             return;
@@ -149,7 +174,20 @@ class ProjectController
         $project = Project::findById((int) $id);
         if ($project && Access::can((int) $user['id'], (int) $id, 'gestion')) {
             $next = $project['status'] === 'archive' ? 'actif' : 'archive';
+            if ($next === 'actif') {
+                $owner = User::find((int) $project['user_id']);
+                if ($owner && Project::atPlanLimit($owner)) {
+                    Session::flashSet('error', Project::planLimitMessage($owner));
+                    redirect('/app/circuits');
+                }
+            }
             Project::setStatusById((int) $id, $next);
+            if ($next === 'archive') {
+                $share = Share::findForProject((int) $id, (int) $project['user_id']);
+                if ($share) {
+                    Share::setEnabled((int) $share['id'], (int) $project['user_id'], false);
+                }
+            }
             Project::log((int) $user['id'], $next === 'archive' ? 'Circuit archivé' : 'Circuit réactivé', (int) $id);
         }
         redirect('/app/circuits');
@@ -214,10 +252,4 @@ class ProjectController
         }
     }
 
-    private function wantsJson(): bool
-    {
-        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
-        $xhr = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
-        return str_contains($accept, 'application/json') || strtolower($xhr) === 'xmlhttprequest';
-    }
 }

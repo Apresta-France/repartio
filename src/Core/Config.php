@@ -11,53 +11,52 @@ class Config
 
     public static function load(string $envPath): void
     {
-        if (!is_file($envPath)) {
-            return;
-        }
-
-        $lines = file($envPath, FILE_IGNORE_NEW_LINES) ?: [];
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#')) {
-                continue;
+        if (is_file($envPath)) {
+            $lines = file($envPath, FILE_IGNORE_NEW_LINES) ?: [];
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if ($line === '' || str_starts_with($line, '#')) {
+                    continue;
+                }
+                if (!str_contains($line, '=')) {
+                    continue;
+                }
+                [$key, $value] = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                if (
+                    (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+                    (str_starts_with($value, "'") && str_ends_with($value, "'"))
+                ) {
+                    $value = substr($value, 1, -1);
+                    $value = str_replace(['\\"', "\\'", '\\\\'], ['"', "'", '\\'], $value);
+                }
+                $_ENV[$key] = $value;
+                putenv($key . '=' . $value);
             }
-            if (!str_contains($line, '=')) {
-                continue;
-            }
-            [$key, $value] = explode('=', $line, 2);
-            $key = trim($key);
-            $value = trim($value);
-            if (
-                (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
-                (str_starts_with($value, "'") && str_ends_with($value, "'"))
-            ) {
-                $value = substr($value, 1, -1);
-            }
-            $_ENV[$key] = $value;
-            putenv($key . '=' . $value);
         }
 
         self::$items = [
-            'app.name' => $_ENV['APP_NAME'] ?? 'repartio',
-            'app.env' => $_ENV['APP_ENV'] ?? 'local',
-            'app.debug' => ($_ENV['APP_DEBUG'] ?? '0') === '1',
-            'app.url' => rtrim($_ENV['APP_URL'] ?? '', '/'),
-            'app.key' => $_ENV['APP_KEY'] ?? '',
-            'db.driver' => $_ENV['DB_DRIVER'] ?? 'mysql',
-            'db.host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
-            'db.port' => (int) ($_ENV['DB_PORT'] ?? 3306),
-            'db.name' => $_ENV['DB_NAME'] ?? 'repartio',
-            'db.user' => $_ENV['DB_USER'] ?? 'root',
-            'db.pass' => $_ENV['DB_PASS'] ?? '',
-            'mail.driver' => $_ENV['MAIL_DRIVER'] ?? 'file',
-            'mail.host' => $_ENV['MAIL_HOST'] ?? '127.0.0.1',
-            'mail.port' => (int) ($_ENV['MAIL_PORT'] ?? 587),
-            'mail.user' => $_ENV['MAIL_USER'] ?? '',
-            'mail.pass' => $_ENV['MAIL_PASS'] ?? '',
-            'mail.encryption' => $_ENV['MAIL_ENCRYPTION'] ?? 'starttls',
-            'mail.from' => $_ENV['MAIL_FROM'] ?? 'bonjour@repartio.fr',
-            'mail.from_name' => $_ENV['MAIL_FROM_NAME'] ?? 'repartio',
-            'mail.admin' => $_ENV['MAIL_ADMIN'] ?? 'bonjour@repartio.fr',
+            'app.name' => env('APP_NAME', 'repartio'),
+            'app.env' => env('APP_ENV', 'local'),
+            'app.debug' => (string) env('APP_DEBUG', '0') === '1',
+            'app.url' => rtrim((string) env('APP_URL', ''), '/'),
+            'app.key' => env('APP_KEY', ''),
+            'db.driver' => env('DB_DRIVER', 'mysql'),
+            'db.host' => env('DB_HOST', '127.0.0.1'),
+            'db.port' => (int) env('DB_PORT', 3306),
+            'db.name' => env('DB_NAME', 'repartio'),
+            'db.user' => env('DB_USER', 'root'),
+            'db.pass' => env('DB_PASS', ''),
+            'mail.driver' => env('MAIL_DRIVER', 'file'),
+            'mail.host' => env('MAIL_HOST', '127.0.0.1'),
+            'mail.port' => (int) env('MAIL_PORT', 587),
+            'mail.user' => env('MAIL_USER', ''),
+            'mail.pass' => env('MAIL_PASS', ''),
+            'mail.encryption' => env('MAIL_ENCRYPTION', 'starttls'),
+            'mail.from' => env('MAIL_FROM', 'bonjour@repartio.fr'),
+            'mail.from_name' => env('MAIL_FROM_NAME', 'repartio'),
+            'mail.admin' => env('MAIL_ADMIN', 'bonjour@repartio.fr'),
         ];
     }
 

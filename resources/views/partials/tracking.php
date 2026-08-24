@@ -18,7 +18,7 @@ if (!is_array($rvEvents)) {
   var t = setInterval(function () {
     if (flush() || ++n > 100) clearInterval(t);
   }, 40);
-  var queued = <?= json_encode($rvEvents, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+  var queued = <?= json_encode($rvEvents, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) ?>;
   queued.forEach(function (ev) {
     var args = [ev.command].concat(ev.args || []);
     w.rv.apply(null, args);

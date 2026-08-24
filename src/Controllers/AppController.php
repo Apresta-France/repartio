@@ -57,7 +57,7 @@ class AppController
     public function updateProfile(): void
     {
         $user = Auth::requireUser();
-        $first = trim((string) ($_POST['first_name'] ?? ''));
+        $first = mb_substr(trim((string) ($_POST['first_name'] ?? '')), 0, 120);
         $email = trim((string) ($_POST['email'] ?? ''));
         if ($first === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Session::flashSet('error', 'Prénom et e-mail sont nécessaires.');

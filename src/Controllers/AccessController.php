@@ -123,27 +123,31 @@ class AccessController
             Session::flashSet('error', 'Cette invitation est invalide.');
             redirect(Auth::check() ? '/app' : '/connexion');
         }
-        if (!empty($invite['expires_at']) && strtotime((string) $invite['expires_at']) < time() && $invite['status'] !== 'active') {
+        $user = Auth::user();
+        if ($user && $invite['status'] === 'active' && (int) $invite['member_id'] === (int) $user['id']) {
+            Session::flashSet('success', 'Vous avez déjà accès à ces circuits.');
+            redirect('/app/circuits');
+        }
+        if ($invite['status'] !== 'pending') {
+            Session::flashSet('error', 'Cette invitation n’est plus valable.');
+            redirect(Auth::check() ? '/app' : '/connexion');
+        }
+        if (!empty($invite['expires_at']) && strtotime((string) $invite['expires_at']) < time()) {
             Session::flashSet('error', 'Cette invitation a expiré. Demandez un nouveau lien.');
             redirect(Auth::check() ? '/app' : '/connexion');
         }
 
         $invite = Access::inviteWithCircuits((int) $invite['id']);
         $owner = User::find((int) $invite['owner_id']);
-        $user = Auth::user();
 
         if ($user && (int) $user['id'] === (int) $invite['owner_id']) {
             Session::flashSet('error', 'Vous ne pouvez pas accepter votre propre invitation.');
             redirect('/app/acces');
         }
-        if ($user && $invite['status'] === 'active' && (int) $invite['member_id'] === (int) $user['id']) {
-            Session::flashSet('success', 'Vous avez déjà accès à ces circuits.');
-            redirect('/app/circuits');
-        }
 
         if (!$user) {
             Session::set('invite_token', $token);
-            Session::set('_old', ['email' => $invite['email']]);
+            Session::flashSet('_old', ['email' => $invite['email']]);
         }
 
         View::render('auth/invite', [
@@ -175,8 +179,15 @@ class AccessController
         if ($invite['status'] === 'active' && (int) $invite['member_id'] === (int) $user['id']) {
             redirect('/app/circuits');
         }
+        if ($invite['status'] !== 'pending') {
+            Session::flashSet('error', 'Cette invitation n’est plus valable.');
+            redirect('/app');
+        }
 
-        Access::accept((int) $invite['id'], (int) $user['id']);
+        if (!Access::accept((int) $invite['id'], (int) $user['id'])) {
+            Session::flashSet('error', 'Cette invitation n’est plus valable.');
+            redirect('/app');
+        }
         Session::forget('invite_token');
         Project::log((int) $user['id'], 'Invitation acceptée');
         Session::flashSet('success', 'Accès accepté. Les circuits partagés apparaissent dans votre liste.');
@@ -189,7 +200,7 @@ class AccessController
         try {
             return (new Mailer())->send($email, $owner['first_name'] . ' vous invite sur repartio', 'access-invite', [
                 'owner_name' => $owner['first_name'],
-                'invite_url' => url('/invitation/' . $token),
+                'invite_url' => app_url('/invitation/' . $token),
                 'circuits' => $invite['circuits'] ?? [],
             ]);
         } catch (Throwable) {

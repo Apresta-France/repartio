@@ -19,7 +19,7 @@
         <span class="visually-hidden">Menu</span>
       </button>
       <a href="<?= e(url('/app')) ?>" class="logo"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
-      <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;padding:8px 12px;font-size:13px;min-height:0;">+ Circuit</a>
+      <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;"><?= csrf_field() ?><button class="btn btn-orange" type="submit" style="padding:8px 12px;font-size:13px;min-height:0;">+ Circuit</button></form>
     </header>
     <div class="sidebar-backdrop" data-sidebar-close hidden></div>
     <?php require BASE_PATH . '/resources/views/partials/sidebar.php'; ?>

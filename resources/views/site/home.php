@@ -239,14 +239,15 @@ $C = [
   </div>
   <div class="split cols-3">
     <?php foreach ([
-      ['Méthode', '6 min', 'Pourquoi votre budget ne tient pas dans un tableur', 'Un tableur décrit des totaux ; un circuit décrit des chemins. La différence se voit au troisième compte joint.', 'budget-tableur'],
-      ['Réglementaire', '4 min', 'Ordre de remplissage des livrets réglementés', 'LEP, LDDS, Livret A : dans quel ordre saturer quand on épargne 1 500 € par mois.', 'ordre-livrets'],
-      ['Étude de cas', '9 min', 'Un couple, 12 338 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre, commenté bloc par bloc.', 'couple-12338'],
+      ['Méthode', '6 min', 'Pourquoi votre budget ne tient pas dans un tableur', 'Un tableur décrit des totaux ; un circuit décrit des chemins. Ajoutez des comptes, voyez ce qui casse.', 'budget-tableur'],
+      ['Réglementaire', '4 min', 'Ordre de remplissage des livrets réglementés', 'LEP, LDDS, Livret A : réglez l’épargne mensuelle, lisez les dates de saturation.', 'ordre-livrets'],
+      ['Étude de cas', '12 min', 'Un couple, 12 338 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
     ] as $p): ?>
       <a href="<?= e(url('/ressources/' . $p[4])) ?>" style="padding:24px 26px;color:inherit;display:flex;flex-direction:column;gap:10px;">
         <div class="eyebrow" style="display:flex;"><span style="color:var(--teal-live);"><?= e($p[0]) ?></span><span style="margin-left:auto;color:var(--faint);"><?= e($p[1]) ?></span></div>
         <strong style="font-size:17.5px;letter-spacing:-.024em;line-height:1.25;"><?= e($p[2]) ?></strong>
         <span style="font-size:13.5px;line-height:1.55;color:var(--muted);"><?= e($p[3]) ?></span>
+        <span class="ressources-live" style="margin-top:auto;width:fit-content;">Interactif</span>
       </a>
     <?php endforeach; ?>
   </div>

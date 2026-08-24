@@ -40,20 +40,7 @@ class Auth
         Session::regenerate();
         Session::set('user_id', (int) $user['id']);
         if ($remember) {
-            $token = bin2hex(random_bytes(32));
-            $hash = hash('sha256', $token);
-            $expires = date('Y-m-d H:i:s', time() + 60 * 60 * 24 * 30);
-            Database::query(
-                'INSERT INTO auth_tokens (user_id, token_hash, purpose, expires_at, created_at) VALUES (?, ?, ?, ?, NOW())',
-                [(int) $user['id'], $hash, 'remember', $expires]
-            );
-            setcookie('repartio_remember', $token, [
-                'expires' => time() + 60 * 60 * 24 * 30,
-                'path' => '/',
-                'httponly' => true,
-                'samesite' => 'Lax',
-                'secure' => is_https(),
-            ]);
+            self::issueRemember((int) $user['id']);
         }
         User::touchLogin((int) $user['id']);
     }
@@ -65,10 +52,16 @@ class Auth
                 'DELETE FROM auth_tokens WHERE token_hash = ? AND purpose = ?',
                 [hash('sha256', (string) $_COOKIE['repartio_remember']), 'remember']
             );
-            setcookie('repartio_remember', '', ['expires' => time() - 3600, 'path' => '/']);
         }
+        self::clearRememberCookie();
         Session::forget('user_id');
         Session::regenerate();
+    }
+
+    public static function revokeAllTokens(int $userId): void
+    {
+        Database::query('DELETE FROM auth_tokens WHERE user_id = ?', [$userId]);
+        self::clearRememberCookie();
     }
 
     public static function requireUser(): array
@@ -96,8 +89,49 @@ class Auth
         }
         $user = User::find((int) $row['user_id']);
         if ($user) {
+            Session::regenerate();
             Session::set('user_id', (int) $user['id']);
+            self::issueRemember((int) $user['id'], $raw);
         }
         return $user;
+    }
+
+    private static function issueRemember(int $userId, ?string $previous = null): void
+    {
+        if ($previous) {
+            Database::query(
+                'DELETE FROM auth_tokens WHERE token_hash = ? AND purpose = ?',
+                [hash('sha256', $previous), 'remember']
+            );
+        }
+        $token = bin2hex(random_bytes(32));
+        $expires = date('Y-m-d H:i:s', time() + 60 * 60 * 24 * 30);
+        Database::query(
+            'INSERT INTO auth_tokens (user_id, token_hash, purpose, expires_at, created_at) VALUES (?, ?, ?, ?, NOW())',
+            [$userId, hash('sha256', $token), 'remember', $expires]
+        );
+        self::setRememberCookie($token);
+    }
+
+    private static function setRememberCookie(string $token): void
+    {
+        setcookie('repartio_remember', $token, [
+            'expires' => time() + 60 * 60 * 24 * 30,
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure' => is_https(),
+        ]);
+    }
+
+    private static function clearRememberCookie(): void
+    {
+        setcookie('repartio_remember', '', [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure' => is_https(),
+        ]);
     }
 }

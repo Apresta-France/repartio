@@ -99,7 +99,7 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
 
     <?php if ($circuits === []): ?>
       <p class="lede" style="font-size:14.5px;">Créez d’abord un circuit pour pouvoir y donner accès.</p>
-      <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>">Nouveau circuit</a>
+      <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
     <?php elseif ($memberCount >= $memberLimit): ?>
       <p class="lede" style="font-size:14.5px;">Limite de <?= (int) $memberLimit ?> personnes atteinte. Retirez un accès pour en inviter un autre.</p>
     <?php else: ?>
