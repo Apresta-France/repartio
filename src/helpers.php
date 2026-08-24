@@ -10,9 +10,23 @@ function e(?string $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function is_https(): bool
+{
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        return true;
+    }
+    if ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443) {
+        return true;
+    }
+    return strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+}
+
 function url(string $path = ''): string
 {
     $base = rtrim((string) env('APP_URL', ''), '/');
+    if (is_https() && str_starts_with($base, 'http://')) {
+        $base = 'https://' . substr($base, strlen('http://'));
+    }
     $path = '/' . ltrim($path, '/');
     if ($path === '/') {
         return $base ?: '/';
@@ -22,7 +36,7 @@ function url(string $path = ''): string
 
 function asset(string $path): string
 {
-    return url('public/assets/' . ltrim($path, '/'));
+    return '/public/assets/' . ltrim($path, '/');
 }
 
 function env(string $key, mixed $default = null): mixed
