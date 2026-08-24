@@ -14,7 +14,7 @@ $bottom = [
 ];
 ?>
 <aside class="sidebar" id="app-sidebar">
-  <a href="<?= e(url('/app')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:30px;"></a>
+  <a href="<?= e(url('/app')) ?>" class="logo"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
   <a class="btn btn-orange" href="<?= e(url('/app/circuits/nouveau')) ?>">+ Nouveau circuit</a>
   <nav>
     <?php foreach ($main as [$id, $label, $href, $dot]): ?>

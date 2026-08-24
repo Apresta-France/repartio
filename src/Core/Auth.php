@@ -52,7 +52,7 @@ class Auth
                 'path' => '/',
                 'httponly' => true,
                 'samesite' => 'Lax',
-                'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                'secure' => is_https(),
             ]);
         }
         User::touchLogin((int) $user['id']);

@@ -4,7 +4,7 @@
     <span class="eyebrow">Première installation</span>
     <h1 style="margin:0;font-size:28px;">Installer repartio</h1>
     <p class="lede">Ce formulaire n’apparaît qu’une fois. Il crée la base, lance les migrations et votre compte administrateur.</p>
-    <?php if ($msg = flash('error')): ?><div class="flash flash-error" style="margin:0;"><?= e($msg) ?></div><?php endif; ?>
+    <?php if ($msg = flash('error')): ?><div class="flash flash-error flash-inline"><?= e($msg) ?></div><?php endif; ?>
     <div class="kv">
       <?php foreach ($checks as $c): ?>
         <div><span><?= e($c[0]) ?></span><strong class="<?= $c[1] ? 'check-ok' : 'check-ko' ?>"><?= $c[1] ? 'OK' : 'Manquant' ?></strong></div>

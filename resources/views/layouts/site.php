@@ -13,11 +13,10 @@
 <body>
 <div class="page">
   <?php require BASE_PATH . '/resources/views/partials/header.php'; ?>
-  <?php if ($msg = flash('error')): ?><div class="flash flash-error"><?= e($msg) ?></div><?php endif; ?>
-  <?php if ($msg = flash('success')): ?><div class="flash flash-success"><?= e($msg) ?></div><?php endif; ?>
   <?= $content ?>
   <?php require BASE_PATH . '/resources/views/partials/footer.php'; ?>
 </div>
+<?php require BASE_PATH . '/resources/views/partials/flash.php'; ?>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
 </body>
 </html>

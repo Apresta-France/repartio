@@ -21,17 +21,28 @@ function is_https(): bool
     return strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
 }
 
-function url(string $path = ''): string
+function request_base_url(): string
 {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host !== '') {
+        return (is_https() ? 'https://' : 'http://') . $host;
+    }
+
     $base = rtrim((string) env('APP_URL', ''), '/');
     if (is_https() && str_starts_with($base, 'http://')) {
         $base = 'https://' . substr($base, strlen('http://'));
     }
+    return $base;
+}
+
+function url(string $path = ''): string
+{
+    $base = request_base_url();
     $path = '/' . ltrim($path, '/');
     if ($path === '/') {
-        return $base ?: '/';
+        return $base !== '' ? $base : '/';
     }
-    return ($base ?: '') . $path;
+    return ($base !== '' ? $base : '') . $path;
 }
 
 function asset(string $path): string

@@ -231,6 +231,31 @@ document.querySelectorAll('[data-share-form]').forEach((form) => {
   }
 })();
 
+document.querySelectorAll('[data-flash]').forEach((el) => {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dismiss = () => {
+    if (el.dataset.flashOut) return;
+    el.dataset.flashOut = '1';
+    const remove = () => {
+      const stack = el.closest('.flash-stack');
+      el.remove();
+      if (stack && !stack.querySelector('[data-flash]')) stack.remove();
+    };
+    if (reduced) {
+      remove();
+      return;
+    }
+    el.classList.add('is-out');
+    el.addEventListener('animationend', remove, { once: true });
+    setTimeout(remove, 280);
+  };
+  el.querySelector('[data-flash-close]')?.addEventListener('click', dismiss);
+  const delay = el.classList.contains('flash-error') ? 7000 : 5000;
+  let timer = setTimeout(dismiss, delay);
+  el.addEventListener('mouseenter', () => clearTimeout(timer));
+  el.addEventListener('mouseleave', () => { timer = setTimeout(dismiss, 2200); });
+});
+
 document.querySelectorAll('[data-cycle]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const annual = btn.getAttribute('data-cycle') === 'Annuel';

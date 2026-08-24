@@ -1,6 +1,6 @@
 <div class="auth-grid">
   <div class="auth-form">
-    <a href="<?= e(url('/')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:32px;"></a>
+    <a href="<?= e(url('/')) ?>" class="logo"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
     <div class="auth-box">
       <div>
         <h1>Content de vous revoir</h1>

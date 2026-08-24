@@ -1,5 +1,5 @@
 <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:34px 32px;">
-  <a href="<?= e(url('/')) ?>" style="align-self:flex-start;"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:32px;"></a>
+  <a href="<?= e(url('/')) ?>" class="logo" style="align-self:flex-start;"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
   <div class="card" style="width:100%;max-width:468px;padding:30px 32px;margin:auto;">
     <h1 style="font-size:27px;">Nouveau mot de passe</h1>
     <form method="post" action="<?= e(url('/reinitialiser-mot-de-passe/' . $token)) ?>" style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">

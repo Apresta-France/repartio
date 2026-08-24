@@ -1,5 +1,5 @@
 <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:34px 32px 40px;gap:40px;">
-  <a href="<?= e(url('/')) ?>" style="align-self:flex-start;"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:32px;"></a>
+  <a href="<?= e(url('/')) ?>" class="logo" style="align-self:flex-start;"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
   <div class="card" style="width:100%;max-width:468px;padding:30px 32px;">
     <?php if (!empty($sent)): ?>
       <h1 style="font-size:25px;">Lien envoyé</h1>
