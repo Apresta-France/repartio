@@ -646,12 +646,10 @@
     const max = Math.max(1, ...(series.total || [0])) * 1.06;
     const maxDelta = Math.max(1, ...(series.delta || [0])) * 1.08;
     const defs = svgEl('defs');
-    livrets.forEach((liv, i) => {
-      const g = svgEl('linearGradient', { id: 'time-fill-' + i, x1: '0', y1: '0', x2: '0', y2: '1' });
-      g.appendChild(svgEl('stop', { offset: '0%', 'stop-color': liv.color, 'stop-opacity': '0.42' }));
-      g.appendChild(svgEl('stop', { offset: '100%', 'stop-color': liv.color, 'stop-opacity': '0.04' }));
-      defs.appendChild(g);
-    });
+    const grad = svgEl('linearGradient', { id: 'time-fill-total', x1: '0', y1: '0', x2: '0', y2: '1' });
+    grad.appendChild(svgEl('stop', { offset: '0%', 'stop-color': 'oklch(0.58 0.12 195)', 'stop-opacity': '0.38' }));
+    grad.appendChild(svgEl('stop', { offset: '100%', 'stop-color': 'oklch(0.58 0.12 195)', 'stop-opacity': '0.04' }));
+    defs.appendChild(grad);
     svg.appendChild(defs);
 
     [0.5, 1].forEach((t) => {
@@ -659,25 +657,12 @@
       svg.appendChild(svgEl('line', { x1: 0, y1: y, x2: W, y2: y, stroke: 'oklch(0.93 0.01 255)', 'stroke-width': '1' }));
     });
 
-    let stack = (series.total || []).map(() => 0);
-    livrets.forEach((liv, i) => {
-      const bottom = stack.slice();
-      const top = liv.balances.map((v, m) => {
-        stack[m] += v;
-        return stack[m];
-      });
-      const path = svgEl('path', {
-        d: areaPath(top, bottom, W, 1, 33, max),
-        fill: 'url(#time-fill-' + i + ')',
-        stroke: liv.color,
-        'stroke-width': '1',
-        'stroke-opacity': '0.5',
-        'vector-effect': 'non-scaling-stroke',
-      });
-      svg.appendChild(path);
-    });
-
+    const zeros = (series.total || []).map(() => 0);
     if (series.total && series.total.length > 1) {
+      svg.appendChild(svgEl('path', {
+        d: areaPath(series.total, zeros, W, 1, 33, max),
+        fill: 'url(#time-fill-total)',
+      }));
       svg.appendChild(svgEl('path', {
         d: linePath(series.total, W, 1, 33, max),
         fill: 'none',
@@ -692,23 +677,19 @@
     const H = state.horizon;
     const barW = H > 0 ? Math.max(1, (W / H) * (H > 80 ? 0.42 : 0.55)) : 3;
     for (let m = 1; m <= H; m += 1) {
+      const dlt = Math.max(0, series.delta[m] || 0);
+      const h = maxDelta > 0 ? (dlt / maxDelta) * 11 : 0;
+      if (h < 0.35) continue;
       const x = (m / H) * W - barW / 2;
-      let y = 47;
-      livrets.forEach((liv) => {
-        const dlt = Math.max(0, (liv.balances[m] || 0) - (liv.balances[m - 1] || 0));
-        const h = maxDelta > 0 ? (dlt / maxDelta) * 11 : 0;
-        if (h < 0.35) return;
-        y -= h;
-        svg.appendChild(svgEl('rect', {
-          x: x.toFixed(2),
-          y: y.toFixed(2),
-          width: barW.toFixed(2),
-          height: h.toFixed(2),
-          rx: Math.min(1.2, barW / 2).toFixed(2),
-          fill: liv.color,
-          opacity: m <= currentMonth() ? '0.9' : '0.25',
-        }));
-      });
+      svg.appendChild(svgEl('rect', {
+        x: x.toFixed(2),
+        y: (47 - h).toFixed(2),
+        width: barW.toFixed(2),
+        height: h.toFixed(2),
+        rx: Math.min(1.2, barW / 2).toFixed(2),
+        fill: 'oklch(0.52 0.09 195)',
+        opacity: m <= currentMonth() ? '0.85' : '0.22',
+      }));
     }
   }
 
