@@ -6,7 +6,7 @@
 <section class="page-split" style="border-bottom:1px solid var(--line);">
   <div style="padding:36px 44px 44px 32px;">
     <?php if (!empty($sent)): ?>
-      <div class="card" style="padding:28px;">
+      <div class="card card-pad">
         <h2>Message envoyé</h2>
         <p class="lede">Nous avons bien reçu votre message. Un accusé vient d’arriver dans votre boîte.</p>
         <a class="btn btn-navy" href="<?= e(url('/')) ?>">Retour à l’accueil</a>

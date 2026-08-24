@@ -1,11 +1,11 @@
 <header class="app-top"><h1>Réglages</h1></header>
 <section style="padding:28px;max-width:560px;display:flex;flex-direction:column;gap:24px;">
-  <div class="card" style="padding:20px;">
+  <div class="card card-pad">
     <strong>Session</strong>
     <p class="lede">Déconnexion de cet appareil.</p>
     <form method="post" action="<?= e(url('/deconnexion')) ?>"><?= csrf_field() ?><button class="btn btn-ghost" type="submit">Se déconnecter</button></form>
   </div>
-  <div class="card" style="padding:20px;border-color:oklch(0.86 0.06 25);">
+  <div class="card card-pad" style="border-color:oklch(0.86 0.06 25);">
     <strong>Supprimer le compte</strong>
     <p class="lede">Suppression immédiate, sans rétention. Exportez vos circuits avant.</p>
     <form method="post" action="<?= e(url('/app/reglages/supprimer')) ?>" style="display:flex;flex-direction:column;gap:10px;">

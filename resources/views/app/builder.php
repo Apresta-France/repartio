@@ -51,7 +51,7 @@
         <input name="name" data-name value="<?= e($project['name']) ?>" class="builder-name-input">
         <label class="builder-horizon">
           <span>Projection</span>
-          <input type="number" min="1" max="360" step="12" data-horizon value="<?= e((string) ($payload['horizon'] ?? 60)) ?>">
+          <input type="number" min="1" max="360" step="1" data-horizon value="<?= e((string) ($payload['horizon'] ?? 60)) ?>">
           <span>mois</span>
         </label>
         <input type="hidden" name="payload" data-payload-input>

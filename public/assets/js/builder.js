@@ -108,6 +108,15 @@
   const presetList = modal?.querySelector('[data-preset-list]');
   let lastCompute = null;
   let pendingDrop = null;
+  const flow = { paths: {}, pellets: [] };
+  const phase = {};
+  let lastTick = 0;
+  let flowPaused = false;
+  try {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    flowPaused = motion.matches;
+    motion.addEventListener('change', (ev) => { flowPaused = ev.matches; });
+  } catch (e) {}
 
   function uid(prefix) {
     return prefix + Math.random().toString(36).slice(2, 8);
@@ -268,6 +277,109 @@
     return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
   }
 
+  function pointAtX(path, len, tx) {
+    let lo = 0;
+    let hi = len;
+    let pt;
+    for (let i = 0; i < 22; i += 1) {
+      const mid = (lo + hi) / 2;
+      pt = path.getPointAtLength(mid);
+      if (pt.x < tx) lo = mid;
+      else hi = mid;
+    }
+    return path.getPointAtLength((lo + hi) / 2);
+  }
+
+  function dodgeNodes(pt) {
+    for (let i = 0; i < state.nodes.length; i += 1) {
+      const n = state.nodes[i];
+      const w = n._w || 244;
+      const h = n._h || 100;
+      if (pt.x + 48 > n.x - 6 && pt.x - 48 < n.x + w + 6 && pt.y + 11 > n.y - 6 && pt.y - 11 < n.y + h + 6) {
+        return { x: pt.x, y: n.y - 13 };
+      }
+    }
+    return pt;
+  }
+
+  function labelPoint(path, a, b, idx) {
+    const len = path.getTotalLength();
+    if (!len) return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    const ax = a.x + (a._w || 244);
+    const bx = b.x;
+    let mid;
+    if (bx - ax > 52) {
+      const span = bx - ax;
+      mid = pointAtX(path, len, ax + span * Math.min(0.82, 0.22 + idx * 0.17));
+    } else {
+      mid = path.getPointAtLength(len * Math.min(0.74, 0.34 + idx * 0.11));
+    }
+    return dodgeNodes(mid);
+  }
+
+  function spawnPellets(e, path, color) {
+    if (flowPaused || e._amt <= 0.5) return;
+    const len = path.getTotalLength();
+    if (!len) return;
+    const count = Math.min(5, 1 + Math.floor(e._amt / 700));
+    const speed = 48 + Math.min(70, e._amt / 28);
+    const prev = phase[e.id] || [];
+    const keep = [];
+    const r = 2.6 + Math.min(2.2, e._amt / 2600);
+    for (let i = 0; i < count; i += 1) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('r', String(r));
+      c.setAttribute('class', 'pellet');
+      c.setAttribute('fill', color);
+      svg.appendChild(c);
+      const d0 = (prev[i] !== undefined && prev[i] < len) ? prev[i] : (len / count) * i;
+      keep.push(d0);
+      flow.pellets.push({ c, path, len, d: d0, v: speed, eid: e.id, idx: i });
+    }
+    phase[e.id] = keep;
+  }
+
+  function redrawWires() {
+    const C = lastCompute;
+    if (!C) return;
+    state.edges.forEach((e) => {
+      const path = flow.paths[e.id];
+      const a = nodeById(e.from);
+      const b = nodeById(e.to);
+      if (!path || !a || !b) return;
+      path.setAttribute('d', curve(portPoint(a, 'out'), portPoint(b, 'in')));
+      const len = path.getTotalLength();
+      flow.pellets.forEach((p) => {
+        if (p.eid === e.id) p.len = len;
+      });
+      if (!labels) return;
+      const pill = labels.querySelector(`[data-edge="${e.id}"]`);
+      if (!pill) return;
+      const sibs = C.outs[e.from] || [];
+      const idx = Math.max(0, sibs.indexOf(e));
+      const mid = labelPoint(path, a, b, idx);
+      pill.style.left = mid.x + 'px';
+      pill.style.top = mid.y + 'px';
+    });
+  }
+
+  function tick(t) {
+    const dt = Math.min(0.05, (t - lastTick) / 1000);
+    lastTick = t;
+    if (!flowPaused) {
+      for (let i = 0; i < flow.pellets.length; i += 1) {
+        const p = flow.pellets[i];
+        if (!p.len) continue;
+        p.d = (p.d + p.v * dt) % p.len;
+        if (phase[p.eid]) phase[p.eid][p.idx] = p.d;
+        const q = p.path.getPointAtLength(p.d);
+        p.c.setAttribute('cx', q.x);
+        p.c.setAttribute('cy', q.y);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
   function nodeStats(n, C) {
     const inflow = C.inflow[n.id] || 0;
     const kept = C.kept[n.id] || 0;
@@ -302,6 +414,8 @@
     layer.querySelectorAll('.node').forEach((el) => el.remove());
     svg.innerHTML = '';
     if (labels) labels.innerHTML = '';
+    flow.paths = {};
+    flow.pellets = [];
 
     state.nodes.forEach((n) => {
       const meta = KINDS[n.kind];
@@ -343,26 +457,33 @@
       if (!a || !b) return;
       const p1 = portPoint(a, 'out');
       const p2 = portPoint(b, 'in');
+      const color = KINDS[a.kind]?.color || '#999';
+      const hot = e._amt > 0.5;
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', curve(p1, p2));
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', e._amt > 0.5 ? (KINDS[a.kind]?.color || '#999') : 'oklch(0.82 0.02 255)');
-      path.setAttribute('stroke-width', e._amt > 0.5 ? '2' : '1.5');
-      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('class', 'builder-wire' + (hot ? ' is-hot' : ''));
+      path.setAttribute('stroke', hot ? color : 'oklch(0.82 0.02 255)');
+      path.setAttribute('stroke-width', hot ? '2.5' : '1.5');
       svg.appendChild(path);
+      flow.paths[e.id] = path;
 
-      if (!labels) return;
-      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-      const pill = document.createElement('button');
-      pill.type = 'button';
-      const tag = e.mode === 'pct' ? e.value + ' %' : (e.mode === 'fixe' ? 'fixe' : 'reste');
-      pill.className = 'edge-pill' + (e._amt > 0.5 ? '' : ' is-zero') + (state.openEdge === e.id ? ' is-open' : '');
-      if (readonly) pill.disabled = true;
-      pill.dataset.edge = e.id;
-      pill.style.left = mid.x + 'px';
-      pill.style.top = mid.y + 'px';
-      pill.innerHTML = `${euro(e._amt)}<i>${tag}</i>`;
-      labels.appendChild(pill);
+      if (labels) {
+        const sibs = C.outs[e.from] || [];
+        const idx = Math.max(0, sibs.indexOf(e));
+        const mid = labelPoint(path, a, b, idx);
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        const tag = e.mode === 'pct' ? e.value + ' %' : (e.mode === 'fixe' ? 'fixe' : 'reste');
+        pill.className = 'edge-pill' + (hot ? '' : ' is-zero') + (state.openEdge === e.id ? ' is-open' : '');
+        if (readonly) pill.disabled = true;
+        pill.dataset.edge = e.id;
+        pill.style.left = mid.x + 'px';
+        pill.style.top = mid.y + 'px';
+        pill.innerHTML = `${euro(e._amt)}<i>${tag}</i>`;
+        labels.appendChild(pill);
+      }
+
+      spawnPellets(e, path, color);
     });
   }
 
@@ -692,6 +813,15 @@
 
   layer.addEventListener('mousedown', (e) => {
     if (readonly) return;
+    const kill = e.target.closest('[data-del]');
+    if (kill) {
+      e.preventDefault();
+      e.stopPropagation();
+      removeNode(kill.getAttribute('data-del'));
+      render();
+      return;
+    }
+    if (e.target.closest('button, .port, input, select')) return;
     const handle = e.target.closest('[data-drag]');
     if (!handle) return;
     const id = handle.getAttribute('data-drag');
@@ -719,19 +849,7 @@
         drag.el.style.top = node.y + 'px';
       }
       lastCompute = lastCompute || compute();
-      svg.innerHTML = '';
-      if (labels) labels.innerHTML = '';
-      state.edges.forEach((ed) => {
-        const a = nodeById(ed.from);
-        const b = nodeById(ed.to);
-        if (!a || !b) return;
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', curve(portPoint(a, 'out'), portPoint(b, 'in')));
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', KINDS[a.kind]?.color || '#999');
-        path.setAttribute('stroke-width', '1.6');
-        svg.appendChild(path);
-      });
+      redrawWires();
     } else if (pan) {
       state.tx = pan.ox + (e.clientX - pan.sx);
       state.ty = pan.oy + (e.clientY - pan.sy);
@@ -764,11 +882,8 @@
 
   layer.addEventListener('click', (e) => {
     if (readonly) return;
-    const del = e.target.closest('[data-del]');
-    if (del) {
+    if (e.target.closest('[data-del]')) {
       e.stopPropagation();
-      removeNode(del.getAttribute('data-del'));
-      render();
       return;
     }
     const out = e.target.closest('[data-port-out]');
@@ -950,4 +1065,5 @@
 
   if (nameInput) nameInput.addEventListener('input', syncPayload);
   render();
+  requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });
 })();

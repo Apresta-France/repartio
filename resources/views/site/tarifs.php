@@ -10,9 +10,9 @@
 <section class="section" style="padding-top:0;">
   <div class="grid-3">
     <div class="card" style="display:flex;flex-direction:column;">
-      <div style="padding:24px 26px;">
+      <div style="padding:24px 26px;display:flex;flex-direction:column;gap:12px;">
         <span class="eyebrow">Libre</span>
-        <div style="display:flex;align-items:baseline;gap:7px;margin:10px 0;"><span class="mono" style="font-size:38px;font-weight:500;">0 €</span><span>pour toujours</span></div>
+        <div style="display:flex;align-items:baseline;gap:7px;margin:0;"><span class="mono" style="font-size:38px;font-weight:500;">0 €</span><span>pour toujours</span></div>
         <p style="color:var(--muted);font-size:13.5px;">De quoi décrire entièrement un budget familial et le projeter à cinq ans.</p>
         <a class="btn btn-ghost" href="<?= e(url('/creer-un-compte')) ?>" style="width:100%;">Créer un circuit</a>
       </div>
@@ -23,9 +23,9 @@
       </div>
     </div>
     <div class="card" style="border:2px solid var(--orange);box-shadow:0 10px 30px oklch(0.5 0.14 38 / 0.14);display:flex;flex-direction:column;">
-      <div style="padding:24px 26px;">
+      <div style="padding:24px 26px;display:flex;flex-direction:column;gap:12px;">
         <div style="display:flex;align-items:center;"><span class="eyebrow">Complet</span><span class="chip" style="margin-left:auto;background:var(--orange);color:#fff;border-color:var(--orange);">Le plus pris</span></div>
-        <div style="display:flex;align-items:baseline;gap:7px;margin:10px 0;"><span class="mono" style="font-size:38px;font-weight:500;" data-price="complet">4,90 €</span><span data-unit="complet">par mois</span></div>
+        <div style="display:flex;align-items:baseline;gap:7px;margin:0;"><span class="mono" style="font-size:38px;font-weight:500;" data-price="complet">4,90 €</span><span data-unit="complet">par mois</span></div>
         <p style="color:var(--muted);font-size:13.5px;">Pour comparer des scénarios et suivre un circuit qui évolue.</p>
         <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>" style="width:100%;">Passer en Complet</a>
       </div>
@@ -36,9 +36,9 @@
       </div>
     </div>
     <div class="card" style="display:flex;flex-direction:column;">
-      <div style="padding:24px 26px;">
+      <div style="padding:24px 26px;display:flex;flex-direction:column;gap:12px;">
         <span class="eyebrow">Foyer</span>
-        <div style="display:flex;align-items:baseline;gap:7px;margin:10px 0;"><span class="mono" style="font-size:38px;font-weight:500;" data-price="foyer">7,90 €</span><span data-unit="foyer">par mois</span></div>
+        <div style="display:flex;align-items:baseline;gap:7px;margin:0;"><span class="mono" style="font-size:38px;font-weight:500;" data-price="foyer">7,90 €</span><span data-unit="foyer">par mois</span></div>
         <p style="color:var(--muted);font-size:13.5px;">Le même circuit, à deux, avec chacun son accès.</p>
         <a class="btn btn-ghost" href="<?= e(url('/contact')) ?>" style="width:100%;">Choisir Foyer</a>
       </div>
