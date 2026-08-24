@@ -10,6 +10,7 @@ $horizon = (int) ($payload['horizon'] ?? $share['horizon'] ?? 60);
   <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Créer mon circuit</a>
 </div>
 <div class="builder is-readonly" data-builder data-readonly data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+  <div class="builder-workspace">
   <aside class="builder-side">
     <div>
       <span class="eyebrow">Circuit partagé</span>
@@ -64,5 +65,7 @@ $horizon = (int) ($payload['horizon'] ?? $share['horizon'] ?? 60);
         <button type="button" class="btn btn-ghost" data-fit>Ajuster</button>
       </div>
     </div>
+    <?php require BASE_PATH . '/resources/views/partials/builder-time.php'; ?>
   </main>
+  </div>
 </div>

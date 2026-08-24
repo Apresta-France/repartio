@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Controllers\AccessController;
 use App\Controllers\AppController;
 use App\Controllers\AuthController;
 use App\Controllers\ContactController;
@@ -95,6 +96,13 @@ class App
         $router->post('/app/circuits/{id}/supprimer', [ProjectController::class, 'destroy']);
         $router->get('/p/{slug}', [ShareController::class, 'preview']);
         $router->get('/app/forfait', [AppController::class, 'billing']);
+        $router->get('/app/acces', [AccessController::class, 'index']);
+        $router->post('/app/acces', [AccessController::class, 'invite']);
+        $router->post('/app/acces/{id}', [AccessController::class, 'update']);
+        $router->post('/app/acces/{id}/renvoyer', [AccessController::class, 'resend']);
+        $router->post('/app/acces/{id}/retirer', [AccessController::class, 'revoke']);
+        $router->get('/invitation/{token}', [AccessController::class, 'showInvite']);
+        $router->post('/invitation/{token}', [AccessController::class, 'acceptInvite']);
         $router->get('/app/profil', [AppController::class, 'profile']);
         $router->post('/app/profil', [AppController::class, 'updateProfile']);
         $router->get('/app/reglages', [AppController::class, 'settings']);

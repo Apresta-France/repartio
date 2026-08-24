@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Session;
 use App\Core\View;
+use App\Models\Access;
 use App\Models\Project;
 use App\Models\User;
 
@@ -15,7 +16,7 @@ class AppController
     public function dashboard(): void
     {
         $user = Auth::requireUser();
-        $projects = Project::allForUser((int) $user['id']);
+        $projects = Access::allProjectsForUser((int) $user['id']);
         $current = $projects[0] ?? null;
         View::render('app/dashboard', [
             'title' => 'Tableau de bord',
@@ -24,7 +25,7 @@ class AppController
             'projects' => $projects,
             'current' => $current,
             'activity' => Project::activity((int) $user['id']),
-            'recents' => Project::recents((int) $user['id']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
         ], 'layouts/app');
     }
@@ -36,7 +37,7 @@ class AppController
             'title' => 'Forfait & facturation',
             'nav' => 'forfait',
             'user' => $user,
-            'recents' => Project::recents((int) $user['id']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
         ], 'layouts/app');
     }
@@ -48,7 +49,7 @@ class AppController
             'title' => 'Mon profil',
             'nav' => 'profil',
             'user' => $user,
-            'recents' => Project::recents((int) $user['id']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
         ], 'layouts/app');
     }
@@ -79,7 +80,7 @@ class AppController
             'title' => 'Réglages',
             'nav' => 'reglages',
             'user' => $user,
-            'recents' => Project::recents((int) $user['id']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
         ], 'layouts/app');
     }

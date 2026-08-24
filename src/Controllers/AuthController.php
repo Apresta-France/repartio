@@ -34,7 +34,7 @@ class AuthController
             redirect('/connexion');
         }
         Auth::login($user, $remember);
-        redirect('/app');
+        $this->afterAuth();
     }
 
     public function registerForm(): void
@@ -87,7 +87,7 @@ class AuthController
         Auth::login($user);
         Project::log((int) $user['id'], 'Compte créé');
         Session::flashSet('success', 'Compte créé. Un e-mail de bienvenue vient de partir.');
-        redirect('/app');
+        $this->afterAuth();
     }
 
     public function verify(string $token): void
@@ -179,12 +179,22 @@ class AuthController
             redirect('/connexion');
         }
         Auth::login($user, true);
-        redirect('/app');
+        $this->afterAuth();
     }
 
     public function logout(): void
     {
         Auth::logout();
         redirect('/');
+    }
+
+    private function afterAuth(): void
+    {
+        $token = trim((string) Session::get('invite_token', ''));
+        if ($token !== '') {
+            Session::forget('invite_token');
+            redirect('/invitation/' . $token);
+        }
+        redirect('/app');
     }
 }

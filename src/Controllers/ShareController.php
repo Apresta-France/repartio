@@ -8,6 +8,7 @@ use App\Core\Auth;
 use App\Core\Mailer;
 use App\Core\Session;
 use App\Core\View;
+use App\Models\Access;
 use App\Models\Project;
 use App\Models\Share;
 use Throwable;
@@ -24,7 +25,7 @@ class ShareController
             'project' => $project,
             'share' => $share,
             'sends' => $sends,
-            'recents' => Project::recents((int) $user['id']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
             'suggestedTitle' => $share['title'] ?? $project['name'],
         ], 'layouts/app');
@@ -36,11 +37,12 @@ class ShareController
         $title = trim((string) ($_POST['title'] ?? '')) ?: $project['name'];
         $title = mb_substr($title, 0, 180);
 
+        $ownerId = (int) $project['user_id'];
         if ($share) {
-            Share::update((int) $share['id'], (int) $user['id'], $title, true);
-            $share = Share::findForProject((int) $project['id'], (int) $user['id']);
+            Share::update((int) $share['id'], $ownerId, $title, true);
+            $share = Share::findForProject((int) $project['id'], $ownerId);
         } else {
-            $share = Share::create((int) $project['id'], (int) $user['id'], $title);
+            $share = Share::create((int) $project['id'], $ownerId, $title);
         }
 
         Project::log((int) $user['id'], 'Lien de partage mis à jour', (int) $project['id']);
@@ -91,7 +93,7 @@ class ShareController
     {
         [$user, $project, $share] = $this->context($id);
         if ($share) {
-            Share::setEnabled((int) $share['id'], (int) $user['id'], false);
+            Share::setEnabled((int) $share['id'], (int) $project['user_id'], false);
             Project::log((int) $user['id'], 'Lien de partage révoqué', (int) $project['id']);
             Session::flashSet('success', 'Le lien public n’est plus accessible.');
         }
@@ -102,7 +104,7 @@ class ShareController
     {
         [$user, $project, $share] = $this->context($id);
         if ($share) {
-            Share::setEnabled((int) $share['id'], (int) $user['id'], true);
+            Share::setEnabled((int) $share['id'], (int) $project['user_id'], true);
             Project::log((int) $user['id'], 'Lien de partage réactivé', (int) $project['id']);
             Session::flashSet('success', 'Le lien public est de nouveau actif.');
         }
@@ -135,12 +137,12 @@ class ShareController
     private function context(string $id): array
     {
         $user = Auth::requireUser();
-        $project = Project::findForUser((int) $id, (int) $user['id']);
-        if (!$project) {
+        $project = Project::findById((int) $id);
+        if (!$project || !Access::can((int) $user['id'], (int) $id, 'gestion')) {
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
-        $share = Share::findForProject((int) $project['id'], (int) $user['id']);
+        $share = Share::findForProject((int) $project['id'], (int) $project['user_id']);
         $sends = $share ? Share::sendsForShare((int) $share['id']) : [];
         return [$user, $project, $share, $sends];
     }

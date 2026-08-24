@@ -328,6 +328,76 @@ document.querySelectorAll('[data-flash]').forEach((el) => {
   el.addEventListener('mouseleave', () => { timer = setTimeout(dismiss, 2200); });
 });
 
+(() => {
+  const modal = document.querySelector('[data-confirm-modal]');
+  if (!modal) return;
+
+  const titleEl = modal.querySelector('[data-confirm-title]');
+  const textEl = modal.querySelector('[data-confirm-text]');
+  const okBtn = modal.querySelector('[data-confirm-ok]');
+  let pending = null;
+
+  const open = (form) => {
+    pending = form;
+    const name = (form.getAttribute('data-confirm-name') || '').trim();
+    const customTitle = (form.getAttribute('data-confirm-title') || '').trim();
+    const customText = (form.getAttribute('data-confirm-text') || '').trim();
+    if (titleEl) {
+      titleEl.textContent = customTitle || (name ? `Supprimer « ${name} » ?` : 'Supprimer ce circuit ?');
+    }
+    if (textEl) {
+      textEl.textContent = customText || 'Cette action est définitive. Le circuit et sa projection seront perdus.';
+    }
+    modal.hidden = false;
+    document.body.classList.add('is-locked');
+    okBtn?.focus();
+  };
+
+  const close = () => {
+    pending = null;
+    modal.hidden = true;
+    document.body.classList.remove('is-locked');
+  };
+
+  document.querySelectorAll('[data-confirm-delete]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      if (form.dataset.confirmed === '1') return;
+      event.preventDefault();
+      open(form);
+    });
+  });
+
+  okBtn?.addEventListener('click', () => {
+    if (!pending) return;
+    const form = pending;
+    form.dataset.confirmed = '1';
+    close();
+    form.submit();
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (event.target.closest('[data-confirm-dismiss]')) close();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) close();
+  });
+})();
+
+document.querySelectorAll('[data-access-row]').forEach((row) => {
+  const check = row.querySelector('[data-access-circuit]');
+  const select = row.querySelector('select');
+  if (!check || !select) return;
+  const sync = () => {
+    select.disabled = !check.checked;
+  };
+  check.addEventListener('change', sync);
+  row.closest('form')?.addEventListener('submit', () => {
+    if (check.checked) select.disabled = false;
+  });
+  sync();
+});
+
 document.querySelectorAll('[data-cycle]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const annual = btn.getAttribute('data-cycle') === 'Annuel';

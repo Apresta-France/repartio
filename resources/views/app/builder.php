@@ -1,4 +1,10 @@
-<div class="builder" data-builder data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+<?php
+$canEdit = !empty($canEdit);
+$canManage = !empty($canManage);
+$readonly = !$canEdit;
+?>
+<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+  <div class="builder-workspace">
   <aside class="builder-side">
     <div>
       <a href="<?= e(url('/app/circuits')) ?>" class="eyebrow">← Mes circuits</a>
@@ -84,10 +90,10 @@
       <form method="post" action="<?= e(url('/app/circuits/' . $project['id'])) ?>" data-save-form class="builder-toolbar">
         <?= csrf_field() ?>
         <button type="button" class="btn btn-ghost builder-side-toggle" data-builder-side-toggle aria-expanded="false">Blocs &amp; chiffres</button>
-        <input name="name" data-name value="<?= e($project['name']) ?>" class="builder-name-input">
+        <input name="name" data-name value="<?= e($project['name']) ?>" class="builder-name-input"<?= $readonly ? ' readonly' : '' ?>>
         <div class="builder-horizon">
           <span>Projection</span>
-          <input type="number" min="1" max="360" step="1" data-horizon value="<?= e((string) ($payload['horizon'] ?? 60)) ?>">
+          <input type="number" min="1" max="360" step="1" data-horizon value="<?= e((string) ($payload['horizon'] ?? 60)) ?>"<?= $readonly ? ' readonly' : '' ?>>
           <div class="builder-horizon-unit" data-horizon-unit>
             <button type="button" class="builder-horizon-unit-btn" data-horizon-unit-toggle aria-haspopup="listbox" aria-expanded="false">
               <span data-horizon-unit-label>mois</span>
@@ -99,6 +105,7 @@
           </div>
         </div>
         <input type="hidden" name="payload" data-payload-input>
+        <?php if ($canEdit): ?>
         <button class="btn btn-ghost" type="button" data-scenario-open>Charger un scénario</button>
         <button class="btn btn-ghost btn-icon" type="button" data-clear title="Vider le canvas" aria-label="Vider le canvas">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
@@ -109,6 +116,8 @@
           </svg>
         </button>
         <button class="btn btn-orange builder-save" type="submit" data-save-btn>Enregistrer</button>
+        <?php endif; ?>
+        <?php if ($canManage): ?>
         <button type="button" class="btn btn-ghost btn-icon" data-share-open title="Partager" aria-label="Partager">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
             <circle cx="18" cy="5.5" r="2.6" stroke="currentColor" stroke-width="1.8"/>
@@ -117,6 +126,7 @@
             <path d="M8.4 10.7 15.5 7M8.4 13.3 15.5 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </button>
+        <?php endif; ?>
         <button type="button" class="btn btn-ghost builder-props-toggle" data-props-toggle aria-expanded="false">Propriétés</button>
       </form>
     </header>
@@ -169,6 +179,7 @@
         <p>Restez cliqué sur un point, puis glissez jusqu’au point opposé.</p>
       </div>
     </div>
+    <?php require BASE_PATH . '/resources/views/partials/builder-time.php'; ?>
   </main>
 
   <aside class="builder-props" data-props>
@@ -178,6 +189,7 @@
     </div>
     <div data-props-form hidden></div>
   </aside>
+  </div>
 </div>
 
 <div class="builder-modal" data-preset-modal hidden>
@@ -280,6 +292,7 @@ foreach ($scenarios as $key => $t) {
 </div>
 <script type="application/json" data-scenarios><?= json_encode($scenarioCatalog, JSON_UNESCAPED_UNICODE) ?></script>
 
+<?php if ($canManage): ?>
 <div class="builder-modal" data-share-modal hidden>
   <div class="builder-modal-backdrop" data-share-dismiss></div>
   <div class="builder-modal-card share-modal-card" role="dialog" aria-modal="true" aria-labelledby="share-title">
@@ -296,3 +309,4 @@ foreach ($scenarios as $key => $t) {
     ?>
   </div>
 </div>
+<?php endif; ?>

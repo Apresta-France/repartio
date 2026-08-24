@@ -6,6 +6,7 @@ $pct = $limit > 0 ? min(100, (int) round($used / $limit * 100)) : 0;
 $main = [
     ['dashboard', 'Tableau de bord', '/app', 'var(--teal)'],
     ['projets', 'Mes circuits', '/app/circuits', 'var(--blue)'],
+    ['acces', 'Accès & droits', '/app/acces', 'var(--orange)'],
 ];
 $bottom = [
     ['forfait', 'Forfait & facturation', '/app/forfait', 'var(--orange)'],

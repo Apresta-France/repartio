@@ -171,6 +171,9 @@
     SCENARIOS = {};
   }
   let lastCompute = null;
+  let playMonth = Number(initial.horizon) || 60;
+  let playPinnedToEnd = true;
+  let timeBound = false;
   let pendingDrop = null;
   const flow = { paths: {}, pills: {}, pellets: [] };
   const phase = {};
@@ -274,7 +277,7 @@
     const stats = nodeStats(n, C);
     const box = propsForm.querySelector('.prop-stats');
     if (box) {
-      box.innerHTML = stats.rows.map(([k, v, cls]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('');
+      box.innerHTML = stats.rows.map(([k, v, cls, key]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('');
     }
     propsForm.querySelectorAll('[data-edge-value]').forEach((input) => {
       const edge = state.edges.find((x) => x.id === input.getAttribute('data-edge-value'));
@@ -434,24 +437,46 @@
     const fin = {};
     const full = {};
     const sat = [];
+    const livrets = [];
+    const usedColors = new Set();
     let proj = 0;
     graph.forEach((n) => {
       if (n.kind !== 'livret') return;
       let b = Math.max(0, n.start);
       const cap = n.cap > 0 ? n.cap : Infinity;
       const add = (kept[n.id] > 0 ? kept[n.id] : (inflow[n.id] || 0));
+      const balances = [b];
       let when = null;
       if (b >= cap - 0.5) when = 0;
       for (let m = 1; m <= state.horizon; m += 1) {
         b += b * (Math.max(0, n.rate) / 100) / 12;
         b = Math.min(cap, b + add);
+        balances.push(b);
         if (when === null && b >= cap - 0.5) when = m;
       }
       fin[n.id] = b;
       full[n.id] = when;
       proj += b;
       if (when !== null) sat.push({ name: n.title, m: when });
+      livrets.push({
+        id: n.id,
+        title: n.title,
+        color: chartColorOf(n, usedColors),
+        cap: n.cap > 0 ? n.cap : 0,
+        add,
+        balances,
+        full: when,
+      });
     });
+
+    const total = [];
+    const delta = [];
+    for (let m = 0; m <= state.horizon; m += 1) {
+      let sum = 0;
+      livrets.forEach((liv) => { sum += liv.balances[m] || 0; });
+      total.push(sum);
+      delta.push(m === 0 ? 0 : sum - total[m - 1]);
+    }
 
     let inn = 0;
     let out = 0;
@@ -465,7 +490,391 @@
       else leftover += kept[n.id] || 0;
     });
 
-    return { byId, outs, inflow, kept, over, cycle, inn, out, saved, leftover, proj, fin, full, sat };
+    return { byId, outs, inflow, kept, over, cycle, inn, out, saved, leftover, proj, fin, full, sat, series: { livrets, total, delta } };
+  }
+
+  const CHART_COLORS = [
+    'oklch(0.55 0.11 62)',
+    'oklch(0.48 0.10 152)',
+    'oklch(0.48 0.10 248)',
+    'oklch(0.48 0.12 300)',
+    'oklch(0.52 0.14 32)',
+    'oklch(0.50 0.12 15)',
+    'oklch(0.46 0.08 220)',
+    'oklch(0.58 0.10 85)',
+  ];
+
+  function chartColorOf(n, used) {
+    const base = colorOf(n);
+    if (!used.has(base)) {
+      used.add(base);
+      return base;
+    }
+    const alt = CHART_COLORS.find((c) => !used.has(c)) || CHART_COLORS[used.size % CHART_COLORS.length];
+    used.add(alt);
+    return alt;
+  }
+
+  function signedEuro(n) {
+    const v = Math.round(n || 0);
+    return (v > 0 ? '+' : '') + euro(v);
+  }
+
+  function yearsLabel(months) {
+    if (months % 12 !== 0) return months + ' mois';
+    const y = months / 12;
+    return y + ' an' + (y > 1 ? 's' : '');
+  }
+
+  function currentMonth() {
+    return Math.min(state.horizon, Math.max(0, playMonth | 0));
+  }
+
+  function syncPlayBound() {
+    if (playPinnedToEnd) playMonth = state.horizon;
+    else playMonth = currentMonth();
+  }
+
+  function playLabel(month) {
+    if (month <= 0) return 'Aujourd’hui';
+    if (month >= state.horizon) return 'Dans ' + yearsLabel(state.horizon);
+    return 'Au mois ' + month;
+  }
+
+  function playTitle(month) {
+    if (month <= 0) return 'Départ';
+    if (month >= state.horizon) return 'Horizon · ' + yearsLabel(state.horizon);
+    if (month % 12 === 0) return 'Mois ' + month + ' · ' + yearsLabel(month);
+    return 'Mois ' + month;
+  }
+
+  function playTotal(C) {
+    const series = C?.series;
+    if (!series || !series.total) return C?.proj || 0;
+    return series.total[currentMonth()] ?? (C.proj || 0);
+  }
+
+  function livretAt(C, id, month) {
+    const liv = (C?.series?.livrets || []).find((l) => l.id === id);
+    if (!liv) return C?.fin?.[id] || 0;
+    return liv.balances[month] ?? (liv.balances[liv.balances.length - 1] || 0);
+  }
+
+  function setPlayMonth(month, fromUser) {
+    const next = Math.min(state.horizon, Math.max(0, Math.round(Number(month) || 0)));
+    if (fromUser) playPinnedToEnd = next >= state.horizon;
+    playMonth = next;
+    syncTimePlay();
+    refreshPlayReadings();
+  }
+
+  function timeMonthFromX(clientX) {
+    const stage = root.querySelector('.builder-time-stage');
+    if (!stage) return currentMonth();
+    const r = stage.getBoundingClientRect();
+    const t = (clientX - r.left) / Math.max(1, r.width);
+    return Math.round(Math.min(1, Math.max(0, t)) * state.horizon);
+  }
+
+  function timeTicks(horizon) {
+    const step = horizon <= 12 ? 3 : horizon <= 36 ? 6 : horizon <= 120 ? 12 : 24;
+    const out = [0];
+    for (let m = step; m < horizon; m += step) out.push(m);
+    if (out[out.length - 1] !== horizon) out.push(horizon);
+    return out;
+  }
+
+  function svgEl(name, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) el.setAttribute(k, String(v));
+    });
+    return el;
+  }
+
+  function areaPath(top, bottom, w, y0, y1, max) {
+    const n = top.length - 1;
+    if (n < 1) return '';
+    const xAt = (i) => (i / n) * w;
+    const yAt = (v) => y1 - (max > 0 ? (Math.max(0, v) / max) * (y1 - y0) : 0);
+    let d = 'M 0 ' + yAt(top[0]).toFixed(1);
+    for (let i = 1; i <= n; i += 1) d += ' L ' + xAt(i).toFixed(1) + ' ' + yAt(top[i]).toFixed(1);
+    for (let i = n; i >= 0; i -= 1) d += ' L ' + xAt(i).toFixed(1) + ' ' + yAt(bottom[i]).toFixed(1);
+    return d + ' Z';
+  }
+
+  function linePath(values, w, y0, y1, max) {
+    const n = values.length - 1;
+    if (n < 1) return '';
+    const xAt = (i) => (i / n) * w;
+    const yAt = (v) => y1 - (max > 0 ? (Math.max(0, v) / max) * (y1 - y0) : 0);
+    return values.map((v, i) => (i ? 'L' : 'M') + ' ' + xAt(i).toFixed(1) + ' ' + yAt(v).toFixed(1)).join(' ');
+  }
+
+  function drawTimeChart() {
+    const svg = root.querySelector('[data-time-svg]');
+    const empty = root.querySelector('[data-time-empty]');
+    const legend = root.querySelector('[data-time-legend]');
+    const ticks = root.querySelector('[data-time-ticks]');
+    const scrub = root.querySelector('[data-time-scrub]');
+    const C = lastCompute || compute();
+    lastCompute = C;
+    syncPlayBound();
+    const series = C.series || { livrets: [], total: [0], delta: [0] };
+    const livrets = series.livrets || [];
+    const has = livrets.length > 0;
+    if (empty) empty.hidden = has;
+    if (scrub) {
+      scrub.max = String(state.horizon);
+      scrub.value = String(currentMonth());
+    }
+    if (ticks) {
+      ticks.innerHTML = timeTicks(state.horizon).map((m) => {
+        const left = state.horizon ? (m / state.horizon) * 100 : 0;
+        return `<span style="left:${left.toFixed(2)}%">${m === 0 ? 'M0' : yearsLabel(m)}</span>`;
+      }).join('');
+    }
+    if (legend) {
+      legend.innerHTML = livrets.map((liv) => {
+        const at = liv.balances[currentMonth()] || 0;
+        return `<span class="builder-time-swatch"><i style="background:${liv.color}"></i>${escapeHtml(liv.title)} <b class="mono">${euro(at)}</b></span>`;
+      }).join('');
+    }
+    if (!svg) return;
+    svg.innerHTML = '';
+    const W = 1000;
+    const max = Math.max(1, ...(series.total || [0])) * 1.06;
+    const maxDelta = Math.max(1, ...(series.delta || [0])) * 1.08;
+    const defs = svgEl('defs');
+    livrets.forEach((liv, i) => {
+      const g = svgEl('linearGradient', { id: 'time-fill-' + i, x1: '0', y1: '0', x2: '0', y2: '1' });
+      g.appendChild(svgEl('stop', { offset: '0%', 'stop-color': liv.color, 'stop-opacity': '0.42' }));
+      g.appendChild(svgEl('stop', { offset: '100%', 'stop-color': liv.color, 'stop-opacity': '0.04' }));
+      defs.appendChild(g);
+    });
+    svg.appendChild(defs);
+
+    [0.5, 1].forEach((t) => {
+      const y = (1 + (1 - t) * 32).toFixed(1);
+      svg.appendChild(svgEl('line', { x1: 0, y1: y, x2: W, y2: y, stroke: 'oklch(0.93 0.01 255)', 'stroke-width': '1' }));
+    });
+
+    let stack = (series.total || []).map(() => 0);
+    livrets.forEach((liv, i) => {
+      const bottom = stack.slice();
+      const top = liv.balances.map((v, m) => {
+        stack[m] += v;
+        return stack[m];
+      });
+      const path = svgEl('path', {
+        d: areaPath(top, bottom, W, 1, 33, max),
+        fill: 'url(#time-fill-' + i + ')',
+        stroke: liv.color,
+        'stroke-width': '1',
+        'stroke-opacity': '0.5',
+        'vector-effect': 'non-scaling-stroke',
+      });
+      svg.appendChild(path);
+    });
+
+    if (series.total && series.total.length > 1) {
+      svg.appendChild(svgEl('path', {
+        d: linePath(series.total, W, 1, 33, max),
+        fill: 'none',
+        stroke: 'oklch(0.45 0.11 195)',
+        'stroke-width': '1.7',
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        'vector-effect': 'non-scaling-stroke',
+      }));
+    }
+
+    const H = state.horizon;
+    const barW = H > 0 ? Math.max(1, (W / H) * (H > 80 ? 0.42 : 0.55)) : 3;
+    for (let m = 1; m <= H; m += 1) {
+      const x = (m / H) * W - barW / 2;
+      let y = 47;
+      livrets.forEach((liv) => {
+        const dlt = Math.max(0, (liv.balances[m] || 0) - (liv.balances[m - 1] || 0));
+        const h = maxDelta > 0 ? (dlt / maxDelta) * 11 : 0;
+        if (h < 0.35) return;
+        y -= h;
+        svg.appendChild(svgEl('rect', {
+          x: x.toFixed(2),
+          y: y.toFixed(2),
+          width: barW.toFixed(2),
+          height: h.toFixed(2),
+          rx: Math.min(1.2, barW / 2).toFixed(2),
+          fill: liv.color,
+          opacity: m <= currentMonth() ? '0.9' : '0.25',
+        }));
+      });
+    }
+  }
+
+  function syncTimePlay() {
+    const month = currentMonth();
+    const C = lastCompute;
+    const series = C?.series;
+    const total = playTotal(C);
+    const dlt = series?.delta?.[month] || 0;
+    const set = (sel, val) => { const el = root.querySelector(sel); if (el) el.textContent = val; };
+    set('[data-time-label]', playTitle(month));
+    set('[data-time-total]', euro(total));
+    set('[data-time-delta]', signedEuro(dlt));
+    const deltaEl = root.querySelector('[data-time-delta]');
+    if (deltaEl) deltaEl.classList.toggle('is-flat', Math.abs(dlt) < 0.5);
+    const scrub = root.querySelector('[data-time-scrub]');
+    if (scrub) {
+      if (scrub.max !== String(state.horizon)) scrub.max = String(state.horizon);
+      if (scrub.value !== String(month)) scrub.value = String(month);
+    }
+    const pct = state.horizon ? (month / state.horizon) * 100 : 0;
+    const gauge = root.querySelector('.builder-time-gauge');
+    if (gauge) gauge.style.setProperty('--pct', pct.toFixed(2) + '%');
+    const cursor = root.querySelector('[data-time-cursor]');
+    if (cursor) cursor.style.left = pct + '%';
+    const legend = root.querySelector('[data-time-legend]');
+    if (legend && series?.livrets) {
+      legend.querySelectorAll('.builder-time-swatch b').forEach((b, i) => {
+        const liv = series.livrets[i];
+        if (liv) b.textContent = euro(liv.balances[month] || 0);
+      });
+    }
+    const svg = root.querySelector('[data-time-svg]');
+    if (svg) {
+      svg.querySelectorAll('rect').forEach((rect) => {
+        const x = Number(rect.getAttribute('x')) || 0;
+        const w = Number(rect.getAttribute('width')) || 0;
+        const center = x + w / 2;
+        const m = state.horizon ? Math.round((center / 1000) * state.horizon) : 0;
+        rect.setAttribute('opacity', m <= month ? '0.92' : '0.28');
+      });
+    }
+  }
+
+  function showTimeTip(month, clientX) {
+    const tip = root.querySelector('[data-time-tip]');
+    const ghost = root.querySelector('[data-time-ghost]');
+    const stage = root.querySelector('.builder-time-stage');
+    const C = lastCompute;
+    if (!tip || !stage || !C?.series) return;
+    const total = C.series.total[month] || 0;
+    const dlt = C.series.delta[month] || 0;
+    tip.hidden = false;
+    tip.innerHTML = `<strong>${playTitle(month)}</strong><span class="mono">${euro(total)}</span><em>${signedEuro(dlt)}</em>`;
+    const r = stage.getBoundingClientRect();
+    const x = Math.min(r.width - 8, Math.max(8, clientX - r.left));
+    tip.style.left = x + 'px';
+    if (ghost) {
+      ghost.hidden = false;
+      ghost.style.left = (state.horizon ? (month / state.horizon) * 100 : 0) + '%';
+    }
+  }
+
+  function hideTimeTip() {
+    const tip = root.querySelector('[data-time-tip]');
+    const ghost = root.querySelector('[data-time-ghost]');
+    if (tip) tip.hidden = true;
+    if (ghost) ghost.hidden = true;
+  }
+
+  function refreshPlayReadings() {
+    const C = lastCompute;
+    if (!C) return;
+    state.nodes.forEach((n) => {
+      if (isAnnotation(n)) return;
+      const el = layer.querySelector(`[data-node="${CSS.escape(n.id)}"]`);
+      if (!el) return;
+      const stats = nodeStats(n, C);
+      stats.rows.forEach(([k, v, cls, key]) => {
+        if (!key) return;
+        const row = el.querySelector(`[data-play="${key}"]`);
+        if (!row) return;
+        const label = row.querySelector('span');
+        const val = row.querySelector('b');
+        if (label) label.textContent = k;
+        if (val) val.textContent = v;
+      });
+      if (n.kind === 'livret' && stats.chip && !stats.chip.bad) {
+        const chip = el.querySelector('.node-chip:not(.is-bad)');
+        if (chip) chip.textContent = stats.chip.text;
+      }
+    });
+    if (propsForm && !propsForm.hidden) {
+      const n = nodeById(state.selected);
+      if (n && !isAnnotation(n)) {
+        const stats = nodeStats(n, C);
+        stats.rows.forEach(([k, v, cls, key]) => {
+          if (!key) return;
+          const row = propsForm.querySelector(`[data-play="${key}"]`);
+          if (!row) return;
+          const label = row.querySelector('span');
+          const val = row.querySelector('b');
+          if (label) label.textContent = k;
+          if (val) val.textContent = v;
+        });
+      }
+    }
+    renderSide();
+  }
+
+  function bindTimeControls() {
+    if (timeBound) return;
+    const plot = root.querySelector('[data-time-plot]');
+    const scrub = root.querySelector('[data-time-scrub]');
+    if (!plot && !scrub) return;
+    timeBound = true;
+    let dragging = false;
+
+    const applyFromEvent = (ev) => {
+      setPlayMonth(timeMonthFromX(ev.clientX), true);
+    };
+
+    plot?.addEventListener('pointerdown', (ev) => {
+      if (ev.target.closest('.builder-time-empty')) return;
+      dragging = true;
+      plot.setPointerCapture?.(ev.pointerId);
+      applyFromEvent(ev);
+      ev.preventDefault();
+    });
+    plot?.addEventListener('pointermove', (ev) => {
+      const month = timeMonthFromX(ev.clientX);
+      if (dragging) setPlayMonth(month, true);
+      else showTimeTip(month, ev.clientX);
+    });
+    plot?.addEventListener('pointerup', (ev) => {
+      dragging = false;
+      try { plot.releasePointerCapture?.(ev.pointerId); } catch (e) {}
+    });
+    plot?.addEventListener('pointerleave', () => {
+      if (!dragging) hideTimeTip();
+    });
+    scrub?.addEventListener('input', () => {
+      setPlayMonth(parseInt(scrub.value, 10), true);
+    });
+    root.querySelectorAll('[data-time-step]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const step = Number(btn.getAttribute('data-time-step')) || 0;
+        setPlayMonth(currentMonth() + step, true);
+      });
+    });
+    if (typeof ResizeObserver !== 'undefined') {
+      const box = root.querySelector('[data-time]');
+      if (box) {
+        let raf = 0;
+        const ro = new ResizeObserver(() => {
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(() => {
+            if (lastCompute) {
+              drawTimeChart();
+              syncTimePlay();
+            }
+          });
+        });
+        ro.observe(box);
+      }
+    }
   }
 
   function portPoint(n, side) {
@@ -605,21 +1014,27 @@
       });
       rows.push(['Par mois', euro(n.amount)]);
       rows.push(['Reçoit', euro(inflow)]);
-      rows.push(['Sur ' + state.horizon + ' mois', euro(inflow * state.horizon)]);
+      const span = currentMonth();
+      rows.push([span <= 0 ? 'Aujourd’hui' : 'Sur ' + span + ' mois', euro(inflow * span), '', 'span']);
     } else {
       rows.push(['Reçoit', euro(inflow)]);
     }
     if (n.kind === 'compte') rows.push(['Reste dessus', euro(kept)]);
     if (n.kind === 'livret') {
+      const month = currentMonth();
       rows.push(['Taux', (n.rate || 0).toString().replace('.', ',') + ' %']);
-      rows.push(['Dans ' + state.horizon + ' mois', euro(C.fin?.[n.id] || 0), 'is-proj']);
+      rows.push([playLabel(month), euro(livretAt(C, n.id, month)), 'is-proj', 'proj']);
     }
     let chip = '';
     if (n.kind === 'repartiteur') {
       chip = kept > 0.5 ? { text: euro(kept) + ' non ventilés', bad: true } : { text: 'tout est ventilé', bad: false };
     }
     if (n.kind === 'livret' && C.full[n.id] !== null && C.full[n.id] !== undefined) {
-      chip = { text: C.full[n.id] === 0 ? 'déjà plein' : 'plein en ' + C.full[n.id] + ' mois', bad: false };
+      const fullAt = C.full[n.id];
+      const month = currentMonth();
+      if (fullAt === 0) chip = { text: 'déjà plein', bad: false };
+      else if (month >= fullAt) chip = { text: 'plein depuis le mois ' + fullAt, bad: false };
+      else chip = { text: 'plein dans ' + (fullAt - month) + ' mois', bad: false };
     }
     if (C.over[n.id]) chip = { text: 'sorties > entrées', bad: true };
     return { rows, chip };
@@ -693,7 +1108,7 @@
             </div>
             <div class="node-title">${escapeHtml(n.title)}</div>
             <div class="node-body">
-              ${stats.rows.map(([k, v, cls]) => `<div class="node-stat${cls === 'is-line' ? ' is-line' : ''}"><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
+              ${stats.rows.map(([k, v, cls, key]) => `<div class="node-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
               ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}">${stats.chip.text}</div>` : ''}
               ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
             </div>
@@ -760,9 +1175,8 @@
     set('[data-stat="out"]', euro(C.out));
     set('[data-stat="saved"]', euro(C.saved));
     set('[data-stat="unassigned"]', euro(C.leftover));
-    set('[data-stat="proj"]', euro(C.proj));
-    const years = state.horizon >= 24 ? 'Dans ' + Math.round(state.horizon / 12) + ' ans' : 'Dans ' + state.horizon + ' mois';
-    set('[data-horizon-label]', years);
+    set('[data-stat="proj"]', euro(playTotal(C)));
+    set('[data-horizon-label]', playLabel(currentMonth()));
     const hint = root.querySelector('[data-stat="proj-hint"]');
     if (hint) {
       hint.textContent = C.sat.length
@@ -898,7 +1312,7 @@
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
-            ${stats.rows.map(([k, v, cls]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
+            ${stats.rows.map(([k, v, cls, key]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
           </div>
         </div>
         ${n.kind === 'depense' ? `
@@ -956,8 +1370,11 @@
 
   function render(opts = {}) {
     lastCompute = compute();
+    syncPlayBound();
     renderCanvas();
     renderSide();
+    drawTimeChart();
+    syncTimePlay();
     applyTransform();
     syncPayload();
     if (opts.props !== false) renderProps();
@@ -1847,6 +2264,8 @@
     lastCompute = compute();
     renderCanvas();
     renderSide();
+    drawTimeChart();
+    syncTimePlay();
     syncPayload();
     if (edgeMode) renderProps();
     else if (itemAmount && n.kind === 'depense') refreshDepenseReadout(n);
@@ -2285,6 +2704,7 @@
   }
 
   if (nameInput) nameInput.addEventListener('input', syncPayload);
+  bindTimeControls();
   render();
   markSaved();
   requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });

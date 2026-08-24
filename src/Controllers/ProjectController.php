@@ -8,6 +8,7 @@ use App\Content;
 use App\Core\Auth;
 use App\Core\Session;
 use App\Core\View;
+use App\Models\Access;
 use App\Models\Project;
 use App\Models\Share;
 
@@ -20,8 +21,8 @@ class ProjectController
             'title' => 'Mes circuits',
             'nav' => 'projets',
             'user' => $user,
-            'projects' => Project::allForUser((int) $user['id']),
-            'recents' => Project::recents((int) $user['id']),
+            'projects' => Access::allProjectsForUser((int) $user['id']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
             'limit' => Project::PLAN_LIMITS[$user['plan']] ?? 3,
         ], 'layouts/app');
@@ -51,12 +52,14 @@ class ProjectController
     public function show(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findForUser((int) $id, (int) $user['id']);
-        if (!$project) {
+        $project = Project::findById((int) $id);
+        if (!$project || !Access::can((int) $user['id'], (int) $id, 'lecture')) {
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
-        $share = Share::findForProject((int) $project['id'], (int) $user['id']);
+        $canEdit = Access::can((int) $user['id'], (int) $id, 'edition');
+        $canManage = Access::can((int) $user['id'], (int) $id, 'gestion');
+        $share = $canManage ? Share::findForProject((int) $project['id'], (int) $project['user_id']) : null;
         $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
         View::render('app/builder', [
             'title' => $project['name'],
@@ -65,20 +68,22 @@ class ProjectController
             'user' => $user,
             'project' => $project,
             'payload' => $payload,
-            'setup' => (string) ($_GET['nouveau'] ?? '') === '1' && empty($payload['nodes']),
-            'recents' => Project::recents((int) $user['id']),
+            'setup' => $canEdit && (string) ($_GET['nouveau'] ?? '') === '1' && empty($payload['nodes']),
+            'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
             'share' => $share,
             'sends' => $share ? Share::sendsForShare((int) $share['id']) : [],
             'suggestedTitle' => $share['title'] ?? $project['name'],
+            'canEdit' => $canEdit,
+            'canManage' => $canManage,
         ], 'layouts/app');
     }
 
     public function update(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findForUser((int) $id, (int) $user['id']);
-        if (!$project) {
+        $project = Project::findById((int) $id);
+        if (!$project || !Access::can((int) $user['id'], (int) $id, 'edition')) {
             http_response_code(404);
             echo json_encode(['ok' => false]);
             return;
@@ -90,7 +95,7 @@ class ProjectController
             Session::flashSet('error', 'Impossible d’enregistrer un circuit vide ou illisible.');
             redirect('/app/circuits/' . $id);
         }
-        Project::updateCircuit((int) $id, (int) $user['id'], $name, $payload);
+        Project::updateById((int) $id, $name, $payload);
         Project::log((int) $user['id'], 'Circuit enregistré', (int) $id);
 
         if (($this->wantsJson())) {
@@ -106,8 +111,8 @@ class ProjectController
     {
         $user = Auth::requireUser();
         $this->guardLimit($user);
-        $project = Project::findForUser((int) $id, (int) $user['id']);
-        if (!$project) {
+        $project = Project::findById((int) $id);
+        if (!$project || !Access::can((int) $user['id'], (int) $id, 'gestion')) {
             redirect('/app/circuits');
         }
         $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
@@ -119,10 +124,10 @@ class ProjectController
     public function archive(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findForUser((int) $id, (int) $user['id']);
-        if ($project) {
+        $project = Project::findById((int) $id);
+        if ($project && Access::can((int) $user['id'], (int) $id, 'gestion')) {
             $next = $project['status'] === 'archive' ? 'actif' : 'archive';
-            Project::setStatus((int) $id, (int) $user['id'], $next);
+            Project::setStatusById((int) $id, $next);
             Project::log((int) $user['id'], $next === 'archive' ? 'Circuit archivé' : 'Circuit réactivé', (int) $id);
         }
         redirect('/app/circuits');
@@ -131,6 +136,10 @@ class ProjectController
     public function destroy(string $id): void
     {
         $user = Auth::requireUser();
+        if (!Access::can((int) $user['id'], (int) $id, 'proprietaire')) {
+            Session::flashSet('error', 'Seul le propriétaire peut supprimer un circuit.');
+            redirect('/app/circuits');
+        }
         Project::delete((int) $id, (int) $user['id']);
         Project::log((int) $user['id'], 'Circuit supprimé');
         Session::flashSet('success', 'Circuit supprimé.');

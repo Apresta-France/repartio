@@ -14,6 +14,11 @@ class Project
         'foyer' => 999,
     ];
 
+    public static function findById(int $id): ?array
+    {
+        return Database::fetch('SELECT * FROM projects WHERE id = ? LIMIT 1', [$id]);
+    }
+
     public static function findForUser(int $id, int $userId): ?array
     {
         return Database::fetch('SELECT * FROM projects WHERE id = ? AND user_id = ? LIMIT 1', [$id, $userId]);
@@ -75,10 +80,18 @@ class Project
 
     public static function updateCircuit(int $id, int $userId, string $name, array $payload): void
     {
+        if (!self::findForUser($id, $userId)) {
+            return;
+        }
+        self::updateById($id, $name, $payload);
+    }
+
+    public static function updateById(int $id, string $name, array $payload): void
+    {
         $totals = self::summarize($payload);
         Database::query(
             'UPDATE projects SET name = ?, horizon = ?, payload = ?, monthly_in = ?, monthly_out = ?, monthly_saved = ?, unassigned = ?, projection = ?, updated_at = NOW()
-             WHERE id = ? AND user_id = ?',
+             WHERE id = ?',
             [
                 $name,
                 (int) ($payload['horizon'] ?? 60),
@@ -89,7 +102,6 @@ class Project
                 $totals['unassigned'],
                 $totals['projection'],
                 $id,
-                $userId,
             ]
         );
     }
@@ -99,6 +111,14 @@ class Project
         Database::query(
             'UPDATE projects SET status = ?, updated_at = NOW() WHERE id = ? AND user_id = ?',
             [$status, $id, $userId]
+        );
+    }
+
+    public static function setStatusById(int $id, string $status): void
+    {
+        Database::query(
+            'UPDATE projects SET status = ?, updated_at = NOW() WHERE id = ?',
+            [$status, $id]
         );
     }
 
@@ -132,6 +152,96 @@ class Project
             'nodes' => [],
             'edges' => [],
         ];
+    }
+
+    public static function blockCount(array $payload): int
+    {
+        $n = 0;
+        foreach ($payload['nodes'] ?? [] as $node) {
+            $kind = (string) ($node['kind'] ?? '');
+            if ($kind !== '' && $kind !== 'note' && $kind !== 'groupe') {
+                $n++;
+            }
+        }
+        return $n;
+    }
+
+    public static function thumb(array $payload): array
+    {
+        $colors = [
+            'revenu' => 'oklch(0.62 0.12 192)',
+            'compte' => 'oklch(0.32 0.09 265)',
+            'repartiteur' => 'oklch(0.68 0.18 38)',
+            'livret' => 'oklch(0.48 0.11 240)',
+            'depense' => 'oklch(0.55 0.16 25)',
+        ];
+        $nodes = [];
+        foreach ($payload['nodes'] ?? [] as $node) {
+            $kind = (string) ($node['kind'] ?? '');
+            if ($kind === '' || $kind === 'note' || $kind === 'groupe' || ($node['id'] ?? '') === '') {
+                continue;
+            }
+            $nodes[] = $node;
+        }
+        if (count($nodes) > 18) {
+            $nodes = array_slice($nodes, 0, 18);
+        }
+        if ($nodes === []) {
+            return ['wires' => [], 'dots' => []];
+        }
+
+        $xs = array_map(static fn (array $n): float => (float) ($n['x'] ?? 0), $nodes);
+        $ys = array_map(static fn (array $n): float => (float) ($n['y'] ?? 0), $nodes);
+        $minX = min($xs);
+        $maxX = max($xs);
+        $minY = min($ys);
+        $maxY = max($ys);
+        $spanX = max(80.0, $maxX - $minX);
+        $spanY = max(60.0, $maxY - $minY);
+        $padX = 18.0;
+        $padY = 22.0;
+        $areaW = 300 - $padX * 2;
+        $areaH = 136 - $padY * 2;
+
+        $map = [];
+        $dots = [];
+        foreach ($nodes as $node) {
+            $kind = (string) ($node['kind'] ?? 'compte');
+            $x = $padX + ((float) ($node['x'] ?? 0) - $minX) / $spanX * $areaW;
+            $y = $padY + ((float) ($node['y'] ?? 0) - $minY) / $spanY * $areaH;
+            $width = match ($kind) {
+                'revenu' => 30,
+                'livret', 'depense' => 46,
+                default => 38,
+            };
+            $rx = max(6, min(300 - $width - 6, $x));
+            $ry = max(10, min(110, $y));
+            $map[(string) $node['id']] = [$rx + $width * 0.5, $ry + 8];
+            $dots[] = [$rx, $ry, $width, $colors[$kind] ?? $colors['compte']];
+        }
+
+        $wires = [];
+        foreach ($payload['edges'] ?? [] as $edge) {
+            $from = $map[(string) ($edge['from'] ?? '')] ?? null;
+            $to = $map[(string) ($edge['to'] ?? '')] ?? null;
+            if (!$from || !$to) {
+                continue;
+            }
+            $mx = ($from[0] + $to[0]) / 2;
+            $wires[] = sprintf(
+                'M%.1f %.1f C%.1f %.1f %.1f %.1f %.1f %.1f',
+                $from[0],
+                $from[1],
+                $mx,
+                $from[1],
+                $mx,
+                $to[1],
+                $to[0],
+                $to[1]
+            );
+        }
+
+        return ['wires' => $wires, 'dots' => $dots];
     }
 
     public static function summarize(array $payload): array
