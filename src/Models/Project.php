@@ -268,6 +268,8 @@ class Project
                 $in += max(0.0, (float) ($node['amount'] ?? 0));
             } elseif ($kind === 'depense') {
                 $out += ($kept[$id] ?? 0) + $outAmt;
+            } elseif (in_array($kind, ['groupe', 'note'], true)) {
+                continue;
             } elseif ($kind === 'livret') {
                 $saved += $kept[$id] ?? 0;
                 $balance = max(0.0, (float) ($node['start'] ?? 0));
@@ -294,13 +296,25 @@ class Project
         ];
     }
 
+    private static function nodeAmount(array $node): float
+    {
+        if (($node['kind'] ?? '') === 'depense' && !empty($node['items']) && is_array($node['items'])) {
+            $sum = 0.0;
+            foreach ($node['items'] as $item) {
+                $sum += max(0.0, (float) ($item['amount'] ?? 0));
+            }
+            return $sum;
+        }
+        return max(0.0, (float) ($node['amount'] ?? 0));
+    }
+
     private static function summarizeLegacy(array $payload): array
     {
         $in = 0.0;
         $out = 0.0;
         $saved = 0.0;
         foreach ($payload['nodes'] ?? [] as $node) {
-            $amount = (float) ($node['amount'] ?? 0);
+            $amount = self::nodeAmount($node);
             $kind = $node['kind'] ?? '';
             if ($kind === 'revenu') {
                 $in += $amount;

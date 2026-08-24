@@ -30,22 +30,22 @@ class Share
         );
     }
 
-    public static function create(int $projectId, int $userId, string $title, string $slug): array
+    public static function create(int $projectId, int $userId, string $title): array
     {
         Database::query(
             'INSERT INTO circuit_shares (project_id, user_id, slug, title, enabled, created_at, updated_at)
              VALUES (?, ?, ?, ?, 1, NOW(), NOW())',
-            [$projectId, $userId, $slug, $title]
+            [$projectId, $userId, self::uniqueToken(), $title]
         );
         return self::findForProject($projectId, $userId) ?? [];
     }
 
-    public static function update(int $id, int $userId, string $title, string $slug, bool $enabled = true): void
+    public static function update(int $id, int $userId, string $title, bool $enabled = true): void
     {
         Database::query(
-            'UPDATE circuit_shares SET title = ?, slug = ?, enabled = ?, updated_at = NOW()
+            'UPDATE circuit_shares SET title = ?, enabled = ?, updated_at = NOW()
              WHERE id = ? AND user_id = ?',
-            [$title, $slug, $enabled ? 1 : 0, $id, $userId]
+            [$title, $enabled ? 1 : 0, $id, $userId]
         );
     }
 
@@ -57,21 +57,13 @@ class Share
         );
     }
 
-    public static function uniqueSlug(string $slug, ?int $exceptId = null): string
+    public static function uniqueToken(): string
     {
-        $slug = slugify($slug);
-        if ($slug === '') {
-            $slug = 'circuit';
-        }
-        $slug = substr($slug, 0, 70);
-        $candidate = $slug;
-        $n = 2;
-        while (self::slugTaken($candidate, $exceptId)) {
-            $suffix = '-' . $n;
-            $candidate = substr($slug, 0, 70 - strlen($suffix)) . $suffix;
-            $n++;
-        }
-        return $candidate;
+        do {
+            $token = bin2hex(random_bytes(8));
+        } while (self::slugTaken($token));
+
+        return $token;
     }
 
     public static function slugTaken(string $slug, ?int $exceptId = null): bool

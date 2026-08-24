@@ -137,36 +137,8 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && shareModal && !shareModal.hidden) closeShare();
 });
 
-const slugifyLive = (text) => (text || '')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '')
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '');
-
 document.querySelectorAll('[data-share-form]').forEach((form) => {
-  const title = form.querySelector('[data-share-title]');
-  const slug = form.querySelector('[data-share-slug]');
   const copyInput = form.querySelector('[data-copy-value]');
-  const prefix = (copyInput?.value || '').replace(/[^/]+$/, '');
-  let slugTouched = Boolean(slug?.getAttribute('data-existing'));
-
-  const syncUrl = () => {
-    if (!copyInput || !slug) return;
-    const value = slugifyLive(slug.value) || 'circuit';
-    copyInput.value = prefix + value;
-  };
-
-  title?.addEventListener('input', () => {
-    if (slugTouched || !slug) return;
-    slug.value = slugifyLive(title.value);
-    syncUrl();
-  });
-  slug?.addEventListener('input', () => {
-    slugTouched = true;
-    slug.value = slugifyLive(slug.value);
-    syncUrl();
-  });
 
   form.querySelector('[data-copy]')?.addEventListener('click', async () => {
     const value = copyInput?.value || '';

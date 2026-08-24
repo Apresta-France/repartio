@@ -2,9 +2,8 @@
 $share = $share ?? null;
 $sends = $sends ?? [];
 $suggestedTitle = $suggestedTitle ?? ($share['title'] ?? $project['name']);
-$suggestedSlug = $suggestedSlug ?? ($share['slug'] ?? slugify($project['name']) ?: 'circuit');
 $returnTo = $returnTo ?? 'page';
-$publicUrl = $share ? url('/p/' . $share['slug']) : url('/p/' . $suggestedSlug);
+$publicUrl = $share ? url('/p/' . $share['slug']) : '';
 $enabled = $share && (int) $share['enabled'] === 1;
 ?>
 <form method="post" action="<?= e(url('/app/circuits/' . $project['id'] . '/partage')) ?>" class="share-form" data-share-form>
@@ -13,28 +12,24 @@ $enabled = $share && (int) $share['enabled'] === 1;
 
   <label class="field">
     <span>Nom de l’aperçu public</span>
-    <input name="title" data-share-title required maxlength="180" value="<?= e($suggestedTitle) ?>" placeholder="Ex. Budget familial">
+    <input name="title" required maxlength="180" value="<?= e($suggestedTitle) ?>" placeholder="Ex. Budget familial">
   </label>
 
-  <label class="field">
-    <span>Adresse du lien</span>
-    <div class="share-slug">
-      <span class="share-slug-prefix">/p/</span>
-      <input name="slug" data-share-slug <?= $share ? 'data-existing="1"' : '' ?> required maxlength="80" value="<?= e($suggestedSlug) ?>" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" title="Lettres minuscules, chiffres et tirets">
+  <?php if ($share): ?>
+    <div class="share-url-row">
+      <input type="text" readonly data-copy-value value="<?= e($publicUrl) ?>" class="share-url-input" aria-label="Lien public">
+      <button type="button" class="btn btn-ghost" data-copy>Copier</button>
+      <?php if ($enabled): ?>
+        <a class="btn btn-ghost" href="<?= e($publicUrl) ?>" target="_blank" rel="noopener">Ouvrir</a>
+      <?php endif; ?>
     </div>
-  </label>
-
-  <div class="share-url-row">
-    <input type="text" readonly data-copy-value value="<?= e($publicUrl) ?>" class="share-url-input" aria-label="Lien public">
-    <button type="button" class="btn btn-ghost" data-copy>Copier</button>
-    <?php if ($enabled): ?>
-      <a class="btn btn-ghost" href="<?= e($publicUrl) ?>" target="_blank" rel="noopener">Ouvrir</a>
-    <?php endif; ?>
-  </div>
+  <?php endif; ?>
   <?php if ($share && !$enabled): ?>
     <p class="builder-hint">Ce lien est révoqué. Enregistrez à nouveau pour le réactiver, ou utilisez Réactiver.</p>
+  <?php elseif ($share): ?>
+    <p class="builder-hint">Toute personne qui a le lien voit la dernière version enregistrée, en lecture seule, sans compte.</p>
   <?php else: ?>
-    <p class="builder-hint">Toute personne qui a le lien voit la dernière version enregistrée, en lecture seule, sans compte. Changer l’adresse invalide l’ancien lien.</p>
+    <p class="builder-hint">Un identifiant unique sera généré à l’enregistrement. Toute personne qui a le lien verra la dernière version, en lecture seule, sans compte.</p>
   <?php endif; ?>
 
   <label class="field">

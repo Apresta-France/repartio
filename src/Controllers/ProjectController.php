@@ -33,7 +33,7 @@ class ProjectController
         $this->guardLimit($user);
         $project = Project::create((int) $user['id'], 'Nouveau circuit', Project::emptyPayload());
         Project::log((int) $user['id'], 'Circuit créé', (int) $project['id']);
-        redirect('/app/circuits/' . $project['id']);
+        redirect('/app/circuits/' . $project['id'] . '?nouveau=1');
     }
 
     public function store(): void
@@ -57,19 +57,20 @@ class ProjectController
             redirect('/app/circuits');
         }
         $share = Share::findForProject((int) $project['id'], (int) $user['id']);
+        $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
         View::render('app/builder', [
             'title' => $project['name'],
             'nav' => 'projets',
             'builder' => true,
             'user' => $user,
             'project' => $project,
-            'payload' => json_decode((string) $project['payload'], true) ?: Project::emptyPayload(),
+            'payload' => $payload,
+            'setup' => (string) ($_GET['nouveau'] ?? '') === '1' && empty($payload['nodes']),
             'recents' => Project::recents((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
             'share' => $share,
             'sends' => $share ? Share::sendsForShare((int) $share['id']) : [],
             'suggestedTitle' => $share['title'] ?? $project['name'],
-            'suggestedSlug' => $share['slug'] ?? Share::uniqueSlug($project['name']),
         ], 'layouts/app');
     }
 

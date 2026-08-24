@@ -27,7 +27,6 @@ class ShareController
             'recents' => Project::recents((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
             'suggestedTitle' => $share['title'] ?? $project['name'],
-            'suggestedSlug' => $share['slug'] ?? Share::uniqueSlug($project['name']),
         ], 'layouts/app');
     }
 
@@ -36,13 +35,12 @@ class ShareController
         [$user, $project, $share] = $this->context($id);
         $title = trim((string) ($_POST['title'] ?? '')) ?: $project['name'];
         $title = mb_substr($title, 0, 180);
-        $slug = Share::uniqueSlug((string) ($_POST['slug'] ?? $title), $share ? (int) $share['id'] : null);
 
         if ($share) {
-            Share::update((int) $share['id'], (int) $user['id'], $title, $slug, true);
+            Share::update((int) $share['id'], (int) $user['id'], $title, true);
             $share = Share::findForProject((int) $project['id'], (int) $user['id']);
         } else {
-            $share = Share::create((int) $project['id'], (int) $user['id'], $title, $slug);
+            $share = Share::create((int) $project['id'], (int) $user['id'], $title);
         }
 
         Project::log((int) $user['id'], 'Lien de partage mis à jour', (int) $project['id']);

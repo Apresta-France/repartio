@@ -8,6 +8,27 @@
     repartiteur: { label: 'Répartiteur', color: 'oklch(0.48 0.12 300)', hasIn: true, hasOut: true },
     livret: { label: 'Livret', color: 'oklch(0.55 0.11 62)', hasIn: true, hasOut: true },
     depense: { label: 'Dépense', color: 'oklch(0.52 0.14 32)', hasIn: true, hasOut: false },
+    groupe: { label: 'Groupe', color: 'oklch(0.50 0.04 255)', hasIn: false, hasOut: false, annotation: true },
+    note: { label: 'Note', color: 'oklch(0.55 0.10 85)', hasIn: false, hasOut: false, annotation: true },
+  };
+
+  const TINTS = {
+    slate: { fill: 'oklch(0.96 0.012 255 / 0.58)', stroke: 'oklch(0.78 0.03 255)', ink: 'oklch(0.36 0.04 255)', block: 'oklch(0.48 0.10 248)', label: 'Bleu' },
+    teal: { fill: 'oklch(0.95 0.03 192 / 0.52)', stroke: 'oklch(0.70 0.07 192)', ink: 'oklch(0.36 0.07 195)', block: 'oklch(0.48 0.10 152)', label: 'Vert' },
+    orange: { fill: 'oklch(0.96 0.05 55 / 0.52)', stroke: 'oklch(0.76 0.10 50)', ink: 'oklch(0.46 0.12 45)', block: 'oklch(0.52 0.14 32)', label: 'Orange' },
+    violet: { fill: 'oklch(0.95 0.035 300 / 0.52)', stroke: 'oklch(0.74 0.07 300)', ink: 'oklch(0.38 0.09 300)', block: 'oklch(0.48 0.12 300)', label: 'Violet' },
+    rose: { fill: 'oklch(0.96 0.035 15 / 0.52)', stroke: 'oklch(0.76 0.07 15)', ink: 'oklch(0.44 0.10 15)', block: 'oklch(0.52 0.14 15)', label: 'Rose' },
+    amber: { fill: 'oklch(0.96 0.055 85 / 0.78)', stroke: 'oklch(0.78 0.09 85)', ink: 'oklch(0.40 0.09 70)', block: 'oklch(0.55 0.11 62)', label: 'Ambre' },
+  };
+
+  const DEFAULT_TINT = {
+    revenu: 'teal',
+    compte: 'slate',
+    repartiteur: 'violet',
+    livret: 'amber',
+    depense: 'orange',
+    groupe: 'slate',
+    note: 'amber',
   };
 
   const PRESETS = {
@@ -70,6 +91,28 @@
         { id: 'blank', title: 'Partir vierge', hint: 'Une dépense sans intitulé.', values: { title: 'Dépense' }, blank: true },
       ]},
     ],
+    groupe: [
+      { group: 'Regrouper', items: [
+        { id: 'famille', title: 'Famille', hint: 'Comptes et dépenses du foyer.', values: { title: 'Famille', tint: 'teal' } },
+        { id: 'enfants', title: 'Enfants', hint: 'Allocations, livrets, frais.', values: { title: 'Enfants', tint: 'violet' } },
+        { id: 'epargne', title: 'Épargne', hint: 'Livrets et répartiteur.', values: { title: 'Épargne', tint: 'orange' } },
+        { id: 'charges', title: 'Charges', hint: 'Prélèvements et fixes.', values: { title: 'Charges', tint: 'rose' } },
+        { id: 'activite', title: 'Activité', hint: 'Revenus pro et provisions.', values: { title: 'Activité', tint: 'slate' } },
+      ]},
+      { group: 'Libre', items: [
+        { id: 'blank', title: 'Partir vierge', hint: 'Un cadre à titrer vous-même.', values: { title: 'Groupe', tint: 'slate' }, blank: true },
+      ]},
+    ],
+    note: [
+      { group: 'Modèles', items: [
+        { id: 'hypothese', title: 'Hypothèse', hint: 'Un chiffre à relire plus tard.', values: { title: 'Hypothèse', tint: 'amber' } },
+        { id: 'rappel', title: 'À vérifier', hint: 'Point à confirmer sur le plan.', values: { title: 'À vérifier', tint: 'rose' } },
+        { id: 'contexte', title: 'Contexte', hint: 'Pourquoi ce câblage.', values: { title: 'Contexte', tint: 'slate' } },
+      ]},
+      { group: 'Libre', items: [
+        { id: 'blank', title: 'Partir vierge', hint: 'Une note sans intitulé.', values: { title: 'Note', tint: 'amber' }, blank: true },
+      ]},
+    ],
   };
 
   const LIVRET_PRESETS = {
@@ -92,6 +135,7 @@
     selected: null,
     openEdge: null,
     connectFrom: null,
+    connectSide: null,
     seq: 1,
   };
 
@@ -106,9 +150,29 @@
   const propsEmpty = root.querySelector('[data-props-empty]');
   const modal = document.querySelector('[data-preset-modal]');
   const presetList = modal?.querySelector('[data-preset-list]');
+  const setupModal = document.querySelector('[data-setup-modal]');
+  const setupForm = setupModal?.querySelector('[data-setup-form]');
+  const setupName = setupModal?.querySelector('[data-setup-name]');
+  const setupHorizon = setupModal?.querySelector('[data-setup-horizon]');
+  const scenarioModal = document.querySelector('[data-scenario-modal]');
+  const projectName = root.querySelector('.builder-project-name');
+  const horizonInput = root.querySelector('[data-horizon]');
+  const saveBtn = form?.querySelector('[data-save-btn]');
+  const horizonUnitWrap = root.querySelector('[data-horizon-unit]');
+  const horizonUnitToggle = root.querySelector('[data-horizon-unit-toggle]');
+  const horizonUnitMenu = root.querySelector('[data-horizon-unit-menu]');
+  const horizonUnitLabel = root.querySelector('[data-horizon-unit-label]');
+  let horizonUnit = 'mois';
+  let savedSnap = null;
+  let SCENARIOS = {};
+  try {
+    SCENARIOS = JSON.parse(document.querySelector('[data-scenarios]')?.textContent || '{}');
+  } catch (e) {
+    SCENARIOS = {};
+  }
   let lastCompute = null;
   let pendingDrop = null;
-  const flow = { paths: {}, pellets: [] };
+  const flow = { paths: {}, pills: {}, pellets: [] };
   const phase = {};
   let lastTick = 0;
   let flowPaused = false;
@@ -122,11 +186,111 @@
     return prefix + Math.random().toString(36).slice(2, 8);
   }
 
-  function normalizeNode(n) {
+  function isAnnotation(n) {
+    const kind = typeof n === 'string' ? n : n?.kind;
+    return Boolean(KINDS[kind]?.annotation);
+  }
+
+  function defaultTint(kind) {
+    return DEFAULT_TINT[kind] || 'slate';
+  }
+
+  function tintOf(n) {
+    return TINTS[n.tint] || TINTS[defaultTint(n?.kind)] || TINTS.slate;
+  }
+
+  function colorOf(n) {
+    return tintOf(n).block || KINDS[n.kind]?.color || '#999';
+  }
+
+  function tintPicker(n, mode) {
+    const current = TINTS[n.tint] ? n.tint : defaultTint(n.kind);
+    return Object.entries(TINTS).map(([id, t]) => {
+      const bg = mode === 'block' ? t.block : t.fill;
+      const bd = mode === 'block' ? t.block : t.stroke;
+      return `<button type="button" class="prop-tint${current === id ? ' is-on' : ''}" data-prop-tint="${id}" style="background:${bg};border-color:${bd}" title="${t.label}" aria-label="${t.label}"></button>`;
+    }).join('');
+  }
+
+  function tintControl(n, mode) {
+    const tint = tintOf(n);
+    const bg = mode === 'block' ? tint.block : tint.fill;
+    const bd = mode === 'block' ? tint.block : tint.stroke;
+    const label = tint.label || 'Couleur';
+    return `
+      <div class="prop-color">
+        <button type="button" class="prop-color-swatch" data-prop-color-toggle style="background:${bg};border-color:${bd}" title="Couleur · ${label}" aria-label="Changer la couleur, ${label}" aria-expanded="false" aria-haspopup="true"></button>
+        <div class="prop-color-menu" hidden>
+          <div class="prop-tints">${tintPicker(n, mode)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function closeTintMenus(except) {
+    propsForm?.querySelectorAll('.prop-color.is-open').forEach((el) => {
+      if (el === except) return;
+      el.classList.remove('is-open');
+      const btn = el.querySelector('[data-prop-color-toggle]');
+      const menu = el.querySelector('.prop-color-menu');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      if (menu) menu.hidden = true;
+    });
+  }
+
+  function normalizeLineItem(item) {
     return {
+      id: item?.id || uid('i'),
+      title: typeof item?.title === 'string' ? item.title : '',
+      amount: Math.max(0, Number(item?.amount) || 0),
+    };
+  }
+
+  function depenseItemsTotal(n) {
+    return (n.items || []).reduce((sum, item) => sum + Math.max(0, Number(item.amount) || 0), 0);
+  }
+
+  function syncDepenseItems(n) {
+    if (!n || n.kind !== 'depense') return;
+    if (!Array.isArray(n.items)) n.items = [];
+    n.amount = depenseItemsTotal(n);
+    syncDepenseAmount(n);
+  }
+
+  function addDepenseItem(n, title = '') {
+    if (!n || n.kind !== 'depense') return null;
+    if (!Array.isArray(n.items)) n.items = [];
+    const item = normalizeLineItem({ title, amount: 0 });
+    n.items.push(item);
+    syncDepenseItems(n);
+    return item;
+  }
+
+  function refreshDepenseReadout(n) {
+    if (!n || n.kind !== 'depense' || !propsForm) return;
+    const total = propsForm.querySelector('[data-items-total]');
+    if (total) total.textContent = euro(n.amount) + ' / mois';
+    const C = lastCompute || compute();
+    const stats = nodeStats(n, C);
+    const box = propsForm.querySelector('.prop-stats');
+    if (box) {
+      box.innerHTML = stats.rows.map(([k, v, cls]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('');
+    }
+    propsForm.querySelectorAll('[data-edge-value]').forEach((input) => {
+      const edge = state.edges.find((x) => x.id === input.getAttribute('data-edge-value'));
+      if (!edge) return;
+      input.value = String(edge.value);
+      const amt = input.closest('.prop-link')?.querySelector('.prop-link-amt');
+      if (amt) amt.textContent = euro(edge._amt) + ' / mois';
+    });
+  }
+
+  function normalizeNode(n) {
+    const kind = KINDS[n.kind] ? n.kind : 'compte';
+    const node = {
       id: n.id || uid('n'),
-      kind: KINDS[n.kind] ? n.kind : 'compte',
-      title: n.title || KINDS[n.kind]?.label || 'Bloc',
+      kind,
+      title: n.title || KINDS[kind]?.label || 'Bloc',
       x: Number(n.x) || 80,
       y: Number(n.y) || 80,
       amount: Number(n.amount) || 0,
@@ -135,7 +299,43 @@
       cap: Number(n.cap) || 0,
       preset: n.preset || '',
       note: typeof n.note === 'string' ? n.note : '',
+      tint: TINTS[n.tint] ? n.tint : defaultTint(kind),
     };
+    if (kind === 'depense') {
+      if (Array.isArray(n.items)) {
+        node.items = n.items.map(normalizeLineItem);
+      } else if (node.amount > 0) {
+        node.items = [normalizeLineItem({ title: node.title || 'Montant', amount: node.amount })];
+      } else {
+        node.items = [];
+      }
+      node.amount = depenseItemsTotal(node);
+    }
+    if (kind === 'groupe' || kind === 'note') {
+      node.w = Math.max(kind === 'groupe' ? 280 : 160, Number(n.w) || (kind === 'groupe' ? 560 : 200));
+      if (kind === 'groupe') node.h = Math.max(160, Number(n.h) || 340);
+    }
+    return node;
+  }
+
+  function nodesInside(g, seen) {
+    const bag = seen || {};
+    const w = g.w || g._w || 560;
+    const h = g.h || g._h || 340;
+    const found = [];
+    state.nodes.forEach((n) => {
+      if (n.id === g.id || bag[n.id]) return;
+      const nw = n.kind === 'groupe' ? (n.w || n._w || 560) : (n._w || 244);
+      const nh = n.kind === 'groupe' ? (n.h || n._h || 340) : (n._h || 100);
+      const cx = n.x + nw / 2;
+      const cy = n.y + nh / 2;
+      if (cx >= g.x && cy >= g.y && cx <= g.x + w && cy <= g.y + h) {
+        bag[n.id] = 1;
+        found.push(n);
+        if (n.kind === 'groupe') found.push(...nodesInside(n, bag));
+      }
+    });
+    return found;
   }
 
   function normalizeEdge(e) {
@@ -165,17 +365,18 @@
   }
 
   function compute() {
+    const graph = state.nodes.filter((n) => !isAnnotation(n));
     const byId = {};
     const outs = {};
     const indeg = {};
-    state.nodes.forEach((n) => { byId[n.id] = n; outs[n.id] = []; indeg[n.id] = 0; });
+    graph.forEach((n) => { byId[n.id] = n; outs[n.id] = []; indeg[n.id] = 0; });
     state.edges.forEach((e) => {
       if (!byId[e.from] || !byId[e.to]) return;
       outs[e.from].push(e);
       indeg[e.to] += 1;
     });
 
-    const q = state.nodes.filter((n) => indeg[n.id] === 0).map((n) => n.id);
+    const q = graph.filter((n) => indeg[n.id] === 0).map((n) => n.id);
     const order = [];
     const seen = {};
     while (q.length) {
@@ -188,13 +389,13 @@
         if (indeg[e.to] === 0) q.push(e.to);
       });
     }
-    const cycle = order.length !== state.nodes.length;
-    state.nodes.forEach((n) => { if (!seen[n.id]) order.push(n.id); });
+    const cycle = order.length !== graph.length;
+    graph.forEach((n) => { if (!seen[n.id]) order.push(n.id); });
 
     const inflow = {};
     const kept = {};
     const over = {};
-    state.nodes.forEach((n) => { inflow[n.id] = 0; });
+    graph.forEach((n) => { inflow[n.id] = 0; });
     state.edges.forEach((e) => { e._amt = 0; });
 
     order.forEach((id) => {
@@ -234,7 +435,7 @@
     const full = {};
     const sat = [];
     let proj = 0;
-    state.nodes.forEach((n) => {
+    graph.forEach((n) => {
       if (n.kind !== 'livret') return;
       let b = Math.max(0, n.start);
       const cap = n.cap > 0 ? n.cap : Infinity;
@@ -256,7 +457,7 @@
     let out = 0;
     let saved = 0;
     let leftover = 0;
-    state.nodes.forEach((n) => {
+    graph.forEach((n) => {
       const outAmt = (outs[n.id] || []).reduce((s, e) => s + e._amt, 0);
       if (n.kind === 'revenu') inn += Math.max(0, n.amount);
       else if (n.kind === 'depense') out += (kept[n.id] || 0) + outAmt;
@@ -291,14 +492,22 @@
     return path.getPointAtLength((lo + hi) / 2);
   }
 
-  function dodgeNodes(pt) {
-    for (let i = 0; i < state.nodes.length; i += 1) {
-      const n = state.nodes[i];
-      const w = n._w || 244;
-      const h = n._h || 100;
-      if (pt.x + 48 > n.x - 6 && pt.x - 48 < n.x + w + 6 && pt.y + 11 > n.y - 6 && pt.y - 11 < n.y + h + 6) {
-        return { x: pt.x, y: n.y - 13 };
-      }
+  function overlapsNode(pt, n) {
+    if (!n || n.kind === 'groupe') return false;
+    const w = n._w || 244;
+    const h = n._h || 100;
+    return pt.x + 36 > n.x && pt.x - 36 < n.x + w && pt.y + 10 > n.y && pt.y - 10 < n.y + h;
+  }
+
+  function dodgeNodes(pt, path, fromId, toId) {
+    const hit = state.nodes.some((n) => n.id !== fromId && n.id !== toId && overlapsNode(pt, n));
+    if (!hit || !path) return pt;
+    const len = path.getTotalLength();
+    if (!len) return pt;
+    for (let i = 1; i <= 12; i += 1) {
+      const t = 0.18 + (0.64 * i) / 12;
+      const q = path.getPointAtLength(len * t);
+      if (!state.nodes.some((n) => n.id !== fromId && n.id !== toId && overlapsNode(q, n))) return q;
     }
     return pt;
   }
@@ -311,11 +520,11 @@
     let mid;
     if (bx - ax > 52) {
       const span = bx - ax;
-      mid = pointAtX(path, len, ax + span * Math.min(0.82, 0.22 + idx * 0.17));
+      mid = pointAtX(path, len, ax + span * Math.min(0.78, 0.42 + idx * 0.14));
     } else {
-      mid = path.getPointAtLength(len * Math.min(0.74, 0.34 + idx * 0.11));
+      mid = path.getPointAtLength(len * Math.min(0.72, 0.46 + idx * 0.1));
     }
-    return dodgeNodes(mid);
+    return dodgeNodes(mid, path, a.id, b.id);
   }
 
   function spawnPellets(e, path, color) {
@@ -353,8 +562,7 @@
       flow.pellets.forEach((p) => {
         if (p.eid === e.id) p.len = len;
       });
-      if (!labels) return;
-      const pill = labels.querySelector(`[data-edge="${e.id}"]`);
+      const pill = flow.pills[e.id] || labels?.querySelector(`[data-edge="${CSS.escape(e.id)}"]`);
       if (!pill) return;
       const sibs = C.outs[e.from] || [];
       const idx = Math.max(0, sibs.indexOf(e));
@@ -382,6 +590,7 @@
   }
 
   function nodeStats(n, C) {
+    if (isAnnotation(n)) return { rows: [], chip: '' };
     const inflow = C.inflow[n.id] || 0;
     const kept = C.kept[n.id] || 0;
     const out = (C.outs[n.id] || []).reduce((s, e) => s + e._amt, 0);
@@ -390,6 +599,10 @@
       rows.push(['Par mois', euro(n.amount)]);
       rows.push(['Sort', euro(out)]);
     } else if (n.kind === 'depense') {
+      (n.items || []).forEach((item) => {
+        if (!String(item.title || '').trim() && !item.amount) return;
+        rows.push([String(item.title || '').trim() || 'Poste', euro(item.amount), 'is-line']);
+      });
       rows.push(['Par mois', euro(n.amount)]);
       rows.push(['Reçoit', euro(inflow)]);
       rows.push(['Sur ' + state.horizon + ' mois', euro(inflow * state.horizon)]);
@@ -419,40 +632,86 @@
     svg.innerHTML = '';
     if (labels) labels.innerHTML = '';
     flow.paths = {};
+    flow.pills = {};
     flow.pellets = [];
 
-    state.nodes.forEach((n) => {
+    const ordered = [
+      ...state.nodes.filter((n) => n.kind === 'groupe'),
+      ...state.nodes.filter((n) => n.kind !== 'groupe'),
+    ];
+    ordered.forEach((n) => {
       const meta = KINDS[n.kind];
-      const stats = nodeStats(n, C);
       const el = document.createElement('div');
-      el.className = 'node' + (state.selected === n.id ? ' is-selected' : '');
       el.dataset.node = n.id;
       el.style.left = n.x + 'px';
       el.style.top = n.y + 'px';
-      el.innerHTML = `
-        <div class="node-inner">
-          <div class="node-bar" style="background:${meta.color}"></div>
-          <div class="node-head"${readonly ? '' : ` data-drag="${n.id}"`}>
-            <span class="node-kind" style="color:${meta.color}">${meta.label}</span>
-            ${readonly ? '' : `<button type="button" class="node-kill" data-del="${n.id}" title="Supprimer">×</button>`}
+      const selected = state.selected === n.id ? ' is-selected' : '';
+      const kill = readonly ? '' : `<button type="button" class="node-kill" data-del="${n.id}" title="Supprimer">×</button>`;
+
+      if (n.kind === 'groupe') {
+        const tint = tintOf(n);
+        el.className = 'node is-group' + selected;
+        el.style.width = (n.w || 560) + 'px';
+        el.style.height = (n.h || 340) + 'px';
+        el.style.background = tint.fill;
+        el.style.borderColor = tint.stroke;
+        if (!readonly) el.setAttribute('data-drag', n.id);
+        el.innerHTML = `
+          <div class="group-label" style="color:${tint.ink};border-color:${tint.stroke}">
+            <span class="group-title">${escapeHtml(n.title)}</span>
+            ${kill}
           </div>
-          <div class="node-title">${escapeHtml(n.title)}</div>
-          <div class="node-body">
-            ${stats.rows.map(([k, v, cls]) => `<div class="node-stat"><span>${k}</span><b${cls ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
-            ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}">${stats.chip.text}</div>` : ''}
-            ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
+          ${n.note ? `<div class="group-note">${escapeHtml(n.note)}</div>` : ''}
+          ${readonly ? '' : `<div class="group-resize" data-resize="${n.id}" title="Redimensionner"></div>`}
+        `;
+      } else if (n.kind === 'note') {
+        const tint = tintOf(n);
+        el.className = 'node is-note' + selected;
+        el.style.width = (n.w || 200) + 'px';
+        el.style.background = tint.fill;
+        el.style.borderColor = tint.stroke;
+        el.innerHTML = `
+          <div class="node-inner">
+            <div class="node-head"${readonly ? '' : ` data-drag="${n.id}"`}>
+              <span class="node-kind" style="color:${tint.ink}">Note</span>
+              ${kill}
+            </div>
+            <div class="node-title">${escapeHtml(n.title)}</div>
+            ${n.note ? `<div class="node-body"><div class="node-note is-open">${escapeHtml(n.note)}</div></div>` : ''}
           </div>
-        </div>
-        ${readonly ? '' : (meta.hasIn ? `<div class="port port-in" data-port-in="${n.id}" style="border:2px solid ${meta.color}" title="Entrée"></div>` : '')}
-        ${readonly ? '' : (meta.hasOut ? `<div class="port port-out" data-port-out="${n.id}" style="background:${meta.color};border:2px solid #fff;box-shadow:0 0 0 1px ${meta.color}" title="Sortie"></div>` : '')}
-      `;
+        `;
+      } else {
+        const stats = nodeStats(n, C);
+        const color = colorOf(n);
+        el.className = 'node' + selected;
+        el.innerHTML = `
+          <div class="node-inner">
+            <div class="node-bar" style="background:${color}"></div>
+            <div class="node-head"${readonly ? '' : ` data-drag="${n.id}"`}>
+              <span class="node-kind" style="color:${color}">${meta.label}</span>
+              ${kill}
+            </div>
+            <div class="node-title">${escapeHtml(n.title)}</div>
+            <div class="node-body">
+              ${stats.rows.map(([k, v, cls]) => `<div class="node-stat${cls === 'is-line' ? ' is-line' : ''}"><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
+              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}">${stats.chip.text}</div>` : ''}
+              ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
+            </div>
+          </div>
+          ${readonly ? '' : (meta.hasIn ? `<div class="port port-in" data-port-in="${n.id}" style="border:2px solid ${color}" title="Entrée"></div>` : '')}
+          ${readonly ? '' : (meta.hasOut ? `<div class="port port-out" data-port-out="${n.id}" style="background:${color};border:2px solid #fff;box-shadow:0 0 0 1px ${color}" title="Sortie"></div>` : '')}
+        `;
+      }
       layer.appendChild(el);
-      n._w = el.offsetWidth;
-      n._h = el.offsetHeight;
+      n._w = n.kind === 'groupe' ? (n.w || el.offsetWidth) : el.offsetWidth;
+      n._h = n.kind === 'groupe' ? (n.h || el.offsetHeight) : el.offsetHeight;
     });
 
     if (state.connectFrom) {
-      const armed = layer.querySelector(`[data-port-out="${state.connectFrom}"]`);
+      const sel = state.connectSide === 'in'
+        ? `[data-port-in="${state.connectFrom}"]`
+        : `[data-port-out="${state.connectFrom}"]`;
+      const armed = layer.querySelector(sel);
       if (armed) armed.classList.add('is-armed');
     }
 
@@ -462,7 +721,7 @@
       if (!a || !b) return;
       const p1 = portPoint(a, 'out');
       const p2 = portPoint(b, 'in');
-      const color = KINDS[a.kind]?.color || '#999';
+      const color = colorOf(a);
       const hot = e._amt > 0.5;
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', curve(p1, p2));
@@ -486,6 +745,7 @@
         pill.style.top = mid.y + 'px';
         pill.innerHTML = `${euro(e._amt)}<i>${tag}</i>`;
         labels.appendChild(pill);
+        flow.pills[e.id] = pill;
       }
 
       spawnPellets(e, path, color);
@@ -512,6 +772,7 @@
     const warns = [];
     if (C.cycle) warns.push('Le circuit contient une boucle. Retirez un lien pour la casser.');
     state.nodes.forEach((n) => {
+      if (isAnnotation(n)) return;
       if (C.over[n.id]) warns.push('« ' + n.title + ' » distribue plus qu’il ne reçoit.');
       if (n.kind === 'repartiteur' && (C.kept[n.id] || 0) > 0.5) warns.push('« ' + n.title + ' » garde ' + euro(C.kept[n.id]) + ' sans destination.');
     });
@@ -532,6 +793,37 @@
     const C = lastCompute || compute();
     lastCompute = C;
     const meta = KINDS[n.kind];
+    if (isAnnotation(n)) {
+      const tint = tintOf(n);
+      if (propsEmpty) propsEmpty.hidden = true;
+      if (!propsForm) return;
+      propsForm.hidden = false;
+      propsForm.innerHTML = `
+        <div class="prop-block">
+          <div class="prop-head">
+            <span class="dot" style="background:${tint.stroke}"></span>
+            <div>
+              <div class="eyebrow">${meta.label}</div>
+              <div class="prop-kind">${escapeHtml(n.title)}</div>
+            </div>
+          </div>
+          <div class="prop-field">
+            <span>${n.kind === 'groupe' ? 'Titre du groupe' : 'Titre'}</span>
+            <div class="prop-name-row">
+              <input data-prop="title" value="${escapeAttr(n.title)}">
+              ${tintControl(n, 'fill')}
+            </div>
+          </div>
+          <label class="prop-field">
+            <span>${n.kind === 'note' ? 'Texte' : 'Commentaire'}</span>
+            <textarea data-prop="note" rows="4" placeholder="${n.kind === 'note' ? 'Rappel, hypothèse, détail…' : 'Optionnel'}">${escapeHtml(n.note)}</textarea>
+          </label>
+          ${n.kind === 'groupe' ? '<p class="builder-hint">Glissez le cadre pour emmener les blocs qu’il contient. Redimensionnez par le coin bas-droit.</p>' : '<p class="builder-hint">La note n’entre pas dans les calculs.</p>'}
+          <button type="button" class="btn btn-ghost" data-del-selected>Supprimer ${n.kind === 'groupe' ? 'le groupe' : 'la note'}</button>
+        </div>
+      `;
+      return;
+    }
     const stats = nodeStats(n, C);
     const outs = (C.outs[n.id] || []);
     if (propsEmpty) propsEmpty.hidden = true;
@@ -540,25 +832,44 @@
     propsForm.innerHTML = `
       <div class="prop-block">
         <div class="prop-head">
-          <span class="dot" style="background:${meta.color}"></span>
+          <span class="dot" style="background:${colorOf(n)}"></span>
           <div>
             <div class="eyebrow">${meta.label}</div>
             <div class="prop-kind">${escapeHtml(n.title)}</div>
           </div>
         </div>
-        <label class="prop-field">
+        <div class="prop-field">
           <span>Nom du bloc</span>
-          <input data-prop="title" value="${escapeAttr(n.title)}">
-        </label>
+          <div class="prop-name-row">
+            <input data-prop="title" value="${escapeAttr(n.title)}">
+            ${tintControl(n, 'block')}
+          </div>
+        </div>
         <label class="prop-field">
           <span>Commentaire</span>
           <textarea data-prop="note" rows="4" placeholder="Précisions, hypothèse, rappel…">${escapeHtml(n.note)}</textarea>
         </label>
-        ${n.kind === 'revenu' || n.kind === 'depense' ? `
+        ${n.kind === 'revenu' ? `
           <label class="prop-field">
             <span>Montant par mois</span>
             <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}">
           </label>` : ''}
+        ${n.kind === 'depense' ? `
+          <div>
+            <div class="prop-items-head">
+              <div class="eyebrow">Postes du mois</div>
+              <button type="button" class="btn btn-ghost" data-item-add style="min-height:0;padding:4px 8px;font-size:12px;">Ajouter</button>
+            </div>
+            <div class="prop-items">
+              ${(n.items || []).length ? (n.items || []).map((item) => `
+                <div class="prop-item" data-item-edit="${item.id}">
+                  <input data-item-title="${item.id}" type="text" placeholder="Essence, loyer, EDF…" value="${escapeAttr(item.title)}" aria-label="Titre du poste">
+                  <input data-item-amount="${item.id}" type="number" min="0" step="1" value="${item.amount}" aria-label="Montant du poste">
+                  <button type="button" class="btn btn-ghost" data-item-del="${item.id}" style="min-height:0;padding:4px 8px;font-size:12px;" title="Retirer ce poste" aria-label="Retirer ce poste">×</button>
+                </div>`).join('') : '<p class="builder-hint">Ajoutez loyer, EDF, essence… Le total alimente le bloc.</p>'}
+            </div>
+            ${(n.items || []).length ? `<div class="prop-items-total" data-items-total>${euro(n.amount)} / mois</div>` : ''}
+          </div>` : ''}
         ${n.kind === 'livret' ? `
           <label class="prop-field">
             <span>Type de livret</span>
@@ -587,7 +898,7 @@
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
-            ${stats.rows.map(([k, v, cls]) => `<div class="prop-stat"><span>${k}</span><b${cls ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
+            ${stats.rows.map(([k, v, cls]) => `<div class="prop-stat${cls === 'is-line' ? ' is-line' : ''}"><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
           </div>
         </div>
         ${n.kind === 'depense' ? `
@@ -635,7 +946,7 @@
                   </div>
                   <div class="prop-link-amt">${euro(e._amt)} / mois</div>
                 </div>`;
-              }).join('') : '<p class="builder-hint">Aucun lien. Cliquez le point droit, puis l’entrée d’un autre bloc.</p>'}
+              }).join('') : '<p class="builder-hint">Aucun lien. Restez cliqué sur un point, puis glissez jusqu’au point opposé d’un autre bloc.</p>'}
             </div>
           </div>` : ''}
         <button type="button" class="btn btn-ghost" data-del-selected>Supprimer le bloc</button>
@@ -652,13 +963,97 @@
     if (opts.props !== false) renderProps();
   }
 
-  function syncPayload() {
-    if (!payloadInput) return;
-    payloadInput.value = JSON.stringify({
+  function circuitSnap() {
+    return JSON.stringify({
+      name: (nameInput?.value || '').trim(),
       horizon: state.horizon,
       nodes: state.nodes.map(({ _w, _h, ...n }) => n),
       edges: state.edges.map(({ _amt, ...e }) => e),
     });
+  }
+
+  function isDirty() {
+    return savedSnap !== null && circuitSnap() !== savedSnap;
+  }
+
+  function syncSaveButton() {
+    if (!saveBtn) return;
+    const dirty = isDirty();
+    saveBtn.disabled = !dirty;
+    saveBtn.textContent = dirty ? 'Enregistrer' : 'Enregistré';
+    saveBtn.classList.toggle('btn-orange', dirty);
+    saveBtn.classList.toggle('is-saved', !dirty);
+    saveBtn.setAttribute('aria-disabled', dirty ? 'false' : 'true');
+  }
+
+  function markSaved() {
+    savedSnap = circuitSnap();
+    syncSaveButton();
+  }
+
+  function horizonDisplay() {
+    return horizonUnit === 'ans' ? Math.max(1, Math.round(state.horizon / 12)) : state.horizon;
+  }
+
+  function syncHorizonInput() {
+    if (!horizonInput) return;
+    if (horizonUnit === 'ans') {
+      horizonInput.min = '1';
+      horizonInput.max = '30';
+    } else {
+      horizonInput.min = '1';
+      horizonInput.max = '360';
+    }
+    horizonInput.value = String(horizonDisplay());
+  }
+
+  function applyHorizonFromInput() {
+    const raw = parseInt(horizonInput?.value, 10);
+    if (horizonUnit === 'ans') {
+      const years = Number.isNaN(raw) ? 5 : Math.min(30, Math.max(1, raw));
+      state.horizon = Math.min(360, Math.max(12, years * 12));
+    } else {
+      state.horizon = Number.isNaN(raw) ? 60 : Math.min(360, Math.max(1, raw));
+    }
+  }
+
+  function horizonUnitOpen() {
+    return Boolean(horizonUnitWrap?.classList.contains('is-open'));
+  }
+
+  function closeHorizonUnitMenu() {
+    if (!horizonUnitWrap || !horizonUnitMenu || !horizonUnitToggle) return;
+    horizonUnitWrap.classList.remove('is-open');
+    horizonUnitMenu.hidden = true;
+    horizonUnitToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  function openHorizonUnitMenu() {
+    if (!horizonUnitWrap || !horizonUnitMenu || !horizonUnitToggle) return;
+    horizonUnitWrap.classList.add('is-open');
+    horizonUnitMenu.hidden = false;
+    horizonUnitToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function setHorizonUnit(unit) {
+    horizonUnit = unit === 'ans' ? 'ans' : 'mois';
+    if (horizonUnitLabel) horizonUnitLabel.textContent = horizonUnit;
+    horizonUnitWrap?.querySelectorAll('[data-horizon-unit-opt]').forEach((btn) => {
+      btn.setAttribute('aria-selected', btn.getAttribute('data-horizon-unit-opt') === horizonUnit ? 'true' : 'false');
+    });
+    syncHorizonInput();
+    closeHorizonUnitMenu();
+  }
+
+  function syncPayload() {
+    if (payloadInput) {
+      payloadInput.value = JSON.stringify({
+        horizon: state.horizon,
+        nodes: state.nodes.map(({ _w, _h, ...n }) => n),
+        edges: state.edges.map(({ _amt, ...e }) => e),
+      });
+    }
+    syncSaveButton();
   }
 
   function escapeHtml(s) {
@@ -687,6 +1082,7 @@
       ...extra,
     });
     state.nodes.push(n);
+    offerLinkCoach();
     return n;
   }
 
@@ -699,7 +1095,9 @@
 
   function syncDepenseAmount(n) {
     const ins = state.edges.filter((e) => e.to === n.id);
-    if (!ins.length || n.amount <= 0) return;
+    if (!ins.length) return;
+    const driven = Array.isArray(n.items) && n.items.length > 0;
+    if (!driven && n.amount <= 0) return;
     const edge = ins.length === 1 ? ins[0] : (ins.find((e) => e.mode === 'fixe') || ins[0]);
     edge.mode = 'fixe';
     edge.value = n.amount;
@@ -707,9 +1105,11 @@
 
   function addEdge(from, to) {
     if (from === to) return;
-    if (!nodeById(from) || !nodeById(to)) return;
+    const src = nodeById(from);
+    const destNode = nodeById(to);
+    if (!src || !destNode || isAnnotation(src) || isAnnotation(destNode)) return;
     if (state.edges.some((e) => e.from === from && e.to === to)) return;
-    const dest = nodeById(to);
+    const dest = destNode;
     const already = state.edges.some((e) => e.from === from);
     const useFixe = dest && dest.kind === 'depense' && dest.amount > 0;
     state.edges.push({
@@ -719,16 +1119,19 @@
       mode: useFixe ? 'fixe' : (already ? 'pct' : 'reste'),
       value: useFixe ? dest.amount : (already ? 25 : 0),
     });
+    dismissLinkCoach();
   }
 
-  function dropPosition(clientX, clientY) {
+  function dropPosition(clientX, clientY, kind) {
+    const ox = kind === 'groupe' ? 280 : (kind === 'note' ? 100 : 122);
+    const oy = kind === 'groupe' ? 40 : 40;
     if (clientX != null && clientY != null) {
       const w = screenToWorld(clientX, clientY);
-      return { x: Math.round(w.x - 122), y: Math.round(w.y - 40) };
+      return { x: Math.round(w.x - ox), y: Math.round(w.y - oy) };
     }
     const r = canvas.getBoundingClientRect();
     const w = screenToWorld(r.left + r.width / 2, r.top + r.height / 2);
-    return { x: Math.round(w.x - 122 + (Math.random() * 40 - 20)), y: Math.round(w.y - 40 + (Math.random() * 40 - 20)) };
+    return { x: Math.round(w.x - ox + (Math.random() * 40 - 20)), y: Math.round(w.y - oy + (Math.random() * 40 - 20)) };
   }
 
   function openPresetModal(kind, x, y) {
@@ -740,10 +1143,16 @@
     }
     const meta = KINDS[kind];
     modal.querySelector('[data-preset-kind]').textContent = meta.label;
-    modal.querySelector('#preset-title').textContent = 'Préconfigurer ce ' + meta.label.toLowerCase();
+    modal.querySelector('#preset-title').textContent = kind === 'groupe'
+      ? 'Quel regroupement ?'
+      : (kind === 'note' ? 'Quelle note ?' : 'Préconfigurer ce ' + meta.label.toLowerCase());
     modal.querySelector('[data-preset-intro]').textContent = kind === 'compte' || kind === 'livret'
       ? 'Choisissez un produit : le taux et le plafond seront remplis automatiquement. Vous pourrez tout ajuster ensuite.'
-      : 'Choisissez un modèle, ou partez vierge.';
+      : (kind === 'groupe'
+        ? 'Le cadre se place derrière les blocs. Glissez-le pour les emmener, redimensionnez par le coin.'
+        : (kind === 'note'
+          ? 'La note n’entre pas dans les calculs : elle sert de rappel sur le plan.'
+          : 'Choisissez un modèle, ou partez vierge.'));
     presetList.innerHTML = PRESETS[kind].map((group) => `
       <div>
         <div class="preset-group-label">${group.group}</div>
@@ -765,7 +1174,99 @@
     if (modal) modal.hidden = true;
     document.body.classList.remove('is-locked');
     pendingDrop = null;
+    flushLinkCoach();
   }
+
+  const LINK_COACH_KEY = 'repartio.linkCoachSeen';
+  const linkCoach = document.querySelector('[data-link-coach]');
+  let linkCoachPending = false;
+  let linkCoachTimer = 0;
+
+  function graphNodeCount() {
+    return state.nodes.filter((n) => !isAnnotation(n)).length;
+  }
+
+  function fullscreenModalOpen() {
+    return Array.from(document.querySelectorAll('.builder-modal')).some((el) => !el.hidden);
+  }
+
+  function overlayBlockingCoach() {
+    const drawer = root.classList.contains('is-props-open') && window.matchMedia('(max-width: 980px)').matches;
+    return fullscreenModalOpen() || drawer;
+  }
+
+  function linkCoachSeen() {
+    try {
+      return window.localStorage.getItem(LINK_COACH_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markLinkCoachSeen() {
+    try {
+      window.localStorage.setItem(LINK_COACH_KEY, '1');
+    } catch (e) {}
+  }
+
+  function offerLinkCoach() {
+    if (readonly || !linkCoach || linkCoachSeen()) return;
+    if (graphNodeCount() !== 2) return;
+    if (state.edges.length) return;
+    if (overlayBlockingCoach()) {
+      linkCoachPending = true;
+      return;
+    }
+    scheduleLinkCoach();
+  }
+
+  function scheduleLinkCoach() {
+    linkCoachPending = false;
+    window.clearTimeout(linkCoachTimer);
+    linkCoachTimer = window.setTimeout(() => {
+      if (overlayBlockingCoach()) {
+        linkCoachPending = true;
+        return;
+      }
+      if (readonly || linkCoachSeen()) return;
+      if (graphNodeCount() !== 2 || state.edges.length) return;
+      showLinkCoach();
+    }, 360);
+  }
+
+  function flushLinkCoach() {
+    if (linkCoachPending) offerLinkCoach();
+  }
+
+  function showLinkCoach() {
+    if (!linkCoach || !linkCoach.hidden) return;
+    linkCoach.hidden = false;
+    markLinkCoachSeen();
+  }
+
+  function dismissLinkCoach() {
+    window.clearTimeout(linkCoachTimer);
+    linkCoachPending = false;
+    if (!linkCoach || linkCoach.hidden) return false;
+    linkCoach.hidden = true;
+    markLinkCoachSeen();
+    return true;
+  }
+
+  linkCoach?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-link-coach-dismiss]')) dismissLinkCoach();
+    e.stopPropagation();
+  });
+  linkCoach?.addEventListener('mousedown', (e) => e.stopPropagation());
+  linkCoach?.addEventListener('wheel', (e) => e.stopPropagation());
+  document.querySelectorAll('.builder-modal').forEach((el) => {
+    new MutationObserver(() => {
+      if (!overlayBlockingCoach()) flushLinkCoach();
+    }).observe(el, { attributes: true, attributeFilter: ['hidden'] });
+  });
+  new MutationObserver(() => {
+    if (!overlayBlockingCoach()) flushLinkCoach();
+  }).observe(root, { attributes: true, attributeFilter: ['class'] });
 
   function applyPreset(presetId) {
     if (!pendingDrop) return;
@@ -783,15 +1284,117 @@
 
   function cancelLink() {
     state.connectFrom = null;
+    state.connectSide = null;
     canvas.classList.remove('is-linking');
-    layer.querySelectorAll('.port.is-armed').forEach((p) => p.classList.remove('is-armed'));
+    layer.querySelectorAll('.port.is-armed, .port.is-target').forEach((p) => {
+      p.classList.remove('is-armed', 'is-target');
+    });
     const ghost = svg.querySelector('[data-ghost]');
     if (ghost) ghost.remove();
+  }
+
+  function startLink(id, side) {
+    dismissLinkCoach();
+    state.connectFrom = id;
+    state.connectSide = side;
+    canvas.classList.add('is-linking');
+    layer.querySelectorAll('.port.is-armed, .port.is-target').forEach((p) => {
+      p.classList.remove('is-armed', 'is-target');
+    });
+    const sel = side === 'in' ? `[data-port-in="${id}"]` : `[data-port-out="${id}"]`;
+    layer.querySelector(sel)?.classList.add('is-armed');
+  }
+
+  function portUnderPoint(clientX, clientY) {
+    const stack = document.elementsFromPoint(clientX, clientY);
+    for (const el of stack) {
+      const out = el.closest?.('[data-port-out]');
+      if (out && layer.contains(out)) {
+        return { id: out.getAttribute('data-port-out'), side: 'out', el: out };
+      }
+      const inn = el.closest?.('[data-port-in]');
+      if (inn && layer.contains(inn)) {
+        return { id: inn.getAttribute('data-port-in'), side: 'in', el: inn };
+      }
+    }
+    const world = screenToWorld(clientX, clientY);
+    let best = null;
+    let bestDist = 28 / state.scale;
+    state.nodes.forEach((n) => {
+      const meta = KINDS[n.kind];
+      if (!meta) return;
+      if (meta.hasOut) {
+        const p = portPoint(n, 'out');
+        const d = Math.hypot(p.x - world.x, p.y - world.y);
+        if (d < bestDist) {
+          bestDist = d;
+          const el = layer.querySelector(`[data-port-out="${n.id}"]`);
+          if (el) best = { id: n.id, side: 'out', el };
+        }
+      }
+      if (meta.hasIn) {
+        const p = portPoint(n, 'in');
+        const d = Math.hypot(p.x - world.x, p.y - world.y);
+        if (d < bestDist) {
+          bestDist = d;
+          const el = layer.querySelector(`[data-port-in="${n.id}"]`);
+          if (el) best = { id: n.id, side: 'in', el };
+        }
+      }
+    });
+    return best;
+  }
+
+  function compatibleTarget(port) {
+    if (!port || !state.connectFrom || !state.connectSide) return null;
+    if (port.id === state.connectFrom || port.side === state.connectSide) return null;
+    return port;
+  }
+
+  function updateLinkPreview(clientX, clientY) {
+    const source = nodeById(state.connectFrom);
+    if (!source) return;
+    const target = compatibleTarget(portUnderPoint(clientX, clientY));
+    layer.querySelectorAll('.port.is-target').forEach((p) => p.classList.remove('is-target'));
+    if (target) target.el.classList.add('is-target');
+    const cursor = screenToWorld(clientX, clientY);
+    const dest = target ? nodeById(target.id) : null;
+    const from = state.connectSide === 'out'
+      ? portPoint(source, 'out')
+      : (dest ? portPoint(dest, 'out') : cursor);
+    const to = state.connectSide === 'in'
+      ? portPoint(source, 'in')
+      : (dest ? portPoint(dest, 'in') : cursor);
+    let g = svg.querySelector('[data-ghost]');
+    if (!g) {
+      g = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      g.setAttribute('data-ghost', '1');
+      g.setAttribute('fill', 'none');
+      g.setAttribute('stroke', 'var(--teal)');
+      g.setAttribute('stroke-width', '1.8');
+      g.setAttribute('stroke-dasharray', '5 5');
+      svg.appendChild(g);
+    }
+    g.setAttribute('d', curve(from, to));
+  }
+
+  function finishLink(clientX, clientY) {
+    const target = compatibleTarget(portUnderPoint(clientX, clientY));
+    if (target) {
+      const from = state.connectSide === 'out' ? state.connectFrom : target.id;
+      const to = state.connectSide === 'out' ? target.id : state.connectFrom;
+      addEdge(from, to);
+      cancelLink();
+      render();
+      return;
+    }
+    cancelLink();
   }
 
   let paletteDrag = null;
   let drag = null;
   let pan = null;
+  let linkJustEnded = false;
 
   root.querySelectorAll('[data-add]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -801,7 +1404,7 @@
         return;
       }
       const kind = btn.getAttribute('data-add');
-      const pos = dropPosition();
+      const pos = dropPosition(null, null, kind);
       openPresetModal(kind, pos.x, pos.y);
     });
     btn.addEventListener('pointerdown', (e) => {
@@ -819,9 +1422,20 @@
     paletteDrag.moved = true;
     paletteDrag.btn.classList.add('is-dragging');
     if (!paletteDrag.ghost) {
+      const meta = KINDS[paletteDrag.kind];
       const g = document.createElement('div');
-      g.className = 'node builder-ghost';
-      g.innerHTML = `<div class="node-inner"><div class="node-bar" style="background:${KINDS[paletteDrag.kind].color}"></div><div class="node-head"><span class="node-kind" style="color:${KINDS[paletteDrag.kind].color}">${KINDS[paletteDrag.kind].label}</span></div><div class="node-title">${KINDS[paletteDrag.kind].label}</div></div>`;
+      if (paletteDrag.kind === 'groupe') {
+        g.className = 'node is-group builder-ghost';
+        g.innerHTML = `<div class="group-label"><span class="group-title">${meta.label}</span></div>`;
+      } else if (paletteDrag.kind === 'note') {
+        const tint = TINTS.amber;
+        g.className = 'node is-note builder-ghost';
+        g.style.background = tint.fill;
+        g.innerHTML = `<div class="node-inner"><div class="node-head"><span class="node-kind" style="color:${tint.ink}">Note</span></div><div class="node-title">Note</div></div>`;
+      } else {
+        g.className = 'node builder-ghost';
+        g.innerHTML = `<div class="node-inner"><div class="node-bar" style="background:${meta.color}"></div><div class="node-head"><span class="node-kind" style="color:${meta.color}">${meta.label}</span></div><div class="node-title">${meta.label}</div></div>`;
+      }
       document.body.appendChild(g);
       paletteDrag.ghost = g;
     }
@@ -840,7 +1454,7 @@
     setTimeout(() => { delete drag.btn.dataset.didDrag; }, 0);
     const over = document.elementFromPoint(e.clientX, e.clientY);
     if (over && canvas.contains(over)) {
-      const pos = dropPosition(e.clientX, e.clientY);
+      const pos = dropPosition(e.clientX, e.clientY, drag.kind);
       openPresetModal(drag.kind, pos.x, pos.y);
     }
   });
@@ -864,7 +1478,29 @@
       render();
       return;
     }
-    if (e.target.closest('button, .port, input, select')) return;
+    const out = e.target.closest('[data-port-out]');
+    const inn = e.target.closest('[data-port-in]');
+    if (out || inn) {
+      e.preventDefault();
+      e.stopPropagation();
+      startLink(
+        out ? out.getAttribute('data-port-out') : inn.getAttribute('data-port-in'),
+        out ? 'out' : 'in'
+      );
+      updateLinkPreview(e.clientX, e.clientY);
+      return;
+    }
+    if (e.target.closest('button, input, select')) return;
+    const resize = e.target.closest('[data-resize]');
+    if (resize) {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = resize.getAttribute('data-resize');
+      const node = nodeById(id);
+      if (!node) return;
+      drag = { type: 'resize', id, sx: e.clientX, sy: e.clientY, ow: node.w || 560, oh: node.h || 340, el: resize.closest('.node') };
+      return;
+    }
     const handle = e.target.closest('[data-drag]');
     if (!handle) return;
     const id = handle.getAttribute('data-drag');
@@ -872,25 +1508,51 @@
     if (!node) return;
     e.preventDefault();
     e.stopPropagation();
-    drag = { type: 'node', id, sx: e.clientX, sy: e.clientY, ox: node.x, oy: node.y, el: handle.closest('.node') };
+    const riders = node.kind === 'groupe'
+      ? nodesInside(node).map((n) => ({ id: n.id, ox: n.x, oy: n.y, el: layer.querySelector(`[data-node="${n.id}"]`) }))
+      : [];
+    drag = { type: 'node', id, sx: e.clientX, sy: e.clientY, ox: node.x, oy: node.y, el: handle.closest('.node'), riders };
   });
 
   canvas.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.node, .edge-pill, button, input, select')) return;
+    if (e.target.closest('.node, .edge-pill, .link-coach, button, input, select')) return;
     pan = { sx: e.clientX, sy: e.clientY, ox: state.tx, oy: state.ty };
     canvas.classList.add('is-grabbing');
   });
 
   document.addEventListener('mousemove', (e) => {
-    if (drag && drag.type === 'node') {
+    if (drag && drag.type === 'resize') {
       const node = nodeById(drag.id);
       if (!node) return;
-      node.x = Math.round(drag.ox + (e.clientX - drag.sx) / state.scale);
-      node.y = Math.round(drag.oy + (e.clientY - drag.sy) / state.scale);
+      node.w = Math.max(280, Math.round(drag.ow + (e.clientX - drag.sx) / state.scale));
+      node.h = Math.max(160, Math.round(drag.oh + (e.clientY - drag.sy) / state.scale));
+      node._w = node.w;
+      node._h = node.h;
+      if (drag.el) {
+        drag.el.style.width = node.w + 'px';
+        drag.el.style.height = node.h + 'px';
+      }
+    } else if (drag && drag.type === 'node') {
+      const node = nodeById(drag.id);
+      if (!node) return;
+      const dx = (e.clientX - drag.sx) / state.scale;
+      const dy = (e.clientY - drag.sy) / state.scale;
+      node.x = Math.round(drag.ox + dx);
+      node.y = Math.round(drag.oy + dy);
       if (drag.el) {
         drag.el.style.left = node.x + 'px';
         drag.el.style.top = node.y + 'px';
       }
+      (drag.riders || []).forEach((r) => {
+        const rider = nodeById(r.id);
+        if (!rider) return;
+        rider.x = Math.round(r.ox + dx);
+        rider.y = Math.round(r.oy + dy);
+        if (r.el) {
+          r.el.style.left = rider.x + 'px';
+          r.el.style.top = rider.y + 'px';
+        }
+      });
       lastCompute = lastCompute || compute();
       redrawWires();
     } else if (pan) {
@@ -898,52 +1560,29 @@
       state.ty = pan.oy + (e.clientY - pan.sy);
       applyTransform();
     }
-    if (state.connectFrom) {
-      const a = nodeById(state.connectFrom);
-      if (!a) return;
-      const w = screenToWorld(e.clientX, e.clientY);
-      let g = svg.querySelector('[data-ghost]');
-      if (!g) {
-        g = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        g.setAttribute('data-ghost', '1');
-        g.setAttribute('fill', 'none');
-        g.setAttribute('stroke', 'var(--teal)');
-        g.setAttribute('stroke-width', '1.8');
-        g.setAttribute('stroke-dasharray', '5 5');
-        svg.appendChild(g);
-      }
-      g.setAttribute('d', curve(portPoint(a, 'out'), w));
-    }
+    if (state.connectFrom) updateLinkPreview(e.clientX, e.clientY);
   });
 
-  document.addEventListener('mouseup', () => {
-    if (drag && drag.type === 'node') render({ props: false });
+  document.addEventListener('mouseup', (e) => {
+    if (drag && (drag.type === 'node' || drag.type === 'resize')) render({ props: false });
     drag = null;
     pan = null;
     canvas.classList.remove('is-grabbing');
+    if (state.connectFrom) {
+      finishLink(e.clientX, e.clientY);
+      linkJustEnded = true;
+      setTimeout(() => { linkJustEnded = false; }, 0);
+    }
   });
 
   layer.addEventListener('click', (e) => {
     if (readonly) return;
-    if (e.target.closest('[data-del]')) {
+    if (linkJustEnded) {
       e.stopPropagation();
       return;
     }
-    const out = e.target.closest('[data-port-out]');
-    if (out) {
+    if (e.target.closest('[data-del], .port')) {
       e.stopPropagation();
-      state.connectFrom = out.getAttribute('data-port-out');
-      canvas.classList.add('is-linking');
-      layer.querySelectorAll('.port.is-armed').forEach((p) => p.classList.remove('is-armed'));
-      out.classList.add('is-armed');
-      return;
-    }
-    const inn = e.target.closest('[data-port-in]');
-    if (inn && state.connectFrom) {
-      e.stopPropagation();
-      addEdge(state.connectFrom, inn.getAttribute('data-port-in'));
-      cancelLink();
-      render();
       return;
     }
     const node = e.target.closest('[data-node]');
@@ -966,7 +1605,7 @@
   });
 
   canvas.addEventListener('click', (e) => {
-    if (e.target.closest('.node, .edge-pill, .port, button')) return;
+    if (e.target.closest('.node, .edge-pill, .port, .link-coach, button')) return;
     if (state.connectFrom) { cancelLink(); return; }
     if (state.selected) selectNode(null);
   });
@@ -992,7 +1631,18 @@
     if (prop === 'note') n.note = e.target.value;
     if (prop === 'amount') {
       n.amount = Number(e.target.value) || 0;
-      if (n.kind === 'depense') syncDepenseAmount(n);
+      if (n.kind === 'depense') syncDepenseItems(n);
+    }
+    const itemTitle = e.target.getAttribute('data-item-title');
+    const itemAmount = e.target.getAttribute('data-item-amount');
+    if (itemTitle && n.kind === 'depense') {
+      const item = (n.items || []).find((x) => x.id === itemTitle);
+      if (item) item.title = e.target.value;
+    }
+    if (itemAmount && n.kind === 'depense') {
+      const item = (n.items || []).find((x) => x.id === itemAmount);
+      if (item) item.amount = Math.max(0, Number(e.target.value) || 0);
+      syncDepenseItems(n);
     }
     if (prop === 'start') n.start = Number(e.target.value) || 0;
     if (prop === 'rate') { n.rate = Number(e.target.value) || 0; n.preset = 'custom'; }
@@ -1031,9 +1681,56 @@
     renderSide();
     syncPayload();
     if (edgeMode) renderProps();
+    else if (itemAmount && n.kind === 'depense') refreshDepenseReadout(n);
   });
 
   propsForm?.addEventListener('click', (e) => {
+    const colorToggle = e.target.closest('[data-prop-color-toggle]');
+    if (colorToggle) {
+      const wrap = colorToggle.closest('.prop-color');
+      const open = !wrap?.classList.contains('is-open');
+      closeTintMenus(open ? wrap : null);
+      if (wrap) {
+        wrap.classList.toggle('is-open', open);
+        colorToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        const menu = wrap.querySelector('.prop-color-menu');
+        if (menu) menu.hidden = !open;
+      }
+      return;
+    }
+    const tintBtn = e.target.closest('[data-prop-tint]');
+    if (tintBtn) {
+      const n = nodeById(state.selected);
+      if (n) {
+        n.tint = tintBtn.getAttribute('data-prop-tint');
+        render();
+      }
+      return;
+    }
+    const addItem = e.target.closest('[data-item-add]');
+    if (addItem) {
+      const n = nodeById(state.selected);
+      if (n && n.kind === 'depense') {
+        const item = addDepenseItem(n);
+        render();
+        if (item) {
+          const field = propsForm.querySelector(`[data-item-title="${CSS.escape(item.id)}"]`);
+          field?.focus();
+        }
+      }
+      return;
+    }
+    const delItem = e.target.closest('[data-item-del]');
+    if (delItem) {
+      const n = nodeById(state.selected);
+      if (n && n.kind === 'depense') {
+        const id = delItem.getAttribute('data-item-del');
+        n.items = (n.items || []).filter((item) => item.id !== id);
+        syncDepenseItems(n);
+        render();
+      }
+      return;
+    }
     const delEdge = e.target.closest('[data-edge-del]');
     if (delEdge) {
       state.edges = state.edges.filter((ed) => ed.id !== delEdge.getAttribute('data-edge-del'));
@@ -1044,13 +1741,30 @@
       removeNode(state.selected);
       render();
     }
+    if (!e.target.closest('.prop-color')) closeTintMenus();
   });
 
-  root.querySelector('[data-horizon]')?.addEventListener('input', (e) => {
-    const v = parseInt(e.target.value, 10);
-    state.horizon = Number.isNaN(v) ? 60 : Math.min(360, Math.max(1, v));
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.prop-color')) closeTintMenus();
+    if (!e.target.closest('[data-horizon-unit]')) closeHorizonUnitMenu();
+  });
+
+  root.querySelector('[data-horizon]')?.addEventListener('input', () => {
+    applyHorizonFromInput();
     render({ props: false });
     renderProps();
+  });
+  horizonUnitToggle?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (horizonUnitOpen()) closeHorizonUnitMenu();
+    else openHorizonUnitMenu();
+  });
+  horizonUnitMenu?.addEventListener('click', (e) => {
+    const opt = e.target.closest('[data-horizon-unit-opt]');
+    if (!opt) return;
+    e.preventDefault();
+    setHorizonUnit(opt.getAttribute('data-horizon-unit-opt'));
   });
 
   root.querySelector('[data-zoom-in]')?.addEventListener('click', () => { state.scale = Math.min(1.8, state.scale * 1.15); applyTransform(); });
@@ -1070,12 +1784,151 @@
     event.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  form?.addEventListener('submit', () => syncPayload());
+  form?.addEventListener('submit', (e) => {
+    syncPayload();
+    if (!isDirty()) e.preventDefault();
+  });
+
+  function setupOpen() {
+    return Boolean(setupModal && !setupModal.hidden);
+  }
+
+  function clearSetupParam() {
+    try {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has('nouveau')) return;
+      url.searchParams.delete('nouveau');
+      const next = url.pathname + url.search + url.hash;
+      history.replaceState({}, '', next);
+    } catch (e) {}
+  }
+
+  function syncSetupPresets() {
+    if (!setupModal || !setupHorizon) return;
+    const current = parseInt(setupHorizon.value, 10);
+    setupModal.querySelectorAll('[data-setup-preset]').forEach((btn) => {
+      btn.classList.toggle('active', parseInt(btn.getAttribute('data-setup-preset'), 10) === current);
+    });
+  }
+
+  function closeSetupModal() {
+    if (!setupModal) return;
+    setupModal.hidden = true;
+    if (!scenarioModal || scenarioModal.hidden) document.body.classList.remove('is-locked');
+    clearSetupParam();
+  }
+
+  function scenarioOpen() {
+    return Boolean(scenarioModal && !scenarioModal.hidden);
+  }
+
+  function openScenarioModal() {
+    if (readonly || !scenarioModal) return;
+    closePresetModal();
+    if (setupModal && !setupModal.hidden) closeSetupModal();
+    scenarioModal.hidden = false;
+    document.body.classList.add('is-locked');
+  }
+
+  function closeScenarioModal() {
+    if (!scenarioModal) return;
+    scenarioModal.hidden = true;
+    document.body.classList.remove('is-locked');
+  }
+
+  function applyScenario(key) {
+    const pack = SCENARIOS[key];
+    if (!pack || !pack.payload) return;
+    if (state.nodes.length && !confirm('Remplacer le circuit actuel par « ' + pack.title + ' » ?')) return;
+    state.nodes = (pack.payload.nodes || []).map(normalizeNode);
+    state.edges = (pack.payload.edges || []).map(normalizeEdge);
+    state.horizon = Number(pack.payload.horizon) || state.horizon;
+    state.selected = null;
+    state.openEdge = null;
+    cancelLink();
+    syncHorizonInput();
+    const currentName = (nameInput?.value || '').trim();
+    if (nameInput && (!currentName || /^nouveau circuit$/i.test(currentName))) {
+      nameInput.value = pack.title;
+      if (projectName) projectName.textContent = pack.title;
+      document.title = pack.title + ' — repartio.fr';
+    }
+    closeScenarioModal();
+    render();
+    requestAnimationFrame(fit);
+  }
+
+  function applySetup() {
+    const name = (setupName?.value || '').trim() || 'Nouveau circuit';
+    const raw = parseInt(setupHorizon?.value, 10);
+    const horizon = Number.isNaN(raw) ? 60 : Math.min(360, Math.max(1, raw));
+    if (nameInput) nameInput.value = name;
+    if (projectName) projectName.textContent = name;
+    document.title = name + ' — repartio.fr';
+    state.horizon = horizon;
+    syncHorizonInput();
+    syncPayload();
+    render({ props: false });
+    if (form) {
+      const data = new FormData(form);
+      fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      }).then((res) => {
+        if (res.ok) markSaved();
+      }).catch(() => {});
+    }
+    closeSetupModal();
+  }
+
+  setupModal?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-setup-dismiss]')) closeSetupModal();
+  });
+  setupHorizon?.addEventListener('input', syncSetupPresets);
+  setupModal?.querySelectorAll('[data-setup-preset]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (!setupHorizon) return;
+      setupHorizon.value = btn.getAttribute('data-setup-preset') || '60';
+      syncSetupPresets();
+    });
+  });
+  setupForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    applySetup();
+  });
+  document.querySelectorAll('[data-scenario-open]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openScenarioModal();
+    });
+  });
+  scenarioModal?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-scenario-dismiss]')) {
+      closeScenarioModal();
+      return;
+    }
+    const pick = e.target.closest('[data-scenario-load]');
+    if (pick) applyScenario(pick.getAttribute('data-scenario-load'));
+  });
+  if (setupOpen() && !readonly) {
+    document.body.classList.add('is-locked');
+    requestAnimationFrame(() => {
+      setupName?.focus();
+      setupName?.select();
+    });
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (horizonUnitOpen()) { closeHorizonUnitMenu(); return; }
+      if (propsForm?.querySelector('.prop-color.is-open')) { closeTintMenus(); return; }
+      if (setupOpen()) { closeSetupModal(); return; }
+      if (scenarioOpen()) { closeScenarioModal(); return; }
       if (modal && !modal.hidden) { closePresetModal(); return; }
       if (state.connectFrom) { cancelLink(); return; }
+      if (dismissLinkCoach()) return;
       if (state.selected) selectNode(null);
       return;
     }
@@ -1112,5 +1965,6 @@
 
   if (nameInput) nameInput.addEventListener('input', syncPayload);
   render();
+  markSaved();
   requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });
 })();
