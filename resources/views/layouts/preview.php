@@ -17,6 +17,7 @@
     <?= $content ?>
   </div>
 </div>
+<?php require BASE_PATH . '/resources/views/partials/tracking.php'; ?>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
 <script src="<?= e(asset('js/builder.js')) ?>"></script>
 </body>

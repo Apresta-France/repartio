@@ -34,6 +34,7 @@
       ['Mot de passe', 'Authentification', 'Hashé, jamais en clair', 'Oui'],
       ['Circuits', 'Fournir le service', 'Jusqu’à suppression', 'Oui'],
       ['Messages de contact', 'Répondre à votre demande', 'Le temps du traitement', 'Oui'],
+      ['Mesure d’audience anonymisée', 'Comprendre l’usage du site, sans cookie', '6 mois, agrégée', 'Oui'],
       ['Journaux d’e-mails', 'Tracer les envois transactionnels', '90 jours', 'Oui'],
     ] as $r): ?>
       <div class="table-row table-data">

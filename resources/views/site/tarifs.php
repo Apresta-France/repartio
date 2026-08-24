@@ -14,7 +14,7 @@
         <span class="eyebrow">Libre</span>
         <div style="display:flex;align-items:baseline;gap:7px;margin:0;"><span class="mono" style="font-size:38px;font-weight:500;">0 €</span><span>pour toujours</span></div>
         <p style="color:var(--muted);font-size:13.5px;">De quoi décrire entièrement un budget familial et le projeter à cinq ans.</p>
-        <a class="btn btn-ghost" href="<?= e(url('/creer-un-compte')) ?>" style="width:100%;">Créer un circuit</a>
+        <a class="btn btn-ghost" href="<?= e(url('/creer-un-compte')) ?>" style="width:100%;" data-rv="event" data-rv-name="plan_selected" data-rv-props='{"plan":"libre"}'>Créer un circuit</a>
       </div>
       <div style="padding:20px 26px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;font-size:13.5px;">
         <?php foreach (['3 circuits enregistrés','Les 5 types de blocs','Plafonds et taux réglementaires','Projection jusqu’à 60 mois','Export JSON et CSV'] as $f): ?>
@@ -27,7 +27,7 @@
         <div style="display:flex;align-items:center;"><span class="eyebrow">Complet</span><span class="chip" style="margin-left:auto;background:var(--orange);color:#fff;border-color:var(--orange);">Le plus pris</span></div>
         <div style="display:flex;align-items:baseline;gap:7px;margin:0;"><span class="mono" style="font-size:38px;font-weight:500;" data-price="complet">4,90 €</span><span data-unit="complet">par mois</span></div>
         <p style="color:var(--muted);font-size:13.5px;">Pour comparer des scénarios et suivre un circuit qui évolue.</p>
-        <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>" style="width:100%;">Passer en Complet</a>
+        <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>" style="width:100%;" data-rv="event" data-rv-name="plan_selected" data-rv-props='{"plan":"complet"}'>Passer en Complet</a>
       </div>
       <div style="padding:20px 26px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;font-size:13.5px;">
         <?php foreach (['Circuits illimités','Scénarios comparés','Horizon jusqu’à 120 mois','Historique des versions','Lien de partage','Impression A3'] as $f): ?>
@@ -40,7 +40,7 @@
         <span class="eyebrow">Foyer</span>
         <div style="display:flex;align-items:baseline;gap:7px;margin:0;"><span class="mono" style="font-size:38px;font-weight:500;" data-price="foyer">7,90 €</span><span data-unit="foyer">par mois</span></div>
         <p style="color:var(--muted);font-size:13.5px;">Le même circuit, à deux, avec chacun son accès.</p>
-        <a class="btn btn-ghost" href="<?= e(url('/contact')) ?>" style="width:100%;">Choisir Foyer</a>
+        <a class="btn btn-ghost" href="<?= e(url('/contact')) ?>" style="width:100%;" data-rv="event" data-rv-name="plan_selected" data-rv-props='{"plan":"foyer"}'>Choisir Foyer</a>
       </div>
       <div style="padding:20px 26px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;font-size:13.5px;">
         <?php foreach (['Tout le plan Complet','2 comptes liés','Blocs personnels masquables','Journal par personne','Assistance 24 h ouvrées'] as $f): ?>

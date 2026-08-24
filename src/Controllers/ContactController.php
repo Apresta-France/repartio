@@ -51,6 +51,7 @@ class ContactController
         ]);
 
         Session::flashSet('contact_sent', true);
+        track_rv('event', 'contact_sent', ['topic' => $topic]);
         redirect('/contact');
     }
 }

@@ -17,6 +17,7 @@
   <?php require BASE_PATH . '/resources/views/partials/footer.php'; ?>
 </div>
 <?php require BASE_PATH . '/resources/views/partials/flash.php'; ?>
+<?php require BASE_PATH . '/resources/views/partials/tracking.php'; ?>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@ class SiteController
         View::render('site/home', [
             'title' => 'Chaque euro a une trajectoire',
             'nav' => '',
+            'featured' => Content::featuredTemplates(),
         ], 'layouts/site');
     }
 
@@ -102,9 +103,18 @@ class SiteController
     public function cgu(): void
     {
         View::render('site/legal', [
-            'title' => 'Conditions générales',
+            'title' => 'Conditions générales d’utilisation',
             'nav' => '',
             'doc' => Content::cgu(),
+        ], 'layouts/site');
+    }
+
+    public function cgv(): void
+    {
+        View::render('site/legal', [
+            'title' => 'Conditions générales de vente',
+            'nav' => '',
+            'doc' => Content::cgv(),
         ], 'layouts/site');
     }
 

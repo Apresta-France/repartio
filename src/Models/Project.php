@@ -14,6 +14,32 @@ class Project
         'foyer' => 999,
     ];
 
+    public const PLAN_LABELS = [
+        'libre' => 'Libre',
+        'complet' => 'Complet',
+        'foyer' => 'Foyer',
+    ];
+
+    public static function planLimit(array $user): int
+    {
+        return self::PLAN_LIMITS[$user['plan'] ?? ''] ?? 3;
+    }
+
+    public static function atPlanLimit(array $user): bool
+    {
+        return self::activeCount((int) $user['id']) >= self::planLimit($user);
+    }
+
+    public static function planLimitMessage(array $user, string $wanted = ''): string
+    {
+        $limit = self::planLimit($user);
+        $label = self::PLAN_LABELS[$user['plan'] ?? ''] ?? 'Libre';
+        $wantedBit = $wanted !== '' ? ' pour « ' . $wanted . ' »' : '';
+
+        return 'Votre forfait ' . $label . ' est plein (' . $limit . ' circuits déjà utilisés)'
+            . $wantedBit . '. Archivez-en un, ou changez de forfait, pour libérer un emplacement.';
+    }
+
     public static function findById(int $id): ?array
     {
         return Database::fetch('SELECT * FROM projects WHERE id = ? LIMIT 1', [$id]);

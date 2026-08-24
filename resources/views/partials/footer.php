@@ -11,6 +11,7 @@
   <div class="footer-col" style="margin-right:auto;">
     <a href="<?= e(url('/')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:38px;"></a>
     <span class="eyebrow">Répartiteur de revenus</span>
+    <span class="footer-powered">Propulsé par <a href="https://reinvent.fr" rel="noopener noreferrer">ReInvent</a></span>
   </div>
   <div class="footer-col">
     <span class="eyebrow">Produit</span>
@@ -35,7 +36,7 @@
     <a href="<?= e(url('/confidentialite')) ?>">Confidentialité</a>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 repartio.fr</span>
+    <span>© 2026 repartio.fr — un produit <a href="https://reinvent.fr" rel="noopener noreferrer">ReInvent</a></span>
     <span style="margin-left:auto;">repartio est un outil de simulation, pas un conseil en investissement.</span>
   </div>
 </footer>

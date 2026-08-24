@@ -17,9 +17,12 @@ class AuthController
     public function loginForm(): void
     {
         if (Auth::check()) {
-            redirect('/app');
+            $this->afterAuth();
         }
-        View::render('auth/login', ['title' => 'Connexion'], 'layouts/auth');
+        View::render('auth/login', [
+            'title' => 'Connexion',
+            'pendingCircuit' => self::pendingCircuitTitle(),
+        ], 'layouts/auth');
     }
 
     public function login(): void
@@ -40,9 +43,12 @@ class AuthController
     public function registerForm(): void
     {
         if (Auth::check()) {
-            redirect('/app');
+            $this->afterAuth();
         }
-        View::render('auth/register', ['title' => 'Créer un compte'], 'layouts/auth');
+        View::render('auth/register', [
+            'title' => 'Créer un compte',
+            'pendingCircuit' => self::pendingCircuitTitle(),
+        ], 'layouts/auth');
     }
 
     public function register(): void
@@ -87,6 +93,8 @@ class AuthController
         Auth::login($user);
         Project::log((int) $user['id'], 'Compte créé');
         Session::flashSet('success', 'Compte créé. Un e-mail de bienvenue vient de partir.');
+        track_rv('signup');
+        track_rv('event', 'trial_started', ['plan' => 'libre']);
         $this->afterAuth();
     }
 
@@ -195,6 +203,17 @@ class AuthController
             Session::forget('invite_token');
             redirect('/invitation/' . $token);
         }
+        (new ProjectController())->resumePendingTemplate();
         redirect('/app');
+    }
+
+    private static function pendingCircuitTitle(): string
+    {
+        $pending = Session::get('pending_template');
+        if (!is_array($pending)) {
+            return '';
+        }
+
+        return trim((string) ($pending['name'] ?? ''));
     }
 }

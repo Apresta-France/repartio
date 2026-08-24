@@ -39,14 +39,36 @@ class ProjectController
 
     public function store(): void
     {
+        $template = trim((string) ($_POST['template'] ?? ''));
+        $name = trim((string) ($_POST['name'] ?? ''));
+        if ($template !== '') {
+            $this->startFromTemplate($template, $name);
+        }
+
         $user = Auth::requireUser();
         $this->guardLimit($user);
-        $name = trim((string) ($_POST['name'] ?? 'Nouveau circuit')) ?: 'Nouveau circuit';
-        $template = (string) ($_POST['template'] ?? '');
-        $payload = Content::templatePayload($template) ?? Project::emptyPayload();
-        $project = Project::create((int) $user['id'], $name, $payload);
-        Project::log((int) $user['id'], 'Circuit créé depuis un modèle', (int) $project['id']);
+        $name = $name !== '' ? $name : 'Nouveau circuit';
+        $project = Project::create((int) $user['id'], $name, Project::emptyPayload());
+        Project::log((int) $user['id'], 'Circuit créé', (int) $project['id']);
         redirect('/app/circuits/' . $project['id']);
+    }
+
+    public function resumePendingTemplate(): void
+    {
+        $pending = Session::get('pending_template');
+        Session::forget('pending_template');
+        if (!is_array($pending) || trim((string) ($pending['key'] ?? '')) === '') {
+            return;
+        }
+        $user = Auth::user();
+        if (!$user) {
+            return;
+        }
+        $this->openTemplateForUser(
+            $user,
+            trim((string) $pending['key']),
+            trim((string) ($pending['name'] ?? ''))
+        );
     }
 
     public function show(string $id): void
@@ -146,12 +168,49 @@ class ProjectController
         redirect('/app/circuits');
     }
 
+    private function startFromTemplate(string $key, string $name): void
+    {
+        $pack = Content::templates()[$key] ?? null;
+        if ($pack === null) {
+            Session::flashSet('error', 'Ce circuit type est introuvable.');
+            redirect('/circuits-types');
+        }
+
+        $name = $name !== '' ? $name : (string) $pack['title'];
+        $user = Auth::user();
+        if (!$user) {
+            Session::set('pending_template', ['key' => $key, 'name' => $name]);
+            redirect('/creer-un-compte');
+        }
+
+        $this->openTemplateForUser($user, $key, $name, $pack);
+    }
+
+    private function openTemplateForUser(array $user, string $key, string $name, ?array $pack = null): void
+    {
+        $pack ??= Content::templates()[$key] ?? null;
+        if ($pack === null) {
+            Session::flashSet('error', 'Ce circuit type est introuvable.');
+            redirect('/circuits-types');
+        }
+
+        $name = $name !== '' ? $name : (string) $pack['title'];
+        if (Project::atPlanLimit($user)) {
+            Session::flashSet('error', Project::planLimitMessage($user, $name));
+            redirect('/app');
+        }
+
+        $payload = $pack['payload'] ?? Project::emptyPayload();
+        $project = Project::create((int) $user['id'], $name, $payload);
+        Project::log((int) $user['id'], 'Circuit créé depuis un modèle', (int) $project['id']);
+        redirect('/app/circuits/' . $project['id']);
+    }
+
     private function guardLimit(array $user): void
     {
-        $limit = Project::PLAN_LIMITS[$user['plan']] ?? 3;
-        if (Project::activeCount((int) $user['id']) >= $limit) {
-            Session::flashSet('error', 'Limite du plan Libre atteinte (3 circuits). Passez en Complet pour continuer.');
-            redirect('/app/forfait');
+        if (Project::atPlanLimit($user)) {
+            Session::flashSet('error', Project::planLimitMessage($user));
+            redirect('/app');
         }
     }
 

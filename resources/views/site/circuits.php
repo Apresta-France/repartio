@@ -17,17 +17,7 @@ $count = count($templates);
 <section class="section" style="padding-top:0;">
   <div class="grid-3">
     <?php foreach ($templates as $key => $t): ?>
-      <form method="post" action="<?= e(url('/app/circuits')) ?>" class="card" data-filter-item="<?= e($t['category']) ?>" data-filter-group="templates" style="display:flex;flex-direction:column;">
-        <?= csrf_field() ?>
-        <input type="hidden" name="name" value="<?= e($t['title']) ?>">
-        <input type="hidden" name="template" value="<?= e((string) $key) ?>">
-        <?php $wires = $t['thumb']['wires']; $dots = $t['thumb']['dots']; require BASE_PATH . '/resources/views/partials/circuit-thumb.php'; ?>
-        <div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1;">
-          <div style="display:flex;gap:10px;"><strong><?= e($t['title']) ?></strong><span class="mono" style="margin-left:auto;font-size:10.5px;color:var(--faint);"><?= (int) $t['blocks'] ?> blocs</span></div>
-          <p style="margin:0;font-size:13px;line-height:1.5;color:var(--muted);"><?= e($t['hint']) ?></p>
-          <button class="btn btn-ghost" style="margin-top:auto;" type="submit">Ouvrir dans le builder</button>
-        </div>
-      </form>
+      <?php require BASE_PATH . '/resources/views/partials/template-card.php'; ?>
     <?php endforeach; ?>
   </div>
 </section>

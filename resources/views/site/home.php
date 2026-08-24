@@ -6,17 +6,6 @@ $C = [
     'livret' => 'oklch(0.48 0.11 240)',
     'depense' => 'oklch(0.55 0.16 25)',
 ];
-$thumbs = [
-    ['Couple, comptes séparés', '11 blocs', 'Deux salaires, un joint pour les factures, un joint pour le quotidien, épargne par personne.',
-        ['M40 30 C80 30 80 68 120 68', 'M40 104 C80 104 80 72 120 72', 'M164 70 C200 70 200 34 240 34', 'M164 74 C200 74 200 104 240 104'],
-        [[8, 22, 32, $C['revenu']], [8, 96, 32, $C['revenu']], [120, 60, 44, $C['compte']], [240, 26, 52, $C['depense']], [240, 96, 52, $C['livret']]]],
-    ['Auto-entrepreneur', '9 blocs', 'Chiffre d’affaires, provision URSSAF, rémunération vers le compte perso, épargne de précaution.',
-        ['M40 68 C80 68 80 30 120 30', 'M40 72 C80 72 80 104 120 104', 'M164 32 C200 32 210 68 240 68'],
-        [[8, 60, 32, $C['revenu']], [120, 22, 44, $C['compte']], [120, 96, 44, $C['depense']], [240, 60, 52, $C['livret']]]],
-    ['Épargne de précaution', '6 blocs', 'Un seul revenu, une règle de trois mois de charges, saturation du LEP puis du Livret A.',
-        ['M40 68 C80 68 80 42 120 42', 'M164 44 C200 44 200 24 240 24', 'M164 48 C200 48 200 96 240 96'],
-        [[8, 60, 32, $C['revenu']], [120, 34, 44, $C['repartiteur']], [240, 16, 52, $C['livret']], [240, 88, 52, $C['livret']]]],
-];
 ?>
 <section class="hero">
   <div class="hero-copy">
@@ -33,54 +22,99 @@ $thumbs = [
       <div><strong>0 €</strong><span>euro non affecté</span></div>
     </div>
   </div>
-  <div class="hero-canvas" aria-hidden="true">
+  <div class="hero-canvas" data-hero-demo aria-hidden="true">
     <div class="dots"></div>
     <div class="hero-canvas-bar">
       <span class="chip">mon-circuit · 60 mois</span>
-      <span class="chip" style="margin-left:auto;color:var(--teal-ink);background:oklch(0.96 0.03 195);border-color:oklch(0.88 0.05 195);">non affecté · 0 €</span>
+      <span class="chip hero-unassigned is-warn" data-hero-unassigned>non affecté · 7 160 €</span>
     </div>
+    <span class="chip hero-saved is-empty" data-hero-saved>dans 5 ans · 0 €</span>
+    <div class="hero-palette">
+      <span class="eyebrow">Poser un bloc</span>
+      <div class="hero-palette-list">
+        <?php foreach ([
+            ['revenu', 'Revenu', 'oklch(0.48 0.10 152)'],
+            ['compte', 'Compte', 'oklch(0.48 0.10 248)'],
+            ['repartiteur', 'Répartiteur', 'oklch(0.48 0.12 300)'],
+            ['livret', 'Livret', 'oklch(0.55 0.11 62)'],
+            ['depense', 'Dépense', 'oklch(0.52 0.14 32)'],
+        ] as $p): ?>
+          <div class="palette-item" data-hero-kind="<?= e($p[0]) ?>">
+            <span class="dot" style="background:<?= e($p[2]) ?>"></span>
+            <span class="palette-item-label"><?= e($p[1]) ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <div class="hero-stage">
     <div class="hero-scene">
       <svg class="hero-wires" width="920" height="720">
-        <path d="M 252 111 C 308 111, 264 171, 320 171" fill="none" stroke="<?= e($C['revenu']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 252 251 C 308 251, 264 171, 320 171" fill="none" stroke="<?= e($C['revenu']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 252 391 C 308 391, 264 171, 320 171" fill="none" stroke="<?= e($C['revenu']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 552 171 C 608 171, 574 91, 630 91" fill="none" stroke="<?= e($C['compte']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 552 171 C 608 171, 574 371, 630 371" fill="none" stroke="<?= e($C['compte']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 552 371 C 608 371, 574 231, 630 231" fill="none" stroke="<?= e($C['repartiteur']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 552 371 C 608 371, 574 401, 630 401" fill="none" stroke="<?= e($C['repartiteur']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
-        <path d="M 552 371 C 608 371, 574 571, 630 571" fill="none" stroke="<?= e($C['repartiteur']) ?>" stroke-width="1.7" stroke-linecap="round"></path>
+        <?php
+        $wires = [
+            ['j-c', 'salaire', 'compte', 'revenu', false, 'M 252 111 C 302 111, 270 171, 320 171'],
+            ['ae-c', 'ae', 'compte', 'revenu', false, 'M 252 251 C 302 251, 270 171, 320 171'],
+            ['lo-c', 'loyers', 'compte', 'revenu', false, 'M 252 391 C 302 391, 270 171, 320 171'],
+            ['c-p', 'compte', 'prelev', 'compte', true, 'M 552 171 C 602 171, 580 91, 630 91'],
+            ['c-r', 'compte', 'repart', 'compte', true, 'M 552 171 C 649 171, 223 371, 320 371'],
+            ['r-a', 'repart', 'livreta', 'repartiteur', true, 'M 552 371 C 602 371, 580 231, 630 231'],
+            ['r-d', 'repart', 'ldds', 'repartiteur', true, 'M 552 371 C 602 371, 580 401, 630 401'],
+            ['r-e', 'repart', 'lep', 'repartiteur', true, 'M 552 371 C 602 371, 580 481, 630 481'],
+        ];
+        foreach ($wires as [$id, $from, $to, $kind, $pending, $d]): ?>
+          <path class="hero-wire<?= $pending ? ' is-pending' : ' is-on' ?>" data-hero-wire="<?= e($id) ?>" data-from="<?= e($from) ?>" data-to="<?= e($to) ?>" pathLength="1" d="<?= e($d) ?>" fill="none" stroke="<?= e($C[$kind]) ?>" stroke-width="1.7" stroke-linecap="round"></path>
+        <?php endforeach; ?>
+        <path class="hero-drag" data-hero-drag pathLength="1" d="" fill="none" stroke="oklch(0.52 0.04 255)" stroke-width="1.7" stroke-dasharray="6 7" stroke-linecap="round"></path>
       </svg>
       <?php
       $nodes = [
-          [20, 60, 'revenu', 'Revenu', 'Salaire Julien', [['Par mois', '1 500 €']]],
-          [20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '5 000 €']]],
-          [20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '2 000 €']]],
-          [320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '7 160 €'], ['Reste', '0 €']]],
-          [320, 320, 'repartiteur', 'Répartiteur', 'Répartiteur épargne', [['Reçoit', '3 665 €'], ['Ventilé', '100 %']]],
-          [630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '3 254 €']]],
-          [630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '1 466 €'], ['Dans 60 mois', '22 950 €']]],
-          [630, 350, 'livret', 'Livret', 'LDDS', [['Reçoit', '1 100 €'], ['Dans 60 mois', '12 000 €']]],
-          [630, 520, 'livret', 'Livret', 'LEP', [['Reçoit', '1 100 €'], ['Dans 60 mois', '10 000 €']]],
+          ['salaire', 20, 60, 'revenu', 'Revenu', 'Salaire', [['Par mois', '1 500 €']], false],
+          ['ae', 20, 200, 'revenu', 'Revenu', 'Auto-entreprise', [['Par mois', '5 000 €']], false],
+          ['loyers', 20, 340, 'revenu', 'Revenu', 'Loyers du local', [['Par mois', '2 000 €']], false],
+          ['compte', 320, 120, 'compte', 'Compte', 'Compte courant', [['Reçoit', '7 160 €'], ['Reste', '7 160 €', 'compte-reste']], false],
+          ['repart', 320, 320, 'repartiteur', 'Répartiteur', 'Répartiteur épargne', [['Reçoit', '0 €', 'repart-in'], ['Ventilé', '0 %', 'repart-pct']], true],
+          ['prelev', 630, 40, 'depense', 'Dépense', 'Prélèvements', [['Reçoit', '3 254 €']], true],
+          ['livreta', 630, 180, 'livret', 'Livret', 'Livret A', [['Reçoit', '1 466 €'], ['Dans 60 mois', '22 950 €', 'livreta-proj']], true],
+          ['ldds', 630, 350, 'livret', 'Livret', 'LDDS', [['Reçoit', '1 100 €'], ['Dans 60 mois', '12 000 €']], true],
+          ['lep', 630, 430, 'livret', 'Livret', 'LEP', [['Reçoit', '1 100 €'], ['Dans 60 mois', '10 000 €']], true],
       ];
-      foreach ($nodes as [$x, $y, $kind, $label, $title, $rows]):
+      foreach ($nodes as [$id, $x, $y, $kind, $label, $title, $rows, $pending]):
           $color = $C[$kind];
       ?>
-        <div class="hero-node" style="left:<?= (int) $x ?>px;top:<?= (int) $y ?>px;color:<?= e($color) ?>">
+        <div class="hero-node<?= $pending ? ' is-pending' : '' ?>" data-hero-node="<?= e($id) ?>" data-x="<?= (int) $x ?>" data-y="<?= (int) $y ?>" style="left:<?= (int) $x ?>px;top:<?= (int) $y ?>px;color:<?= e($color) ?>">
           <div class="bar" style="background:<?= e($color) ?>"></div>
           <span class="kind" style="color:<?= e($color) ?>"><?= e($label) ?></span>
           <div class="title"><?= e($title) ?></div>
           <?php foreach ($rows as $row): ?>
-            <div class="row"><span><?= e($row[0]) ?></span><b><?= e($row[1]) ?></b></div>
+            <div class="row"><span><?= e($row[0]) ?></span><b<?= isset($row[2]) ? ' data-hero-val="' . e($row[2]) . '"' : '' ?>><?= e($row[1]) ?></b></div>
           <?php endforeach; ?>
           <div style="height:11px;"></div>
           <i class="port port-in"></i>
           <i class="port port-out" style="background:<?= e($color) ?>"></i>
         </div>
       <?php endforeach; ?>
-      <?php foreach ([[386, 132, '1 500 €'], [386, 202, '3 660 €'], [386, 272, '2 000 €'], [591, 122, '3 254 €'], [591, 262, '3 665 €'], [591, 292, '1 466 €'], [591, 386, '1 100 €'], [591, 462, '1 100 €']] as $f): ?>
-        <div class="hero-flow" style="left:<?= (int) $f[0] ?>px;top:<?= (int) $f[1] ?>px;"><?= e($f[2]) ?></div>
+      <div class="hero-node hero-ghost" data-hero-ghost hidden></div>
+      <?php
+      $flows = [
+          ['j-c', 286, 133, '1 500 €', false],
+          ['ae-c', 286, 203, '3 660 €', false],
+          ['lo-c', 286, 273, '2 000 €', false],
+          ['c-p', 591, 122, '3 254 €', true],
+          ['c-r', 591, 262, '3 665 €', true],
+          ['r-a', 591, 292, '1 466 €', true],
+          ['r-d', 591, 386, '1 100 €', true],
+          ['r-e', 591, 426, '1 100 €', true],
+      ];
+      foreach ($flows as [$id, $x, $y, $label, $pending]): ?>
+        <div class="hero-flow<?= $pending ? ' is-pending' : ' is-on' ?>" data-hero-flow="<?= e($id) ?>" style="left:<?= (int) $x ?>px;top:<?= (int) $y ?>px;"><?= e($label) ?></div>
       <?php endforeach; ?>
     </div>
+    </div>
+    <div class="hero-cursor" data-hero-cursor>
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path d="M5.2 2.8 19 13.6l-6.6.6-2.6 6.8Z" fill="var(--ink)" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="hero-zoom-chip"><span data-hero-zoom>100 %</span></div>
     <div class="hero-fade"></div>
   </div>
 </section>
@@ -102,7 +136,7 @@ $thumbs = [
   <div class="split cols-3">
     <?php
     $steps = [
-      ['01', 'Posez vos blocs', 'oklch(0.95 0.03 192)', 'oklch(0.45 0.11 195)', 'Un bloc par revenu, compte, livret ou poste de dépense. Rien à catégoriser, rien à importer.', [['Salaire Julien','1 500 €'],['Auto-entreprise','5 000 €'],['Loyers du local','2 000 €']]],
+      ['01', 'Posez vos blocs', 'oklch(0.95 0.03 192)', 'oklch(0.45 0.11 195)', 'Un bloc par revenu, compte, livret ou poste de dépense. Rien à catégoriser, rien à importer.', [['Salaire','1 500 €'],['Auto-entreprise','5 000 €'],['Loyers du local','2 000 €']]],
       ['02', 'Reliez les flux', 'oklch(0.96 0.04 38)', 'oklch(0.56 0.17 38)', 'Tirez un fil d’un bloc à l’autre, en montant fixe ou en pourcentage. Le solde de chaque bloc s’ajuste en direct.', [['Compte → Joint','3 254 €'],['Compte → Épargne','3 665 €'],['Non affecté','0 €']]],
       ['03', 'Lisez la suite', 'oklch(0.94 0.02 265)', 'oklch(0.36 0.09 265)', 'repartio déroule votre mois type sur 60 mois, applique taux et plafonds, et vous dit quand chaque livret sature.', [['Épargné / mois','5 234 €'],['Dans 5 ans','105 615 €'],['Livret A plein en','16 mois']]],
     ];
@@ -131,14 +165,8 @@ $thumbs = [
   </div>
   <p class="lede" style="margin-bottom:28px;">Chaque modèle est un vrai circuit ouvrable&nbsp;: remplacez les montants par les vôtres, la projection se recalcule.</p>
   <div class="grid-3">
-    <?php foreach ($thumbs as $t): ?>
-      <a class="card" href="<?= e(url('/circuits-types')) ?>" style="color:inherit;">
-        <?php $wires = $t[3]; $dots = $t[4]; require BASE_PATH . '/resources/views/partials/circuit-thumb.php'; ?>
-        <div style="padding:16px 17px 18px;">
-          <div style="display:flex;gap:10px;align-items:baseline;"><strong style="letter-spacing:-.02em;"><?= e($t[0]) ?></strong><span class="mono" style="margin-left:auto;font-size:10.5px;color:var(--faint);"><?= e($t[1]) ?></span></div>
-          <p style="margin:8px 0 0;font-size:13px;line-height:1.5;color:var(--muted);"><?= e($t[2]) ?></p>
-        </div>
-      </a>
+    <?php foreach (($featured ?? []) as $key => $t): ?>
+      <?php $cta = ''; require BASE_PATH . '/resources/views/partials/template-card.php'; ?>
     <?php endforeach; ?>
   </div>
 </section>

@@ -66,6 +66,7 @@ class App
         $router->post('/contact', [ContactController::class, 'store']);
         $router->get('/mentions-legales', [SiteController::class, 'mentions']);
         $router->get('/cgu', [SiteController::class, 'cgu']);
+        $router->get('/cgv', [SiteController::class, 'cgv']);
         $router->get('/confidentialite', [SiteController::class, 'confidentialite']);
 
         $router->get('/connexion', [AuthController::class, 'loginForm']);

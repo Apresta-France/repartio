@@ -206,6 +206,48 @@
     return tintOf(n).block || KINDS[n.kind]?.color || '#999';
   }
 
+  function livretFullMonth(C, id) {
+    const when = C?.full?.[id];
+    return (when === null || when === undefined) ? null : when;
+  }
+
+  function isLivretFullNow(n, C) {
+    if (n?.kind !== 'livret') return false;
+    const when = livretFullMonth(C, n.id);
+    return when !== null && currentMonth() >= when;
+  }
+
+  function accentColorOf(n, C) {
+    return isLivretFullNow(n, C) ? TINTS.orange.block : colorOf(n);
+  }
+
+  function paintNodeTone(el, n, C) {
+    if (!el || isAnnotation(n)) return;
+    const color = accentColorOf(n, C);
+    const full = isLivretFullNow(n, C);
+    el.classList.toggle('is-full', full);
+    const bar = el.querySelector('.node-bar');
+    const kind = el.querySelector('.node-kind');
+    const portIn = el.querySelector('.port-in');
+    const portOut = el.querySelector('.port-out');
+    if (bar) bar.style.background = color;
+    if (kind) kind.style.color = color;
+    if (portIn) portIn.style.borderColor = color;
+    if (portOut) {
+      portOut.style.background = color;
+      portOut.style.boxShadow = '0 0 0 1px ' + color;
+    }
+    state.edges.forEach((e) => {
+      if (e.from !== n.id) return;
+      const path = flow.paths[e.id];
+      if (!path) return;
+      path.setAttribute('stroke', e._amt > 0.5 ? color : 'oklch(0.82 0.02 255)');
+      flow.pellets.forEach((p) => {
+        if (p.eid === e.id) p.c.setAttribute('fill', color);
+      });
+    });
+  }
+
   function tintPicker(n, mode) {
     const current = TINTS[n.tint] ? n.tint : defaultTint(n.kind);
     return Object.entries(TINTS).map(([id, t]) => {
@@ -717,9 +759,15 @@
     if (cursor) cursor.style.left = pct + '%';
     const legend = root.querySelector('[data-time-legend]');
     if (legend && series?.livrets) {
-      legend.querySelectorAll('.builder-time-swatch b').forEach((b, i) => {
+      legend.querySelectorAll('.builder-time-swatch').forEach((sw, i) => {
         const liv = series.livrets[i];
-        if (liv) b.textContent = euro(liv.balances[month] || 0);
+        if (!liv) return;
+        const full = liv.full !== null && liv.full !== undefined && month >= liv.full;
+        const dot = sw.querySelector('i');
+        const val = sw.querySelector('b');
+        if (dot) dot.style.background = full ? TINTS.orange.block : liv.color;
+        if (val) val.textContent = euro(liv.balances[month] || 0);
+        sw.classList.toggle('is-full', full);
       });
     }
     const svg = root.querySelector('[data-time-svg]');
@@ -777,9 +825,15 @@
         if (label) label.textContent = k;
         if (val) val.textContent = v;
       });
-      if (n.kind === 'livret' && stats.chip && !stats.chip.bad) {
-        const chip = el.querySelector('.node-chip:not(.is-bad)');
-        if (chip) chip.textContent = stats.chip.text;
+      if (n.kind === 'livret') {
+        paintNodeTone(el, n, C);
+        if (stats.chip && !stats.chip.bad) {
+          const chip = el.querySelector('.node-chip:not(.is-bad)');
+          if (chip) {
+            chip.textContent = stats.chip.text;
+            chip.classList.toggle('is-full', !!stats.chip.full);
+          }
+        }
       }
     });
     if (propsForm && !propsForm.hidden) {
@@ -1013,9 +1067,9 @@
     if (n.kind === 'livret' && C.full[n.id] !== null && C.full[n.id] !== undefined) {
       const fullAt = C.full[n.id];
       const month = currentMonth();
-      if (fullAt === 0) chip = { text: 'déjà plein', bad: false };
-      else if (month >= fullAt) chip = { text: 'plein depuis le mois ' + fullAt, bad: false };
-      else chip = { text: 'plein dans ' + (fullAt - month) + ' mois', bad: false };
+      if (fullAt === 0) chip = { text: 'déjà plein', bad: false, full: true };
+      else if (month >= fullAt) chip = { text: 'plein depuis le mois ' + fullAt, bad: false, full: true };
+      else chip = { text: 'plein dans ' + (fullAt - month) + ' mois', bad: false, full: false };
     }
     if (C.over[n.id]) chip = { text: 'sorties > entrées', bad: true };
     return { rows, chip };
@@ -1078,8 +1132,9 @@
         `;
       } else {
         const stats = nodeStats(n, C);
-        const color = colorOf(n);
-        el.className = 'node' + selected;
+        const color = accentColorOf(n, C);
+        const full = isLivretFullNow(n, C);
+        el.className = 'node' + selected + (full ? ' is-full' : '');
         el.innerHTML = `
           <div class="node-inner">
             <div class="node-bar" style="background:${color}"></div>
@@ -1090,7 +1145,7 @@
             <div class="node-title">${escapeHtml(n.title)}</div>
             <div class="node-body">
               ${stats.rows.map(([k, v, cls, key]) => `<div class="node-stat${cls === 'is-line' ? ' is-line' : ''}"${key ? ` data-play="${key}"` : ''}><span>${k}</span><b${cls && cls !== 'is-line' ? ` class="${cls}"` : ''}>${v}</b></div>`).join('')}
-              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}">${stats.chip.text}</div>` : ''}
+              ${stats.chip ? `<div class="node-chip${stats.chip.bad ? ' is-bad' : ''}${stats.chip.full ? ' is-full' : ''}">${stats.chip.text}</div>` : ''}
               ${n.note ? `<div class="node-note">${escapeHtml(n.note)}</div>` : ''}
             </div>
           </div>
@@ -1117,7 +1172,7 @@
       if (!a || !b) return;
       const p1 = portPoint(a, 'out');
       const p2 = portPoint(b, 'in');
-      const color = colorOf(a);
+      const color = accentColorOf(a, C);
       const hot = e._amt > 0.5;
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', curve(p1, p2));

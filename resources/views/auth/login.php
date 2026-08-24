@@ -4,7 +4,11 @@
     <div class="auth-box">
       <div>
         <h1>Content de vous revoir</h1>
-        <p class="lede">Vos circuits vous attendent, exactement là où vous les avez laissés.</p>
+        <?php if (!empty($pendingCircuit)): ?>
+          <p class="lede">Connectez-vous pour ajouter « <?= e((string) $pendingCircuit) ?> » à vos circuits.</p>
+        <?php else: ?>
+          <p class="lede">Vos circuits vous attendent, exactement là où vous les avez laissés.</p>
+        <?php endif; ?>
       </div>
       <form method="post" action="<?= e(url('/connexion')) ?>" style="display:flex;flex-direction:column;gap:14px;">
         <?= csrf_field() ?>

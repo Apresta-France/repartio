@@ -167,3 +167,37 @@ function is_installed(): bool
 {
     return is_file(BASE_PATH . '/storage/installed.lock');
 }
+
+function legal_text(string $text): string
+{
+    $parts = preg_split('/(\[[^\]]+\]\((?:https?:\/\/[^)]+|\/[^)]+)\))/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    if ($parts === false) {
+        return e($text);
+    }
+
+    $out = '';
+    foreach ($parts as $part) {
+        if (preg_match('/^\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)$/', $part, $m)) {
+            $href = str_starts_with($m[2], '/') ? url($m[2]) : $m[2];
+            $rel = str_starts_with($m[2], 'http') ? ' rel="noopener noreferrer"' : '';
+            $out .= '<a href="' . e($href) . '"' . $rel . '>' . e($m[1]) . '</a>';
+            continue;
+        }
+        $out .= e($part);
+    }
+
+    return $out;
+}
+
+function track_rv(string $command, mixed ...$args): void
+{
+    $events = $_SESSION['_flash']['rv_events'] ?? [];
+    if (!is_array($events)) {
+        $events = [];
+    }
+    $events[] = [
+        'command' => $command,
+        'args' => array_values($args),
+    ];
+    App\Core\Session::flashSet('rv_events', $events);
+}
