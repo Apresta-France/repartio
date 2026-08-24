@@ -54,7 +54,7 @@ class Config
             'mail.port' => (int) ($_ENV['MAIL_PORT'] ?? 587),
             'mail.user' => $_ENV['MAIL_USER'] ?? '',
             'mail.pass' => $_ENV['MAIL_PASS'] ?? '',
-            'mail.encryption' => $_ENV['MAIL_ENCRYPTION'] ?? 'tls',
+            'mail.encryption' => $_ENV['MAIL_ENCRYPTION'] ?? 'starttls',
             'mail.from' => $_ENV['MAIL_FROM'] ?? 'bonjour@repartio.fr',
             'mail.from_name' => $_ENV['MAIL_FROM_NAME'] ?? 'repartio',
             'mail.admin' => $_ENV['MAIL_ADMIN'] ?? 'bonjour@repartio.fr',

@@ -63,12 +63,10 @@ class Mailer
         $port = (int) Config::get('mail.port', 587);
         $user = (string) Config::get('mail.user');
         $pass = (string) Config::get('mail.pass');
-        $enc = strtolower((string) Config::get('mail.encryption', 'tls'));
         $from = (string) Config::get('mail.from');
         $fromName = (string) Config::get('mail.from_name');
 
-        $remote = ($enc === 'ssl' ? 'ssl://' : '') . $host . ':' . $port;
-        $fp = @stream_socket_client($remote, $errno, $errstr, 20, STREAM_CLIENT_CONNECT);
+        $fp = @stream_socket_client('tcp://' . $host . ':' . $port, $errno, $errstr, 20, STREAM_CLIENT_CONNECT);
         if (!$fp) {
             throw new \RuntimeException('SMTP inaccessible : ' . $errstr);
         }
@@ -76,11 +74,15 @@ class Mailer
 
         $this->expect($fp, [220]);
         $this->cmd($fp, 'EHLO repartio.fr', [250]);
-        if ($enc === 'tls') {
-            $this->cmd($fp, 'STARTTLS', [220]);
-            stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-            $this->cmd($fp, 'EHLO repartio.fr', [250]);
+        $this->cmd($fp, 'STARTTLS', [220]);
+        $crypto = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+        if (defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT')) {
+            $crypto |= STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT;
         }
+        if (!stream_socket_enable_crypto($fp, true, $crypto)) {
+            throw new \RuntimeException('Échec de la négociation STARTTLS.');
+        }
+        $this->cmd($fp, 'EHLO repartio.fr', [250]);
         if ($user !== '') {
             $this->cmd($fp, 'AUTH LOGIN', [334]);
             $this->cmd($fp, base64_encode($user), [334]);

@@ -34,7 +34,7 @@
       <label class="field"><span>Port SMTP</span><input name="mail_port" value="<?= e((string) $defaults['mail_port']) ?>"></label>
       <label class="field"><span>Utilisateur SMTP</span><input name="mail_user"></label>
       <label class="field"><span>Mot de passe SMTP</span><input type="password" name="mail_pass"></label>
-      <input type="hidden" name="mail_encryption" value="tls">
+      <input type="hidden" name="mail_encryption" value="starttls">
       <label class="field"><span>Expéditeur</span><input name="mail_from" value="<?= e($defaults['mail_from']) ?>"></label>
       <h2 style="font-size:18px;margin:8px 0 0;">Compte administrateur</h2>
       <label class="field"><span>Prénom</span><input name="first_name" required placeholder="Julien"></label>

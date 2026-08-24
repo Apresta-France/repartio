@@ -92,7 +92,7 @@ class InstallController
             'MAIL_PORT' => trim((string) ($_POST['mail_port'] ?? '587')),
             'MAIL_USER' => trim((string) ($_POST['mail_user'] ?? '')),
             'MAIL_PASS' => (string) ($_POST['mail_pass'] ?? ''),
-            'MAIL_ENCRYPTION' => trim((string) ($_POST['mail_encryption'] ?? 'tls')),
+            'MAIL_ENCRYPTION' => trim((string) ($_POST['mail_encryption'] ?? 'starttls')),
             'MAIL_FROM' => trim((string) ($_POST['mail_from'] ?? 'bonjour@repartio.fr')),
             'MAIL_FROM_NAME' => 'repartio',
             'MAIL_ADMIN' => $email,
