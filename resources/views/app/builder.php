@@ -182,6 +182,52 @@ $readonly = !$canEdit;
         </div>
         <p>Restez cliqué sur un point, puis glissez jusqu’au point opposé.</p>
       </div>
+      <div class="link-coach" data-split-coach hidden role="status" aria-live="polite">
+        <div class="link-coach-head">
+          <strong>Réglez la répartition</strong>
+          <button type="button" class="link-coach-close" data-split-coach-dismiss aria-label="Fermer">×</button>
+        </div>
+        <div class="split-coach-scene" aria-hidden="true">
+          <div class="link-coach-node is-from">
+            <span class="link-coach-bar" style="background:oklch(0.48 0.10 152)"></span>
+            <span class="link-coach-kind" style="color:oklch(0.48 0.10 152)">Revenu</span>
+            <span class="link-coach-title">Salaire</span>
+            <span class="link-coach-port is-out"></span>
+          </div>
+          <div class="link-coach-node is-to">
+            <span class="link-coach-bar" style="background:oklch(0.48 0.10 248)"></span>
+            <span class="link-coach-kind" style="color:oklch(0.48 0.10 248)">Compte</span>
+            <span class="link-coach-title">Courant</span>
+            <span class="link-coach-port is-in"></span>
+          </div>
+          <svg class="link-coach-wires" viewBox="0 0 280 140" fill="none">
+            <path class="split-coach-line" d="M104 38 C138 38 142 38 176 38"/>
+          </svg>
+          <span class="split-coach-pill">
+            <span class="is-amt">2 200 €</span>
+            <span class="is-reste">reste</span>
+          </span>
+          <div class="split-coach-panel">
+            <span class="split-coach-panel-label">Liens sortants</span>
+            <div class="split-coach-link">
+              <span class="split-coach-link-to">→ Courant</span>
+              <div class="split-coach-row">
+                <span class="split-coach-mode">
+                  <span class="is-reste">Le reste</span>
+                  <span class="is-fixe">Montant fixe</span>
+                </span>
+                <span class="split-coach-value">2200</span>
+              </div>
+            </div>
+          </div>
+          <span class="split-coach-cursor">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M5.2 2.8 19 13.6l-6.6.6-2.6 6.8Z" fill="var(--ink)" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <p>Cliquez le premier bloc pour choisir le montant à répartir.</p>
+      </div>
     </div>
   </main>
 
@@ -220,7 +266,7 @@ $readonly = !$canEdit;
       </div>
       <button type="button" class="btn btn-ghost builder-modal-close" data-setup-dismiss aria-label="Fermer">×</button>
     </div>
-    <p class="builder-hint setup-intro">Deux réglages pour démarrer — déjà préremplis. Fermez cette fenêtre si les valeurs par défaut vous conviennent, vous pourrez les changer ensuite dans la barre du haut.</p>
+    <p class="builder-hint setup-intro">Deux réglages déjà préremplis. Vous pourrez les changer ensuite dans la barre du haut.</p>
     <form class="setup-form" data-setup-form>
       <label class="field">
         <span>Nom du circuit</span>
@@ -228,22 +274,24 @@ $readonly = !$canEdit;
         <span class="field-hint">Pour le retrouver dans votre liste — «&nbsp;Budget foyer&nbsp;», «&nbsp;Objectif apport&nbsp;»…</span>
       </label>
       <div class="field">
-        <span>Durée de la projection</span>
-        <div class="setup-horizon">
-          <input type="number" name="setup_horizon" data-setup-horizon min="1" max="360" step="1" value="<?= e((string) ($payload['horizon'] ?? 60)) ?>">
-          <span>mois</span>
+        <div class="setup-horizon-head">
+          <span>Durée de la projection</span>
+          <div class="setup-horizon">
+            <input type="number" name="setup_horizon" data-setup-horizon min="1" max="360" step="1" value="<?= e((string) ($payload['horizon'] ?? 60)) ?>" aria-label="Durée en mois">
+            <span>mois</span>
+          </div>
         </div>
-        <div class="chips setup-horizon-chips">
-          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 12 ? ' active' : '' ?>" data-setup-preset="12">12 mois · 1 an</button>
-          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 60 ? ' active' : '' ?>" data-setup-preset="60">60 mois · 5 ans</button>
-          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 120 ? ' active' : '' ?>" data-setup-preset="120">120 mois · 10 ans</button>
+        <div class="chips setup-horizon-chips" role="group" aria-label="Durées fréquentes">
+          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 12 ? ' active' : '' ?>" data-setup-preset="12"><strong>1 an</strong><span>12 mois</span></button>
+          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 60 ? ' active' : '' ?>" data-setup-preset="60"><strong>5 ans</strong><span>60 mois</span></button>
+          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 120 ? ' active' : '' ?>" data-setup-preset="120"><strong>10 ans</strong><span>120 mois</span></button>
         </div>
-        <span class="field-hint">Le mois type est répété jusqu’à cet horizon : soldes, intérêts et saturation des livrets. 60 mois est le défaut.</span>
+        <span class="field-hint">Le mois type se répète jusqu’à cet horizon : soldes, intérêts et saturation des livrets.</span>
       </div>
       <div class="setup-actions">
-        <button class="btn btn-orange" type="submit">Commencer</button>
-        <button class="btn btn-ghost" type="button" data-scenario-open>Charger un scénario</button>
         <button class="btn btn-ghost" type="button" data-setup-dismiss>Plus tard</button>
+        <button class="btn btn-ghost" type="button" data-scenario-open>Charger un scénario</button>
+        <button class="btn btn-orange" type="submit">Commencer</button>
       </div>
     </form>
   </div>

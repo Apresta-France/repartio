@@ -418,6 +418,7 @@ class Project
             }
             if ($kind === 'revenu') {
                 $in += max(0.0, (float) ($node['amount'] ?? 0));
+                $leftover += $kept[$id] ?? 0;
             } elseif ($kind === 'depense') {
                 $out += ($kept[$id] ?? 0) + $outAmt;
             } elseif (in_array($kind, ['groupe', 'note'], true)) {

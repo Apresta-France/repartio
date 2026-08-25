@@ -327,16 +327,23 @@
     return item;
   }
 
+  function lectureRows(n, C) {
+    return nodeStats(n, C).rows.filter((row) => row[0] !== 'Déjà dessus');
+  }
+
+  function refreshLectureStats(n) {
+    if (!n || isAnnotation(n) || !propsForm) return;
+    const C = lastCompute || compute();
+    lastCompute = C;
+    const box = propsForm.querySelector('.prop-stats');
+    if (box) box.innerHTML = statRowsHtml(lectureRows(n, C), 'prop-stat');
+  }
+
   function refreshDepenseReadout(n) {
     if (!n || n.kind !== 'depense' || !propsForm) return;
     const total = propsForm.querySelector('[data-items-total]');
     if (total) total.textContent = euro(n.amount) + ' / mois';
-    const C = lastCompute || compute();
-    const stats = nodeStats(n, C);
-    const box = propsForm.querySelector('.prop-stats');
-    if (box) {
-      box.innerHTML = statRowsHtml(stats.rows, 'prop-stat');
-    }
+    refreshLectureStats(n);
     propsForm.querySelectorAll('[data-edge-value]').forEach((input) => {
       const edge = state.edges.find((x) => x.id === input.getAttribute('data-edge-value'));
       if (!edge) return;
@@ -561,7 +568,10 @@
     let leftover = 0;
     graph.forEach((n) => {
       const outAmt = (outs[n.id] || []).reduce((s, e) => s + e._amt, 0);
-      if (n.kind === 'revenu') inn += Math.max(0, n.amount);
+      if (n.kind === 'revenu') {
+        inn += Math.max(0, n.amount);
+        leftover += kept[n.id] || 0;
+      }
       else if (n.kind === 'depense') out += (kept[n.id] || 0) + outAmt;
       else if (n.kind === 'livret') {
         const add = kept[n.id] || 0;
@@ -814,9 +824,8 @@
     if (!n || n.kind !== 'livret' || !propsForm) return;
     const C = lastCompute || compute();
     lastCompute = C;
-    const stats = nodeStats(n, C);
     const box = propsForm.querySelector('.prop-stats');
-    if (box) box.innerHTML = statRowsHtml(stats.rows, 'prop-stat');
+    if (box) box.innerHTML = statRowsHtml(lectureRows(n, C), 'prop-stat');
     const host = propsForm.querySelector('[data-interest]');
     const html = livretInterestHtml(n, C).trim();
     if (host && html) {
@@ -1332,6 +1341,8 @@
     if (n.kind === 'livret') {
       const month = currentMonth();
       const bal = livretAt(C, n.id, month);
+      const start = Number(n.start) || 0;
+      rows.push(['Déjà dessus', euro(start), start > 0 ? 'is-gain' : '']);
       rows.push(['Taux', (n.rate || 0).toString().replace('.', ',') + ' %']);
       rows.push([playLabel(month), euro(bal), bal > 0 ? 'is-gain' : '', 'proj']);
       if ((n.rate || 0) > 0) {
@@ -1631,7 +1642,7 @@
         <div>
           <div class="eyebrow" style="margin-bottom:4px;">Lecture</div>
           <div class="prop-stats">
-            ${statRowsHtml(stats.rows, 'prop-stat')}
+            ${statRowsHtml(lectureRows(n, C), 'prop-stat')}
           </div>
         </div>
         ${livretInterestHtml(n, C)}
@@ -1829,6 +1840,7 @@
     else root.classList.remove('is-props-open');
     const toggle = root.querySelector('[data-props-toggle]');
     if (toggle) toggle.setAttribute('aria-expanded', id ? 'true' : 'false');
+    if (id && state.edges.some((e) => e.from === id)) dismissSplitCoach();
   }
 
   function paintSelection() {
@@ -1932,6 +1944,7 @@
       value: useFixe ? dest.amount : (already ? 25 : 0),
     });
     dismissLinkCoach();
+    offerSplitCoach();
   }
 
   function kindSize(kind) {
@@ -2094,13 +2107,17 @@
     if (modal) modal.hidden = true;
     document.body.classList.remove('is-locked');
     pendingDrop = null;
-    flushLinkCoach();
+    flushCoaches();
   }
 
   const LINK_COACH_KEY = 'repartio.linkCoachSeen';
+  const SPLIT_COACH_KEY = 'repartio.splitCoachSeen';
   const linkCoach = document.querySelector('[data-link-coach]');
+  const splitCoach = document.querySelector('[data-split-coach]');
   let linkCoachPending = false;
   let linkCoachTimer = 0;
+  let splitCoachPending = false;
+  let splitCoachTimer = 0;
 
   function graphNodeCount() {
     return state.nodes.filter((n) => !isAnnotation(n)).length;
@@ -2173,19 +2190,101 @@
     return true;
   }
 
+  function splitCoachSeen() {
+    try {
+      return window.localStorage.getItem(SPLIT_COACH_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markSplitCoachSeen() {
+    try {
+      window.localStorage.setItem(SPLIT_COACH_KEY, '1');
+    } catch (e) {}
+  }
+
+  function sourceAlreadyOpen() {
+    return !!(state.selected && state.edges.some((e) => e.from === state.selected));
+  }
+
+  function offerSplitCoach() {
+    if (readonly || !splitCoach || splitCoachSeen()) return;
+    if (!state.edges.length) return;
+    if (sourceAlreadyOpen()) {
+      markSplitCoachSeen();
+      return;
+    }
+    if (overlayBlockingCoach()) {
+      splitCoachPending = true;
+      return;
+    }
+    scheduleSplitCoach();
+  }
+
+  function scheduleSplitCoach() {
+    splitCoachPending = false;
+    window.clearTimeout(splitCoachTimer);
+    splitCoachTimer = window.setTimeout(() => {
+      if (overlayBlockingCoach()) {
+        splitCoachPending = true;
+        return;
+      }
+      if (readonly || splitCoachSeen()) return;
+      if (!state.edges.length) return;
+      if (sourceAlreadyOpen()) {
+        markSplitCoachSeen();
+        return;
+      }
+      if (linkCoach && !linkCoach.hidden) return;
+      showSplitCoach();
+    }, 420);
+  }
+
+  function flushSplitCoach() {
+    if (splitCoachPending) offerSplitCoach();
+  }
+
+  function flushCoaches() {
+    flushLinkCoach();
+    flushSplitCoach();
+  }
+
+  function showSplitCoach() {
+    if (!splitCoach || !splitCoach.hidden) return;
+    dismissLinkCoach();
+    splitCoach.hidden = false;
+    markSplitCoachSeen();
+  }
+
+  function dismissSplitCoach() {
+    window.clearTimeout(splitCoachTimer);
+    splitCoachPending = false;
+    markSplitCoachSeen();
+    if (!splitCoach || splitCoach.hidden) return false;
+    splitCoach.hidden = true;
+    return true;
+  }
+
   linkCoach?.addEventListener('click', (e) => {
     if (e.target.closest('[data-link-coach-dismiss]')) dismissLinkCoach();
     e.stopPropagation();
   });
   linkCoach?.addEventListener('mousedown', (e) => e.stopPropagation());
   linkCoach?.addEventListener('wheel', (e) => e.stopPropagation());
+  splitCoach?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-split-coach-dismiss]')) dismissSplitCoach();
+    e.stopPropagation();
+  });
+  splitCoach?.addEventListener('mousedown', (e) => e.stopPropagation());
+  splitCoach?.addEventListener('wheel', (e) => e.stopPropagation());
   document.querySelectorAll('.builder-modal').forEach((el) => {
     new MutationObserver(() => {
-      if (!overlayBlockingCoach()) flushLinkCoach();
+      if (!overlayBlockingCoach()) flushCoaches();
     }).observe(el, { attributes: true, attributeFilter: ['hidden'] });
   });
   new MutationObserver(() => {
-    if (!overlayBlockingCoach()) flushLinkCoach();
+    if (!overlayBlockingCoach()) flushCoaches();
   }).observe(root, { attributes: true, attributeFilter: ['class'] });
 
   function applyPreset(presetId) {
@@ -2561,6 +2660,7 @@
     state.selected = edge.from;
     state.openEdge = edge.id;
     root.classList.add('is-props-open');
+    dismissSplitCoach();
     render();
     propsForm?.querySelector(`[data-edge-edit="${edge.id}"]`)?.scrollIntoView({ block: 'nearest' });
   });
@@ -2649,6 +2749,8 @@
     else if (itemAmount && n.kind === 'depense') refreshDepenseReadout(n);
     else if (n.kind === 'livret' && (prop === 'rate' || prop === 'start' || prop === 'cap' || prop === 'preset')) {
       refreshLivretInterest(n);
+    } else {
+      refreshLectureStats(n);
     }
   });
 
@@ -3148,6 +3250,7 @@
       if (modal && !modal.hidden) { closePresetModal(); return; }
       if (state.connectFrom) { cancelLink(); return; }
       if (dismissLinkCoach()) return;
+      if (dismissSplitCoach()) return;
       if (state.selected) selectNode(null);
       return;
     }
