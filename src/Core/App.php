@@ -29,7 +29,7 @@ class App
             redirect('/install');
         }
 
-        if (is_installed()) {
+        if (is_installed() && $path !== '/sitemap.xml' && $path !== '/robots.txt') {
             try {
                 (new Migrator(Database::pdo()))->run();
             } catch (\Throwable) {
@@ -63,6 +63,9 @@ class App
     {
         $router->get('/install', [InstallController::class, 'show']);
         $router->post('/install', [InstallController::class, 'store']);
+
+        $router->get('/sitemap.xml', [SiteController::class, 'sitemap']);
+        $router->get('/robots.txt', [SiteController::class, 'robots']);
 
         $router->get('/', [SiteController::class, 'home']);
         $router->get('/fonctionnement', [SiteController::class, 'fonctionnement']);

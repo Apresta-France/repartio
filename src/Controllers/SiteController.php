@@ -6,32 +6,26 @@ namespace App\Controllers;
 
 use App\Content;
 use App\Core\View;
+use App\Seo;
 
 class SiteController
 {
     public function home(): void
     {
-        View::render('site/home', [
-            'title' => 'Chaque euro a une trajectoire',
+        $this->page('/', 'site/home', [
             'nav' => '',
             'featured' => Content::featuredTemplates(),
-        ], 'layouts/site');
+        ]);
     }
 
     public function fonctionnement(): void
     {
-        View::render('site/fonctionnement', [
-            'title' => 'Fonctionnement',
-            'nav' => 'fonctionnement',
-        ], 'layouts/site');
+        $this->page('/fonctionnement', 'site/fonctionnement', ['nav' => 'fonctionnement']);
     }
 
     public function circuits(): void
     {
-        View::render('site/circuits', [
-            'title' => 'Circuits types',
-            'nav' => 'circuits',
-        ], 'layouts/site');
+        $this->page('/circuits-types', 'site/circuits', ['nav' => 'circuits']);
     }
 
     public function circuitRempli(): void
@@ -41,38 +35,31 @@ class SiteController
             redirect('/circuits-types');
         }
 
-        View::render('site/circuit-rempli', [
-            'title' => 'Un circuit rempli',
+        $this->page('/circuit-rempli', 'site/circuit-rempli', [
             'nav' => 'circuits',
             'builder' => true,
             'showcase' => true,
             'pack' => $showcase,
-        ], 'layouts/site');
+        ]);
     }
 
     public function tarifs(): void
     {
-        View::render('site/tarifs', [
-            'title' => 'Tarifs',
-            'nav' => 'tarifs',
-        ], 'layouts/site');
+        $this->page('/tarifs', 'site/tarifs', ['nav' => 'tarifs']);
     }
 
     public function donnees(): void
     {
-        View::render('site/donnees', [
-            'title' => 'Vos données',
-            'nav' => 'donnees',
-        ], 'layouts/site');
+        $this->page('/vos-donnees', 'site/donnees', ['nav' => 'donnees']);
     }
 
     public function ressources(): void
     {
-        View::render('site/ressources', [
-            'title' => 'Ressources',
+        $this->page('/ressources', 'site/ressources', [
             'nav' => 'ressources',
+            'ressources' => true,
             'posts' => Content::posts(),
-        ], 'layouts/site');
+        ]);
     }
 
     public function article(string $slug): void
@@ -80,59 +67,78 @@ class SiteController
         $post = Content::post($slug);
         if (!$post) {
             http_response_code(404);
-            View::render('site/404', ['title' => 'Article introuvable'], 'layouts/site');
+            $this->missing('Article introuvable');
             return;
         }
+        $seo = Seo::article($post);
         View::render('site/article', [
-            'title' => $post['t'],
             'nav' => 'ressources',
             'ressources' => true,
+            'hide_crumbs' => true,
             'post' => $post,
-        ], 'layouts/site');
+            'seo' => $seo,
+        ] + $seo, 'layouts/site');
     }
 
     public function faq(): void
     {
-        View::render('site/faq', [
-            'title' => 'FAQ',
+        $this->page('/faq', 'site/faq', [
             'nav' => '',
             'faq' => Content::faq(),
-        ], 'layouts/site');
+        ]);
     }
 
     public function mentions(): void
     {
-        View::render('site/legal', [
-            'title' => 'Mentions légales',
-            'nav' => '',
-            'doc' => Content::mentions(),
-        ], 'layouts/site');
+        $this->legal('/mentions-legales', Content::mentions());
     }
 
     public function cgu(): void
     {
-        View::render('site/legal', [
-            'title' => 'Conditions générales d’utilisation',
-            'nav' => '',
-            'doc' => Content::cgu(),
-        ], 'layouts/site');
+        $this->legal('/cgu', Content::cgu());
     }
 
     public function cgv(): void
     {
-        View::render('site/legal', [
-            'title' => 'Conditions générales de vente',
-            'nav' => '',
-            'doc' => Content::cgv(),
-        ], 'layouts/site');
+        $this->legal('/cgv', Content::cgv());
     }
 
     public function confidentialite(): void
     {
-        View::render('site/legal', [
-            'title' => 'Politique de confidentialité',
+        $this->legal('/confidentialite', Content::privacy());
+    }
+
+    public function sitemap(): void
+    {
+        Seo::emitSitemap();
+    }
+
+    public function robots(): void
+    {
+        Seo::emitRobots();
+    }
+
+    /** @param array<string, mixed> $data */
+    private function page(string $path, string $view, array $data = []): void
+    {
+        $seo = Seo::for($path, $data);
+        View::render($view, $data + ['seo' => $seo] + $seo, 'layouts/site');
+    }
+
+    /** @param array<string, mixed> $doc */
+    private function legal(string $path, array $doc): void
+    {
+        $this->page($path, 'site/legal', [
             'nav' => '',
-            'doc' => Content::privacy(),
-        ], 'layouts/site');
+            'doc' => $doc,
+            'title' => (string) ($doc['title'] ?? ''),
+            'description' => (string) ($doc['lede'] ?? ''),
+        ]);
+    }
+
+    private function missing(string $title): void
+    {
+        $seo = Seo::notFound($title);
+        View::render('site/404', ['seo' => $seo] + $seo, 'layouts/site');
     }
 }

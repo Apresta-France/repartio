@@ -16,9 +16,11 @@ $headingId = static function (array $block): string {
 <article class="article">
   <header class="article-hero">
     <div class="article-crumb">
+      <a href="<?= e(url('/')) ?>">Accueil</a>
+      <span aria-hidden="true">/</span>
       <a href="<?= e(url('/ressources')) ?>">Ressources</a>
       <span aria-hidden="true">/</span>
-      <span><?= e($post['topic'] ?? $post['tag']) ?></span>
+      <span><?= e($post['t']) ?></span>
     </div>
     <h1 class="page-title"><?= e($post['t']) ?></h1>
     <p class="lede"><?= e($post['d']) ?></p>

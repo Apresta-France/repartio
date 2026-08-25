@@ -9,7 +9,7 @@
 </section>
 <footer class="site-footer">
   <div class="footer-col" style="margin-right:auto;">
-    <a href="<?= e(url('/')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" style="height:38px;"></a>
+    <a href="<?= e(url('/')) ?>"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" width="101" height="38" decoding="async" style="height:38px;width:auto;"></a>
     <span class="eyebrow">Répartiteur de revenus</span>
     <span class="footer-powered">Propulsé par <a href="https://reinvent.fr" rel="noopener noreferrer">ReInvent</a></span>
   </div>

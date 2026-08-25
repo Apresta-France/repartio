@@ -8,6 +8,7 @@ use App\Core\Database;
 use App\Core\Mailer;
 use App\Core\Session;
 use App\Core\View;
+use App\Seo;
 use Throwable;
 
 class ContactController
@@ -16,11 +17,12 @@ class ContactController
 
     public function show(): void
     {
+        $seo = Seo::for('/contact');
         View::render('site/contact', [
-            'title' => 'Contact',
             'nav' => '',
             'sent' => (bool) flash('contact_sent'),
-        ], 'layouts/site');
+            'seo' => $seo,
+        ] + $seo, 'layouts/site');
     }
 
     public function store(): void

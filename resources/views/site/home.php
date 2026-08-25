@@ -230,17 +230,10 @@ $C = [
 <section class="section" style="background:var(--paper);">
   <div class="section-head"><span class="eyebrow">05 · Questions</span><h2>Ce qu’on nous demande</h2></div>
   <div class="grid-2" style="gap:0 46px;max-width:1200px;">
-    <?php foreach ([
-      ['Faut-il connecter ma banque ?', 'Non. repartio fonctionne uniquement avec les montants que vous saisissez : un salaire, un loyer, un versement mensuel. C’est ce qui permet de modéliser des situations qui n’existent pas encore.'],
-      ['Est-ce un outil de budget ou de projection ?', 'Les deux, dans le même canvas : le circuit décrit votre mois type, la projection déroule ce mois type sur l’horizon que vous choisissez, plafonds de livrets inclus.'],
-      ['Comment sont gérés les plafonds réglementaires ?', 'Chaque livret porte son plafond et son taux. Quand il sature, repartio vous dit en combien de mois et redirige le surplus vers la destination que vous avez câblée.'],
-      ['Peut-on modéliser un couple avec des comptes séparés ?', 'Oui — c’est même le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts par personne.'],
-      ['Que se passe-t-il si un euro n’est pas affecté ?', 'Le compteur « non affecté » reste visible en permanence. Tant qu’il n’est pas à zéro, vous savez que le circuit est incomplet.'],
-      ['Que contient la version gratuite ?', 'Un circuit, tous les types de blocs, la projection jusqu’à 24 mois et le partage public. Le payant ajoute plus de circuits, un horizon plus long et des invitations.'],
-    ] as $q): ?>
+    <?php foreach (\App\Content::homeFaq() as $q): ?>
       <div class="faq-item">
-        <button type="button" data-faq><span style="flex:1;"><?= e($q[0]) ?></span><span class="sign">+</span></button>
-        <p><?= e($q[1]) ?></p>
+        <button type="button" data-faq><span style="flex:1;"><?= e($q['q']) ?></span><span class="sign">+</span></button>
+        <p><?= e($q['a']) ?></p>
       </div>
     <?php endforeach; ?>
   </div>

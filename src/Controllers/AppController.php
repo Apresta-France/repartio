@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Articles;
 use App\Core\Auth;
 use App\Core\Session;
 use App\Core\View;
@@ -27,6 +28,9 @@ class AppController
             'activity' => Project::activity((int) $user['id']),
             'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
+            'memberCount' => Access::countForOwner((int) $user['id']),
+            'memberLimit' => Access::memberLimitFor($user),
+            'guides' => Articles::recent(3),
         ], 'layouts/app');
     }
 

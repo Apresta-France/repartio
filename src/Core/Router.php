@@ -37,7 +37,8 @@ class Router
         }
 
         http_response_code(404);
-        View::render('site/404', ['title' => 'Page introuvable'], 'layouts/site');
+        $seo = \App\Seo::notFound();
+        View::render('site/404', ['seo' => $seo] + $seo, 'layouts/site');
     }
 
     private function invoke(callable|array $handler, array $params): void

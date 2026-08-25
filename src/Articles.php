@@ -250,6 +250,21 @@ class Articles
         return $out;
     }
 
+    /** @return list<array<string, mixed>> */
+    public static function recent(int $limit = 3): array
+    {
+        $out = [];
+        foreach (self::index() as $post) {
+            $post['topic'] = self::topicOf($post);
+            $out[] = $post;
+            if (count($out) >= $limit) {
+                break;
+            }
+        }
+
+        return $out;
+    }
+
     /** @return list<string> */
     public static function topics(): array
     {

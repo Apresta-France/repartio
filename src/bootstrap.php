@@ -29,7 +29,9 @@ Config::load(BASE_PATH . '/.env');
 
 date_default_timezone_set('Europe/Paris');
 
-if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
+$seoFile = in_array(request_path(), ['/sitemap.xml', '/robots.txt'], true);
+
+if (PHP_SAPI !== 'cli' && !$seoFile && session_status() !== PHP_SESSION_ACTIVE) {
     $sessionDir = BASE_PATH . '/storage/cache';
     if (is_dir($sessionDir) && is_writable($sessionDir)) {
         session_save_path($sessionDir);

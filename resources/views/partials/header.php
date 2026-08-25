@@ -10,7 +10,7 @@ $links = [
 $user = \App\Core\Auth::user();
 ?>
 <header class="site-header" data-site-header>
-  <a href="<?= e(url('/')) ?>" class="logo"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
+  <a href="<?= e(url('/')) ?>" class="logo"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr" width="171" height="64" decoding="async"></a>
   <nav id="site-nav">
     <?php foreach ($links as [$id, $label, $href]): ?>
       <a href="<?= e(url($href)) ?>" class="<?= $nav === $id ? 'active' : '' ?>"><?= e($label) ?></a>

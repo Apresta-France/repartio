@@ -16,6 +16,19 @@ class Content
         return Articles::find($slug);
     }
 
+    /** @return list<array{q: string, a: string}> */
+    public static function homeFaq(): array
+    {
+        return [
+            ['q' => 'Faut-il connecter ma banque ?', 'a' => 'Non. repartio fonctionne uniquement avec les montants que vous saisissez : un salaire, un loyer, un versement mensuel. C’est ce qui permet de modéliser des situations qui n’existent pas encore.'],
+            ['q' => 'Est-ce un outil de budget ou de projection ?', 'a' => 'Les deux, dans le même canvas : le circuit décrit votre mois type, la projection déroule ce mois type sur l’horizon que vous choisissez, plafonds de livrets inclus.'],
+            ['q' => 'Comment sont gérés les plafonds réglementaires ?', 'a' => 'Chaque livret porte son plafond et son taux. Quand il sature, repartio vous dit en combien de mois et redirige le surplus vers la destination que vous avez câblée.'],
+            ['q' => 'Peut-on modéliser un couple avec des comptes séparés ?', 'a' => 'Oui — c’est même le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts par personne.'],
+            ['q' => 'Que se passe-t-il si un euro n’est pas affecté ?', 'a' => 'Le compteur « non affecté » reste visible en permanence. Tant qu’il n’est pas à zéro, vous savez que le circuit est incomplet.'],
+            ['q' => 'Que contient la version gratuite ?', 'a' => 'Un circuit, tous les types de blocs, la projection jusqu’à 24 mois et le partage public. Le payant ajoute plus de circuits, un horizon plus long et des invitations.'],
+        ];
+    }
+
     public static function faq(): array
     {
         return [
