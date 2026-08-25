@@ -1124,6 +1124,24 @@ document.querySelectorAll('[data-access-row]').forEach((row) => {
   sync();
 });
 
+(() => {
+  const demos = [...document.querySelectorAll('[data-how-demo]')];
+  if (!demos.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!('IntersectionObserver' in window)) return;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      entry.target.classList.toggle('is-paused', !entry.isIntersecting);
+    });
+  }, { threshold: 0.22 });
+
+  demos.forEach((el) => {
+    el.classList.add('is-paused');
+    io.observe(el);
+  });
+})();
+
 document.querySelectorAll('[data-cycle]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const annual = btn.getAttribute('data-cycle') === 'Annuel';
