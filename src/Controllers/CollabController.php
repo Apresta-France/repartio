@@ -73,6 +73,7 @@ class CollabController
             'author_name' => CircuitLive::authorName($authorId),
             'name' => (string) $live['name'],
             'updated_at' => (string) $live['updated_at'],
+            'persisted' => !CircuitLive::isAhead($project, $live),
             'peers' => CircuitLive::peers($projectId, $userId, $clientId),
         ];
         if ($revision > $since) {
@@ -98,10 +99,11 @@ class CollabController
         foreach ($rows as $row) {
             $when = (string) $row['created_at'];
             $ts = strtotime($when);
+            $author = trim((string) ($row['first_name'] ?? ''));
             $versions[] = [
                 'id' => (int) $row['id'],
                 'name' => (string) $row['name'],
-                'author' => (string) $row['first_name'],
+                'author' => $author !== '' ? $author : 'Compte supprimé',
                 'when' => $ts ? date('d/m/Y', $ts) . ' à ' . date('H:i', $ts) : $when,
                 'ago' => time_ago($when),
             ];

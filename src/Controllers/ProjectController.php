@@ -98,23 +98,10 @@ class ProjectController
         $canManage = Access::can((int) $user['id'], (int) $id, 'gestion');
         $share = $canManage ? Share::findForProject((int) $project['id'], (int) $project['user_id']) : null;
         $owner = User::find((int) $project['user_id']) ?? $user;
-        $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload(Plan::defaultHorizon($owner));
-        $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
-        $live = CircuitLive::find((int) $project['id']);
-        if ($live) {
-            $livePayload = json_decode((string) $live['payload'], true);
-            if (is_array($livePayload)) {
-                $payload = $livePayload;
-                $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
-                $liveName = trim((string) $live['name']);
-                if ($liveName !== '') {
-                    $project['name'] = $liveName;
-                }
-            }
-            $revision = (int) $live['revision'];
-        } else {
-            $revision = CircuitLive::ensure((int) $project['id'], (int) $project['user_id'], (string) $project['name'], $payload);
-        }
+        $working = CircuitLive::workingCopy($project, $owner);
+        $payload = $working['payload'];
+        $project['name'] = $working['name'];
+        $revision = $working['revision'];
         View::render('app/builder', [
             'title' => $project['name'],
             'nav' => 'projets',
@@ -134,6 +121,7 @@ class ProjectController
             'canEdit' => $canEdit,
             'canManage' => $canManage,
             'revision' => $revision,
+            'liveAhead' => !empty($working['ahead']),
         ], 'layouts/app');
     }
 
@@ -154,10 +142,17 @@ class ProjectController
         $name = mb_substr(trim((string) ($_POST['name'] ?? $project['name'])) ?: $project['name'], 0, 180);
         $raw = $_POST['payload'] ?? null;
         if ($raw === null || $raw === '') {
-            $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
+            $live = CircuitLive::find((int) $id);
+            $from = $live
+                ? json_decode((string) $live['payload'], true)
+                : json_decode((string) $project['payload'], true);
+            $payload = is_array($from) ? $from : Project::emptyPayload();
             if (isset($_POST['horizon'])) {
                 $owner = User::find((int) $project['user_id']) ?? $user;
                 $payload['horizon'] = Project::clampHorizonForUser($_POST['horizon'], $owner);
+            }
+            if ($live && trim((string) $live['name']) !== '' && !isset($_POST['name'])) {
+                $name = mb_substr((string) $live['name'], 0, 180);
             }
         } else {
             $payload = is_array($raw) ? $raw : json_decode((string) $raw, true);
@@ -185,6 +180,13 @@ class ProjectController
                 CircuitVersion::snapshot((int) $id, (int) $user['id'], (string) $project['name'], $previous);
             }
         }
+        $live = CircuitLive::find((int) $id);
+        if ($live) {
+            $livePayload = json_decode((string) $live['payload'], true);
+            if (is_array($livePayload) && !CircuitVersion::same((string) $live['name'], $livePayload, $name, $payload)) {
+                CircuitVersion::snapshot((int) $id, (int) $user['id'], (string) $live['name'], $livePayload);
+            }
+        }
         Project::updateById((int) $id, $name, $payload);
         $revision = CircuitLive::publish((int) $id, (int) $user['id'], $name, $payload);
         if (($_POST['autosave'] ?? '') !== '1') {
@@ -208,8 +210,9 @@ class ProjectController
         if (!$project || !Access::can((int) $user['id'], (int) $id, 'gestion')) {
             redirect('/app/circuits');
         }
-        $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
-        $copy = Project::create((int) $user['id'], $project['name'] . ' — copie', $payload);
+        $owner = User::find((int) $project['user_id']) ?? $user;
+        $working = CircuitLive::workingCopy($project, $owner);
+        $copy = Project::create((int) $user['id'], $working['name'] . ' — copie', $working['payload']);
         Project::log((int) $user['id'], 'Circuit dupliqué', (int) $copy['id']);
         redirect('/app/circuits/' . $copy['id']);
     }

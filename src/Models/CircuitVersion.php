@@ -37,15 +37,15 @@ class CircuitVersion
 
     public static function snapshotIfDue(int $projectId, int $userId, string $name, array $payload, int $minSeconds = 120): void
     {
-        $last = Database::fetch(
-            'SELECT user_id, created_at FROM circuit_versions WHERE project_id = ? ORDER BY created_at DESC, id DESC LIMIT 1',
-            [$projectId]
+        $recent = Database::fetch(
+            'SELECT id FROM circuit_versions
+             WHERE project_id = ? AND user_id = ?
+               AND created_at > DATE_SUB(NOW(), INTERVAL ? SECOND)
+             ORDER BY created_at DESC, id DESC
+             LIMIT 1',
+            [$projectId, $userId, $minSeconds]
         );
-        if (
-            $last
-            && (int) $last['user_id'] === $userId
-            && strtotime((string) $last['created_at']) > time() - $minSeconds
-        ) {
+        if ($recent) {
             return;
         }
         self::snapshot($projectId, $userId, $name, $payload);
@@ -56,7 +56,7 @@ class CircuitVersion
         return Database::fetchAll(
             'SELECT v.id, v.user_id, v.name, v.created_at, u.first_name
              FROM circuit_versions v
-             INNER JOIN users u ON u.id = v.user_id
+             LEFT JOIN users u ON u.id = v.user_id
              WHERE v.project_id = ?
              ORDER BY v.created_at DESC, v.id DESC
              LIMIT ' . self::KEEP,

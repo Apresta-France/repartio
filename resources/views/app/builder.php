@@ -3,7 +3,7 @@ $canEdit = !empty($canEdit);
 $canManage = !empty($canManage);
 $readonly = !$canEdit;
 ?>
-<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= (int) $project['id'] ?>" data-user-id="<?= (int) $user['id'] ?>" data-revision="<?= (int) ($revision ?? 1) ?>" data-live-url="<?= e(url('/app/circuits/' . $project['id'] . '/live')) ?>" data-versions-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions')) ?>" data-restore-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions/restaurer')) ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= (int) $project['id'] ?>" data-user-id="<?= (int) $user['id'] ?>" data-revision="<?= (int) ($revision ?? 1) ?>"<?= !empty($liveAhead) ? ' data-live-ahead' : '' ?> data-live-url="<?= e(url('/app/circuits/' . $project['id'] . '/live')) ?>" data-versions-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions')) ?>" data-restore-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions/restaurer')) ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
   <div class="builder-workspace">
   <aside class="builder-side">
     <a href="<?= e(url('/app/circuits')) ?>" class="btn btn-navy builder-back">← Mes circuits</a>

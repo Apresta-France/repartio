@@ -2993,21 +2993,38 @@
     }
     if (root.getAttribute('data-live-url')) {
       e.preventDefault();
-      if (saving) return;
-      saving = true;
-      try {
-        await persistCircuit();
-      } finally {
-        saving = false;
-      }
+      await runPersist();
       return;
     }
     saving = true;
   });
 
+  function currentPayloadJson() {
+    return JSON.stringify({
+      horizon: state.horizon,
+      nodes: state.nodes.map(({ _w, _h, ...n }) => n),
+      edges: state.edges.map(({ _amt, ...e }) => e),
+    });
+  }
+
+  async function runPersist(opts = {}) {
+    if (opts.autosave && saving) return false;
+    while (saving) {
+      if (opts.autosave) return false;
+      await new Promise((resolve) => window.setTimeout(resolve, 40));
+    }
+    saving = true;
+    try {
+      return await persistCircuit(opts);
+    } finally {
+      saving = false;
+    }
+  }
+
   async function persistCircuit(opts = {}) {
     if (!form) return false;
     syncPayload();
+    const sentSnap = circuitSnap();
     const data = new FormData(form);
     if (opts.autosave) data.set('autosave', '1');
     const res = await fetch(form.action, {
@@ -3015,26 +3032,44 @@
       body: data,
       headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     });
-    if (!res.ok) return false;
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 419 || res.status === 403) {
+        collabEnabled = false;
+        if (res.status === 419) {
+          window.alert('Session expirée. Rechargez la page pour enregistrer.');
+        }
+      }
+      return false;
+    }
     let body = {};
     try { body = await res.json(); } catch (err) { body = {}; }
-    if (body.revision) rememberCollabRevision(body.revision);
-    markSaved();
+    if (body.ok === false) return false;
+    const revision = parseInt(body.revision, 10);
+    if (circuitSnap() === sentSnap) {
+      if (revision) rememberCollabRevision(revision);
+      markSaved();
+      root.removeAttribute('data-live-ahead');
+    } else {
+      if (revision) appliedRevision = Math.max(appliedRevision, revision);
+      lastPushedSnap = sentSnap;
+      scheduleLivePush();
+      scheduleAutoPersist();
+    }
     return true;
   }
 
   document.querySelectorAll('[data-share-modal] form').forEach((shareForm) => {
     shareForm.addEventListener('submit', async (e) => {
       if (readonly) return;
+      if (!isDirty() && !root.hasAttribute('data-live-ahead')) return;
       saving = true;
-      if (!isDirty()) return;
       e.preventDefault();
       if (shareForm.dataset.sharing === '1') return;
       shareForm.dataset.sharing = '1';
       const btn = e.submitter || shareForm.querySelector('[type="submit"]');
       if (btn) btn.disabled = true;
       try {
-        if (!(await persistCircuit())) throw new Error('save');
+        if (!(await runPersist())) throw new Error('save');
         shareForm.submit();
       } catch {
         saving = false;
@@ -3356,25 +3391,7 @@
     syncHorizonInput();
     syncPayload();
     render({ props: false });
-    if (form) {
-      const data = new FormData(form);
-      data.delete('payload');
-      data.set('horizon', String(horizon));
-      data.set('name', name);
-      fetch(form.action, {
-        method: 'POST',
-        body: data,
-        redirect: 'manual',
-        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-      }).then(async (res) => {
-        if (!res.ok) return;
-        markSaved();
-        try {
-          const body = await res.json();
-          if (body.revision) rememberCollabRevision(body.revision);
-        } catch (err) {}
-      }).catch(() => {});
-    }
+    runPersist().catch(() => {});
     closeSetupModal();
   }
 
@@ -3566,10 +3583,13 @@
   if (payloadBroken) {
     savedSnap = '';
     syncSaveButton();
+  } else if (root.hasAttribute('data-live-ahead')) {
+    savedSnap = '\0';
+    syncSaveButton();
   } else {
     markSaved();
   }
-  lastPushedSnap = savedSnap;
+  lastPushedSnap = circuitSnap();
   requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });
 
   const liveUrl = root.getAttribute('data-live-url') || '';
@@ -3634,16 +3654,14 @@
     if (!collabEnabled || readonly) return;
     clearTimeout(autoPersistTimer);
     autoPersistTimer = window.setTimeout(async () => {
-      if (readonly || saving || !isDirty()) return;
+      if (readonly || !isDirty()) return;
       if (isCollabBusy()) {
         scheduleAutoPersist();
         return;
       }
-      saving = true;
       try {
-        await persistCircuit({ autosave: true });
+        await runPersist({ autosave: true });
       } catch (err) {}
-      saving = false;
     }, 2800);
   }
 
@@ -3715,11 +3733,19 @@
       }
       syncHorizonInput();
       render();
-      markSaved();
       rememberCollabRevision(data.revision);
+      if (data.persisted === false) {
+        savedSnap = '\0';
+        root.setAttribute('data-live-ahead', '');
+        syncSaveButton();
+      } else {
+        markSaved();
+        root.removeAttribute('data-live-ahead');
+      }
     } finally {
       applyingRemote = false;
     }
+    if (data.persisted === false) scheduleAutoPersist();
     if (!silent && data.author_id && data.author_id !== myUserId && data.author_name) {
       showCollabToast(data.author_name + ' vient de modifier le circuit');
     }
@@ -3729,7 +3755,8 @@
     if (!collabEnabled || liveBusy || document.hidden) return;
     liveBusy = true;
     const snap = circuitSnap();
-    const sendPayload = !readonly && (forcePayload || isDirty()) && snap !== lastPushedSnap;
+    const payloadJson = currentPayloadJson();
+    const sendPayload = !readonly && !saving && (forcePayload || isDirty()) && snap !== lastPushedSnap;
     const data = new FormData();
     data.set('_token', csrfToken());
     data.set('client_id', collabClientId());
@@ -3739,11 +3766,7 @@
     data.set('cursor_y', String(collabPointer ? Math.round(collabPointer.y) : 0));
     if (sendPayload) {
       data.set('name', (nameInput?.value || '').trim());
-      data.set('payload', payloadInput?.value || JSON.stringify({
-        horizon: state.horizon,
-        nodes: state.nodes.map(({ _w, _h, ...n }) => n),
-        edges: state.edges.map(({ _amt, ...e }) => e),
-      }));
+      data.set('payload', payloadJson);
     }
     try {
       const res = await fetch(liveUrl, {
@@ -3764,7 +3787,11 @@
       if (sendPayload) {
         lastPushedSnap = snap;
         lastPostedRevision = revision;
-        appliedRevision = Math.max(appliedRevision, revision);
+        if (body.payload && body.author_id && body.author_id !== myUserId && !isRemoteBlocked() && !saving) {
+          applyRemoteCircuit(body, false);
+        } else {
+          appliedRevision = Math.max(appliedRevision, revision);
+        }
         return;
       }
       if (revision > appliedRevision && body.payload && !isRemoteBlocked() && (!isDirty() || lastPushedSnap === circuitSnap())) {
@@ -3780,6 +3807,7 @@
 
   function startCollab() {
     if (!collabEnabled) return;
+    if (root.hasAttribute('data-live-ahead')) scheduleAutoPersist();
     const loop = () => {
       liveTick(false);
       liveTimer = window.setTimeout(loop, document.hidden ? 4000 : 900);
@@ -3834,24 +3862,32 @@
   }
 
   async function restoreVersion(versionId) {
-    if (!restoreUrl || readonly) return;
+    if (!restoreUrl || readonly || saving) return;
     if (!window.confirm('Revenir à cette version ? L’état actuel sera conservé dans l’historique.')) return;
-    const data = new FormData();
-    data.set('_token', csrfToken());
-    data.set('version_id', String(versionId));
-    const res = await fetch(restoreUrl, {
-      method: 'POST',
-      body: data,
-      headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-    });
-    const body = await res.json();
-    if (!res.ok || !body.ok) {
+    saving = true;
+    try {
+      const data = new FormData();
+      data.set('_token', csrfToken());
+      data.set('version_id', String(versionId));
+      const res = await fetch(restoreUrl, {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      let body = {};
+      try { body = await res.json(); } catch (err) { body = {}; }
+      if (!res.ok || !body.ok) {
+        window.alert('Impossible de restaurer cette version.');
+        return;
+      }
+      applyRemoteCircuit(body, true);
+      closeHistoryModal();
+      showCollabToast('Version restaurée');
+    } catch (err) {
       window.alert('Impossible de restaurer cette version.');
-      return;
+    } finally {
+      saving = false;
     }
-    applyRemoteCircuit(body, true);
-    closeHistoryModal();
-    showCollabToast('Version restaurée');
   }
 
   document.querySelector('[data-history-open]')?.addEventListener('click', (e) => {

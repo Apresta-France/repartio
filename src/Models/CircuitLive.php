@@ -47,6 +47,58 @@ class CircuitLive
         }
     }
 
+    public static function isAhead(array $project, ?array $live = null): bool
+    {
+        $live ??= self::find((int) $project['id']);
+        if (!$live) {
+            return false;
+        }
+        $livePayload = json_decode((string) $live['payload'], true);
+        $saved = json_decode((string) $project['payload'], true);
+        if (!is_array($livePayload)) {
+            return false;
+        }
+        if (!is_array($saved)) {
+            return true;
+        }
+        return !CircuitVersion::same((string) $live['name'], $livePayload, (string) $project['name'], $saved);
+    }
+
+    /**
+     * @return array{name:string,payload:array,revision:int,ahead:bool}
+     */
+    public static function workingCopy(array $project, array $owner): array
+    {
+        $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
+        $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
+        $live = self::find((int) $project['id']);
+        if ($live) {
+            $livePayload = json_decode((string) $live['payload'], true);
+            if (is_array($livePayload)) {
+                $livePayload['horizon'] = Project::clampHorizonForUser($livePayload['horizon'] ?? null, $owner);
+                $liveName = trim((string) $live['name']);
+                return [
+                    'name' => $liveName !== '' ? $liveName : (string) $project['name'],
+                    'payload' => $livePayload,
+                    'revision' => (int) $live['revision'],
+                    'ahead' => self::isAhead($project, $live),
+                ];
+            }
+            return [
+                'name' => (string) $project['name'],
+                'payload' => $payload,
+                'revision' => (int) $live['revision'],
+                'ahead' => false,
+            ];
+        }
+        return [
+            'name' => (string) $project['name'],
+            'payload' => $payload,
+            'revision' => self::ensure((int) $project['id'], (int) $project['user_id'], (string) $project['name'], $payload),
+            'ahead' => false,
+        ];
+    }
+
     public static function find(int $projectId): ?array
     {
         return Database::fetch('SELECT * FROM circuit_live WHERE project_id = ? LIMIT 1', [$projectId]);
@@ -60,22 +112,22 @@ class CircuitLive
         if ($row && (string) $row['name'] === $name && (string) $row['payload'] === $json) {
             return (int) $row['revision'];
         }
-        $revision = $row ? (int) $row['revision'] + 1 : 1;
         if ($row) {
             Database::query(
-                'UPDATE circuit_live SET user_id = ?, revision = ?, name = ?, payload = ?, updated_at = NOW()
+                'UPDATE circuit_live SET user_id = ?, revision = revision + 1, name = ?, payload = ?, updated_at = NOW()
                  WHERE project_id = ?',
-                [$userId, $revision, $name, $json, $projectId]
+                [$userId, $name, $json, $projectId]
             );
-            return $revision;
+            $updated = self::find($projectId);
+            return $updated ? (int) $updated['revision'] : (int) $row['revision'] + 1;
         }
         try {
             Database::query(
                 'INSERT INTO circuit_live (project_id, user_id, revision, name, payload, updated_at)
-                 VALUES (?, ?, ?, ?, ?, NOW())',
-                [$projectId, $userId, $revision, $name, $json]
+                 VALUES (?, ?, 1, ?, ?, NOW())',
+                [$projectId, $userId, $name, $json]
             );
-            return $revision;
+            return 1;
         } catch (\PDOException $e) {
             $existing = self::find($projectId);
             if ($existing) {
@@ -136,6 +188,9 @@ class CircuitLive
 
     public static function authorName(int $userId): string
     {
+        if ($userId <= 0) {
+            return 'Quelqu’un';
+        }
         $user = User::find($userId);
         return $user ? (string) $user['first_name'] : 'Quelqu’un';
     }
