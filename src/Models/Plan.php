@@ -40,11 +40,39 @@ class Plan
         ],
     ];
 
+    public static function exists(string $slug): bool
+    {
+        return isset(self::ALL[$slug]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function features(array|string|null $userOrPlan): array
+    {
+        $plan = self::of($userOrPlan);
+        $circuits = $plan['circuits'] === 1 ? '1 circuit' : $plan['circuits'] . ' circuits';
+        $invite = match ((int) $plan['members']) {
+            0 => 'Pas d’invitation',
+            1 => '1 personne invitée',
+            default => 'Jusqu’à ' . $plan['members'] . ' personnes invitées',
+        };
+
+        return [
+            $circuits,
+            'Projection jusqu’à ' . self::horizonLabel($plan['slug']),
+            $invite,
+            'Partage public',
+        ];
+    }
+
     public static function of(array|string|null $userOrPlan): array
     {
-        $slug = is_array($userOrPlan)
-            ? (string) ($userOrPlan['plan'] ?? self::LIBRE)
-            : (string) ($userOrPlan ?: self::LIBRE);
+        if (is_array($userOrPlan)) {
+            $slug = (string) ($userOrPlan['plan'] ?? $userOrPlan['slug'] ?? self::LIBRE);
+        } else {
+            $slug = (string) ($userOrPlan ?: self::LIBRE);
+        }
 
         return self::ALL[$slug] ?? self::ALL[self::LIBRE];
     }

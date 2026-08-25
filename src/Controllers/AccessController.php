@@ -9,7 +9,6 @@ use App\Core\Mailer;
 use App\Core\Session;
 use App\Core\View;
 use App\Models\Access;
-use App\Models\Plan;
 use App\Models\Project;
 use App\Models\User;
 use Throwable;
@@ -57,15 +56,8 @@ class AccessController
             redirect('/app/acces');
         }
         $memberLimit = Access::memberLimitFor($user);
-        if ($memberLimit <= 0) {
-            Session::flashSet('error', 'Le plan Libre ne permet pas d’inviter. Passez en Complet pour inviter une personne.');
-            redirect('/app/acces');
-        }
-        if (Access::countForOwner($ownerId) >= $memberLimit) {
-            $next = Plan::nextLabel($user);
-            Session::flashSet('error', 'Limite atteinte (' . $memberLimit . ' personne' . ($memberLimit > 1 ? 's' : '') . ').'
-                . ($next ? ' Passez en ' . $next . ' pour en inviter davantage, ou retirez un accès.' : ' Retirez un accès pour en ajouter un autre.'));
-            redirect('/app/acces');
+        if ($memberLimit <= 0 || Access::countForOwner($ownerId) >= $memberLimit) {
+            redirect(Project::planChangePath('invitations'));
         }
 
         $created = Access::invite($ownerId, $email, $assignments);

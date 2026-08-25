@@ -99,15 +99,13 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
 
     <?php if ($memberLimit <= 0): ?>
       <p class="lede" style="font-size:14.5px;">Le plan Libre ne permet pas d’inviter quelqu’un à gérer un circuit. Le plan Complet ouvre une invitation.</p>
-      <a class="btn btn-orange" href="<?= e(url('/tarifs')) ?>">Voir les plans payants</a>
+      <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
     <?php elseif ($circuits === []): ?>
       <p class="lede" style="font-size:14.5px;">Créez d’abord un circuit pour pouvoir y donner accès.</p>
       <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
     <?php elseif ($memberCount >= $memberLimit): ?>
-      <p class="lede" style="font-size:14.5px;">Limite de <?= (int) $memberLimit ?> personne<?= (int) $memberLimit > 1 ? 's' : '' ?> atteinte.<?= \App\Models\Plan::nextLabel($user) ? ' Passez en ' . e(\App\Models\Plan::nextLabel($user)) . ' pour en inviter davantage, ou retirez un accès.' : ' Retirez un accès pour en inviter un autre.' ?></p>
-      <?php if (\App\Models\Plan::nextLabel($user)): ?>
-        <a class="btn btn-orange" href="<?= e(url('/tarifs')) ?>">Voir les plans payants</a>
-      <?php endif; ?>
+      <p class="lede" style="font-size:14.5px;">Limite de <?= (int) $memberLimit ?> personne<?= (int) $memberLimit > 1 ? 's' : '' ?> atteinte. Changez de forfait pour en inviter davantage, ou retirez un accès.</p>
+      <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
     <?php else: ?>
       <form method="post" action="<?= e(url('/app/acces')) ?>" class="access-form">
         <?= csrf_field() ?>

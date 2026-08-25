@@ -40,6 +40,12 @@ class Project
         return self::activeCount((int) $user['id']) >= self::planLimit($user);
     }
 
+    public static function planChangePath(string $reason = 'circuits'): string
+    {
+        $reason = in_array($reason, ['circuits', 'invitations'], true) ? $reason : 'circuits';
+        return '/app/forfait?raison=' . $reason;
+    }
+
     public static function planLimitMessage(array $user, string $wanted = ''): string
     {
         $limit = self::planLimit($user);

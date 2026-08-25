@@ -184,8 +184,7 @@ class ProjectController
             if ($next === 'actif') {
                 $owner = User::find((int) $project['user_id']);
                 if ($owner && Project::atPlanLimit($owner)) {
-                    Session::flashSet('error', Project::planLimitMessage($owner));
-                    redirect('/app/circuits');
+                    redirect(Project::planChangePath('circuits'));
                 }
             }
             Project::setStatusById((int) $id, $next);
@@ -241,8 +240,7 @@ class ProjectController
 
         $name = $name !== '' ? $name : (string) $pack['title'];
         if (Project::atPlanLimit($user)) {
-            Session::flashSet('error', Project::planLimitMessage($user, $name));
-            redirect('/app');
+            redirect(Project::planChangePath('circuits'));
         }
 
         $payload = $pack['payload'] ?? Project::emptyPayload();
@@ -254,8 +252,7 @@ class ProjectController
     private function guardLimit(array $user): void
     {
         if (Project::atPlanLimit($user)) {
-            Session::flashSet('error', Project::planLimitMessage($user));
-            redirect('/app');
+            redirect(Project::planChangePath('circuits'));
         }
     }
 

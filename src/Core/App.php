@@ -108,6 +108,7 @@ class App
         $router->post('/app/circuits/{id}/supprimer', [ProjectController::class, 'destroy']);
         $router->get('/p/{slug}', [ShareController::class, 'preview']);
         $router->get('/app/forfait', [AppController::class, 'billing']);
+        $router->post('/app/forfait', [AppController::class, 'changePlan']);
         $router->get('/app/acces', [AccessController::class, 'index']);
         $router->post('/app/acces', [AccessController::class, 'invite']);
         $router->post('/app/acces/{id}', [AccessController::class, 'update']);

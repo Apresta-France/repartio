@@ -45,6 +45,14 @@ class User
         );
     }
 
+    public static function updatePlan(int $id, string $plan): void
+    {
+        Database::query(
+            'UPDATE users SET plan = ?, updated_at = NOW() WHERE id = ?',
+            [$plan, $id]
+        );
+    }
+
     public static function updatePassword(int $id, string $password): void
     {
         Database::query(
