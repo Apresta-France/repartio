@@ -175,16 +175,30 @@ class EnvFile
         }
 
         $path = self::path();
-        $tmp = $path . '.tmp';
-        if (file_put_contents($tmp, implode(PHP_EOL, $lines) . PHP_EOL) === false) {
+        $contents = implode(PHP_EOL, $lines) . PHP_EOL;
+        $tmp = $path . '.tmp.' . bin2hex(random_bytes(4));
+        if (file_put_contents($tmp, $contents) === false) {
             throw new \RuntimeException('Impossible d’écrire le fichier .env.');
         }
-        if (!@rename($tmp, $path)) {
-            @unlink($path);
-            if (!@rename($tmp, $path)) {
+        if (is_file($path)) {
+            $backup = $path . '.bak.' . bin2hex(random_bytes(4));
+            if (!@copy($path, $backup)) {
                 @unlink($tmp);
                 throw new \RuntimeException('Impossible de remplacer le fichier .env.');
             }
+            if (@copy($tmp, $path) === false) {
+                @copy($backup, $path);
+                @unlink($tmp);
+                @unlink($backup);
+                throw new \RuntimeException('Impossible de remplacer le fichier .env.');
+            }
+            @unlink($tmp);
+            @unlink($backup);
+            return;
+        }
+        if (!@rename($tmp, $path)) {
+            @unlink($tmp);
+            throw new \RuntimeException('Impossible de remplacer le fichier .env.');
         }
     }
 

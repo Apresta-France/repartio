@@ -60,12 +60,16 @@ class ShareController
             $previewUrl = Share::publicUrl($share);
             foreach ($emails as $email) {
                 try {
-                    $mailer->send($email, $user['first_name'] . ' vous partage un circuit', 'circuit-share', [
+                    $ok = $mailer->send($email, $user['first_name'] . ' vous partage un circuit', 'circuit-share', [
                         'owner_name' => $user['first_name'],
                         'title' => $title,
                         'preview_url' => $previewUrl,
                         'note' => $note,
                     ]);
+                    if (!$ok) {
+                        $failed++;
+                        continue;
+                    }
                     Share::logSend((int) $share['id'], $email);
                     $sent++;
                 } catch (Throwable) {
@@ -140,6 +144,10 @@ class ShareController
         $project = Project::findById((int) $id);
         if (!$project || !Access::can((int) $user['id'], (int) $id, 'gestion')) {
             Session::flashSet('error', 'Circuit introuvable.');
+            redirect('/app/circuits');
+        }
+        if (($project['status'] ?? '') === 'archive') {
+            Session::flashSet('error', 'Réactivez le circuit avant de gérer le lien public.');
             redirect('/app/circuits');
         }
         $share = Share::findForProject((int) $project['id'], (int) $project['user_id']);

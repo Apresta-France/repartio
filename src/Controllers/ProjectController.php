@@ -64,14 +64,18 @@ class ProjectController
     public function resumePendingTemplate(): void
     {
         $pending = Session::get('pending_template');
-        Session::forget('pending_template');
         if (!is_array($pending) || trim((string) ($pending['key'] ?? '')) === '') {
+            Session::forget('pending_template');
             return;
         }
         $user = Auth::user();
         if (!$user) {
             return;
         }
+        if (Project::atPlanLimit($user)) {
+            return;
+        }
+        Session::forget('pending_template');
         $this->openTemplateForUser(
             $user,
             trim((string) $pending['key']),
@@ -87,7 +91,8 @@ class ProjectController
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
-        $canEdit = Access::can((int) $user['id'], (int) $id, 'edition');
+        $archived = ($project['status'] ?? '') === 'archive';
+        $canEdit = !$archived && Access::can((int) $user['id'], (int) $id, 'edition');
         $canManage = Access::can((int) $user['id'], (int) $id, 'gestion');
         $share = $canManage ? Share::findForProject((int) $project['id'], (int) $project['user_id']) : null;
         $owner = User::find((int) $project['user_id']) ?? $user;
@@ -118,7 +123,7 @@ class ProjectController
     {
         $user = Auth::requireUser();
         $project = Project::findById((int) $id);
-        if (!$project || !Access::can((int) $user['id'], (int) $id, 'edition')) {
+        if (!$project || ($project['status'] ?? '') === 'archive' || !Access::can((int) $user['id'], (int) $id, 'edition')) {
             if (wants_json()) {
                 http_response_code(403);
                 header('Content-Type: application/json');
@@ -170,7 +175,7 @@ class ProjectController
             redirect('/app/circuits');
         }
         $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
-        $copy = Project::create((int) $user['id'], $project['name'] . ' — copie', $payload, 'scenario');
+        $copy = Project::create((int) $user['id'], $project['name'] . ' — copie', $payload);
         Project::log((int) $user['id'], 'Circuit dupliqué', (int) $copy['id']);
         redirect('/app/circuits/' . $copy['id']);
     }
@@ -184,7 +189,8 @@ class ProjectController
             if ($next === 'actif') {
                 $owner = User::find((int) $project['user_id']);
                 if ($owner && Project::atPlanLimit($owner)) {
-                    redirect(Project::planChangePath('circuits'));
+                    Session::flashSet('error', Project::planLimitMessage($owner));
+                    redirect('/app/circuits');
                 }
             }
             Project::setStatusById((int) $id, $next);
@@ -202,6 +208,11 @@ class ProjectController
     public function destroy(string $id): void
     {
         $user = Auth::requireUser();
+        $project = Project::findById((int) $id);
+        if (!$project) {
+            Session::flashSet('error', 'Circuit introuvable.');
+            redirect('/app/circuits');
+        }
         if (!Access::can((int) $user['id'], (int) $id, 'proprietaire')) {
             Session::flashSet('error', 'Seul le propriétaire peut supprimer un circuit.');
             redirect('/app/circuits');
@@ -240,6 +251,7 @@ class ProjectController
 
         $name = $name !== '' ? $name : (string) $pack['title'];
         if (Project::atPlanLimit($user)) {
+            Session::set('pending_template', ['key' => $key, 'name' => $name]);
             redirect(Project::planChangePath('circuits'));
         }
 

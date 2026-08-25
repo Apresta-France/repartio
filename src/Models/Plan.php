@@ -114,7 +114,13 @@ class Plan
         }
 
         $catalog = self::catalog();
-        return $catalog[$slug] ?? $catalog[self::LIBRE] ?? array_values($catalog)[0];
+        if (isset($catalog[$slug])) {
+            return $catalog[$slug];
+        }
+        if (isset($catalog[self::LIBRE])) {
+            return $catalog[self::LIBRE];
+        }
+        return self::normalize(self::DEFAULTS[self::LIBRE]);
     }
 
     public static function slug(array|string|null $userOrPlan): string
@@ -190,8 +196,9 @@ class Plan
     public static function horizonLabel(array|string|null $userOrPlan): string
     {
         $months = self::horizonMax($userOrPlan);
-        if ($months >= 12 && $months % 12 === 0 && $months >= 120) {
-            return ($months / 12) . ' ans';
+        if ($months >= 12 && $months % 12 === 0) {
+            $years = intdiv($months, 12);
+            return $years === 1 ? '1 an' : $years . ' ans';
         }
         return $months . ' mois';
     }

@@ -18,6 +18,7 @@ $subActive = is_array($subscription) && in_array((string) ($subscription['status
 $cancelAtEnd = $subActive && !empty($subscription['cancel_at_period_end']);
 $periodEnd = !empty($subscription['current_period_end']) ? strtotime((string) $subscription['current_period_end']) : false;
 $currentCycle = \App\Models\Billing::cycleFromPrice($subscription['price_code'] ?? null);
+$cycleIsYearly = $currentCycle === 'yearly';
 $profileType = (string) ($profile['type'] ?? 'individual');
 ?>
 <header class="app-top">
@@ -155,8 +156,8 @@ $profileType = (string) ($profile['type'] ?? 'individual');
 
   <?php if ($paymentReady): ?>
     <div class="chips billing-cycle" style="background:oklch(0.94 0.01 255);padding:4px;border-radius:11px;align-self:start;">
-      <button type="button" class="chip active" data-cycle="Mensuel">Mensuel</button>
-      <button type="button" class="chip" data-cycle="Annuel">Annuel</button>
+      <button type="button" class="chip<?= $cycleIsYearly ? '' : ' active' ?>" data-cycle="Mensuel">Mensuel</button>
+      <button type="button" class="chip<?= $cycleIsYearly ? ' active' : '' ?>" data-cycle="Annuel">Annuel</button>
     </div>
   <?php endif; ?>
 
@@ -182,8 +183,8 @@ $profileType = (string) ($profile['type'] ?? 'individual');
           <?php endif; ?>
         </div>
         <div class="billing-plan-price">
-          <span class="mono" data-monthly="<?= e(\App\Models\Plan::priceMonthly($slug)) ?>" data-yearly="<?= e(\App\Models\Plan::priceYearly($slug)) ?>"><?= e(\App\Models\Plan::priceMonthly($slug)) ?></span>
-          <span data-unit-monthly="<?= $paid ? 'par mois' : 'pour toujours' ?>" data-unit-yearly="<?= (float) $offer['price_yearly_ht'] > 0 ? 'par an' : 'pour toujours' ?>"><?= $paid ? 'par mois' : 'pour toujours' ?></span>
+          <span class="mono" data-monthly="<?= e(\App\Models\Plan::priceMonthly($slug)) ?>" data-yearly="<?= e(\App\Models\Plan::priceYearly($slug)) ?>"><?= e($cycleIsYearly ? \App\Models\Plan::priceYearly($slug) : \App\Models\Plan::priceMonthly($slug)) ?></span>
+          <span data-unit-monthly="<?= $paid ? 'par mois' : 'pour toujours' ?>" data-unit-yearly="<?= (float) $offer['price_yearly_ht'] > 0 ? 'par an' : 'pour toujours' ?>"><?= $cycleIsYearly && (float) $offer['price_yearly_ht'] > 0 ? 'par an' : ($paid ? 'par mois' : 'pour toujours') ?></span>
         </div>
         <ul>
           <?php foreach (\App\Models\Plan::features($slug) as $feature): ?>
@@ -201,7 +202,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
           <form method="post" action="<?= e(url('/app/forfait')) ?>">
             <?= csrf_field() ?>
             <input type="hidden" name="plan" value="<?= e($slug) ?>">
-            <input type="hidden" name="cycle" value="monthly" data-billing-cycle>
+            <input type="hidden" name="cycle" value="<?= $cycleIsYearly ? 'yearly' : 'monthly' ?>" data-billing-cycle>
             <?php if ($reason !== ''): ?>
               <input type="hidden" name="reason" value="<?= e($reason) ?>">
             <?php endif; ?>

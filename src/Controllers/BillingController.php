@@ -62,11 +62,16 @@ class BillingController
     public function saveProfile(): void
     {
         $user = Auth::requireUser();
+        $email = trim((string) ($_POST['billing_email'] ?? $user['email']));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            Session::flashSet('error', 'Indiquez une adresse e-mail de facturation valide.');
+            redirect('/app/forfait#facturation');
+        }
         Billing::saveProfile((int) $user['id'], [
             'type' => (string) ($_POST['billing_type'] ?? 'individual'),
             'name' => (string) ($_POST['billing_name'] ?? $user['first_name']),
             'company_name' => (string) ($_POST['billing_company'] ?? ''),
-            'email' => (string) ($_POST['billing_email'] ?? $user['email']),
+            'email' => $email,
             'line1' => (string) ($_POST['billing_line1'] ?? ''),
             'line2' => (string) ($_POST['billing_line2'] ?? ''),
             'postal_code' => (string) ($_POST['billing_postal_code'] ?? ''),
@@ -107,7 +112,7 @@ class BillingController
         }
 
         if (!$paid) {
-            $this->downgradeToFree($user, $active, $sub);
+            $this->applyFreePlan($user, $slug, $active, $sub);
             return;
         }
 
@@ -160,12 +165,18 @@ class BillingController
         Session::forget('billing_retry_plan');
         Session::forget('billing_retry_cycle');
 
+        if ($paidPlan === '' && $reason === '') {
+            redirect('/app/forfait');
+        }
+
         $active = false;
         if (ReInvent::enabled()) {
             for ($i = 0; $i < 4; $i++) {
                 try {
-                    $data = Billing::syncUser((int) $user['id']);
-                    $active = !empty($data['active']);
+                    Billing::syncUser((int) $user['id']);
+                    $user = User::find((int) $user['id']) ?? $user;
+                    $active = Billing::hasActiveSubscription((int) $user['id'])
+                        || (Plan::exists($paidPlan) && Plan::slug($user) === $paidPlan);
                     if ($active) {
                         break;
                     }
@@ -178,13 +189,16 @@ class BillingController
         }
 
         $user = User::find((int) $user['id']) ?? $user;
-        if (Plan::exists($paidPlan)) {
-            $this->trackPurchase($paidPlan, $paidCycle === 'yearly' ? 'yearly' : 'monthly');
-        } else {
-            $this->trackPurchase(
-                Plan::slug($user),
-                Billing::cycleFromPrice((Billing::subscription((int) $user['id']) ?? [])['price_code'] ?? null)
-            );
+        if ($active) {
+            if (Plan::exists($paidPlan)) {
+                $this->trackPurchase($paidPlan, $paidCycle === 'yearly' ? 'yearly' : 'monthly');
+            } else {
+                $this->trackPurchase(
+                    Plan::slug($user),
+                    Billing::cycleFromPrice((Billing::subscription((int) $user['id']) ?? [])['price_code'] ?? null)
+                );
+            }
+            (new ProjectController())->resumePendingTemplate();
         }
 
         View::render('app/billing-success', [
@@ -193,7 +207,7 @@ class BillingController
             'user' => $user,
             'recents' => Access::recentsForUser((int) $user['id']),
             'reason' => $reason,
-            'activated' => $active || Plan::slug($user) !== Plan::LIBRE,
+            'activated' => $active,
         ], 'layouts/app');
     }
 
@@ -296,8 +310,17 @@ class BillingController
      * @param array<string, mixed> $user
      * @param array<string, mixed>|null $sub
      */
-    private function downgradeToFree(array $user, bool $active, ?array $sub): void
+    /**
+     * @param array<string, mixed> $user
+     * @param array<string, mixed>|null $sub
+     */
+    private function applyFreePlan(array $user, string $slug, bool $active, ?array $sub): void
     {
+        if (!Plan::exists($slug)) {
+            $slug = Plan::LIBRE;
+        }
+        $label = Plan::label($slug);
+
         if ($active && ReInvent::enabled() && !empty($sub['product_code'])) {
             try {
                 ReInvent::cancel(ReInvent::accountId((int) $user['id']), (string) $sub['product_code'], true);
@@ -306,13 +329,13 @@ class BillingController
                 Session::flashSet('error', $e->getMessage());
                 redirect('/app/forfait');
             }
-            Session::flashSet('success', 'Retour au forfait Libre à la fin de la période déjà réglée.');
+            Session::flashSet('success', 'Retour au forfait ' . $label . ' à la fin de la période déjà réglée.');
             redirect('/app/forfait');
         }
 
-        User::updatePlan((int) $user['id'], Plan::LIBRE);
-        Project::log((int) $user['id'], 'Forfait passé en Libre');
-        Session::flashSet('success', 'Forfait Libre activé. ' . Plan::blurb(Plan::LIBRE));
+        User::updatePlan((int) $user['id'], $slug);
+        Project::log((int) $user['id'], 'Forfait passé en ' . $label);
+        Session::flashSet('success', 'Forfait ' . $label . ' activé. ' . Plan::blurb($slug));
         redirect('/app/circuits');
     }
 

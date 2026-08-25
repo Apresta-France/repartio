@@ -44,6 +44,9 @@ class User
             'UPDATE users SET first_name = ?, email = ?' . ($changed ? ', email_verified_at = NULL' : '') . ', updated_at = NOW() WHERE id = ?',
             [$firstName, $email, $id]
         );
+        if ($changed) {
+            Database::query('DELETE FROM auth_tokens WHERE user_id = ? AND purpose = ?', [$id, 'verify']);
+        }
     }
 
     public static function updatePlan(int $id, string $plan): void

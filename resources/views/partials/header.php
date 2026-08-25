@@ -18,17 +18,15 @@ $user = \App\Core\Auth::user();
     <?php endforeach; ?>
     <div class="nav-mobile-auth">
       <?php if ($user): ?>
-        <a class="btn btn-ghost" href="<?= e(url('/app')) ?>">Tableau de bord</a>
+        <a class="btn btn-ghost" href="<?= e(url('/app')) ?>">Mon compte</a>
       <?php else: ?>
         <a class="btn btn-ghost" href="<?= e(url('/connexion')) ?>">Se connecter</a>
       <?php endif; ?>
     </div>
   </nav>
   <div class="header-actions">
-    <span class="hint">Gratuit · 1 circuit</span>
     <?php if ($user): ?>
-      <a class="btn-link" href="<?= e(url('/app')) ?>">Tableau de bord</a>
-      <a class="btn btn-orange" href="<?= e(url('/app/circuits')) ?>">Mes circuits</a>
+      <a class="btn btn-orange" href="<?= e(url('/app')) ?>">Mon compte</a>
     <?php else: ?>
       <a class="btn-link" href="<?= e(url('/connexion')) ?>">Se connecter</a>
       <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Ouvrir le builder</a>

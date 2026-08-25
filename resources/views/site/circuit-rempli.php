@@ -122,7 +122,7 @@ $steps = [
 </section>
 
 <section class="showcase-stage" data-showcase>
-  <script type="application/json" data-showcase-steps><?= json_encode($steps, JSON_UNESCAPED_UNICODE) ?></script>
+  <script type="application/json" data-showcase-steps><?= json_encode($steps, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
   <aside class="showcase-rail">
     <span class="eyebrow">Parcourir le circuit</span>
     <ol class="showcase-steps">

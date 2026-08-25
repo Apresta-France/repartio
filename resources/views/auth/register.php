@@ -17,7 +17,7 @@
         <label class="field"><span>Adresse e-mail</span><input type="email" name="email" required value="<?= e((string) old('email')) ?>" placeholder="vous@exemple.fr"></label>
         <label class="field">
           <span>Mot de passe</span>
-          <input type="password" name="password" required data-password placeholder="12 caractères minimum">
+          <input type="password" name="password" required minlength="12" data-password placeholder="12 caractères minimum">
           <div class="pwd-bars"><i data-pwd-bar></i><i data-pwd-bar></i><i data-pwd-bar></i><i data-pwd-bar></i></div>
           <span class="mono" style="font-size:11px;color:var(--faint);" data-pwd-check data-label="12 caractères minimum">· 12 caractères minimum</span>
           <span class="mono" style="font-size:11px;color:var(--faint);" data-pwd-check data-label="une majuscule et une minuscule">· une majuscule et une minuscule</span>

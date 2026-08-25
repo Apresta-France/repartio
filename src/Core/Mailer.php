@@ -11,14 +11,16 @@ class Mailer
         $html = View::html('emails/' . $template, $data, 'emails/layout');
         $text = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $html));
 
-        $this->log($to, $subject, $template);
-
         $driver = (string) Config::get('mail.driver', 'file');
-        return match ($driver) {
+        $ok = match ($driver) {
             'smtp' => $this->sendSmtp($to, $subject, $html, $text),
             'mail' => $this->sendPhpMail($to, $subject, $html),
             default => $this->sendFile($to, $subject, $html),
         };
+        if ($ok) {
+            $this->log($to, $subject, $template);
+        }
+        return $ok;
     }
 
     private function log(string $to, string $subject, string $template): void
@@ -107,8 +109,8 @@ class Mailer
             'Content-Type: multipart/alternative; boundary="' . $boundary . '"',
         ];
         $body = implode("\r\n", $headers) . "\r\n\r\n";
-        $body .= '--' . $boundary . "\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" . $text . "\r\n\r\n";
-        $body .= '--' . $boundary . "\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" . $html . "\r\n\r\n";
+        $body .= '--' . $boundary . "\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" . $this->dotStuff($text) . "\r\n\r\n";
+        $body .= '--' . $boundary . "\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" . $this->dotStuff($html) . "\r\n\r\n";
         $body .= '--' . $boundary . "--\r\n.";
         $this->cmd($fp, $body, [250]);
         $this->cmd($fp, 'QUIT', [221, 250]);
@@ -140,5 +142,10 @@ class Mailer
     private function encode(string $value): string
     {
         return '=?UTF-8?B?' . base64_encode($value) . '?=';
+    }
+
+    private function dotStuff(string $value): string
+    {
+        return (string) preg_replace('/^\./m', '..', str_replace(["\r\n", "\r"], "\n", $value));
     }
 }

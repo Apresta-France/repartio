@@ -2943,6 +2943,42 @@
     saving = true;
   });
 
+  async function persistCircuit() {
+    if (!form) return false;
+    syncPayload();
+    const data = new FormData(form);
+    const res = await fetch(form.action, {
+      method: 'POST',
+      body: data,
+      headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    });
+    if (!res.ok) return false;
+    markSaved();
+    return true;
+  }
+
+  document.querySelectorAll('[data-share-modal] form').forEach((shareForm) => {
+    shareForm.addEventListener('submit', async (e) => {
+      if (readonly) return;
+      saving = true;
+      if (!isDirty()) return;
+      e.preventDefault();
+      if (shareForm.dataset.sharing === '1') return;
+      shareForm.dataset.sharing = '1';
+      const btn = e.submitter || shareForm.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      try {
+        if (!(await persistCircuit())) throw new Error('save');
+        shareForm.submit();
+      } catch {
+        saving = false;
+        shareForm.dataset.sharing = '';
+        if (btn) btn.disabled = false;
+        window.alert('Enregistrez le circuit avant de partager.');
+      }
+    });
+  });
+
   function setupOpen() {
     return Boolean(setupModal && !setupModal.hidden);
   }
@@ -3264,6 +3300,8 @@
         body: data,
         redirect: 'manual',
         headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      }).then((res) => {
+        if (res.ok) markSaved();
       }).catch(() => {});
     }
     closeSetupModal();

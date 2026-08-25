@@ -348,6 +348,10 @@ class AdminController
         if (!Plan::exists($slug)) {
             redirect('/admin/forfaits');
         }
+        if ($slug === Plan::LIBRE) {
+            Session::flashSet('error', 'Le forfait Libre ne peut pas être supprimé.');
+            redirect('/admin/forfaits/' . $slug);
+        }
         if (count(Plan::all()) <= 1) {
             Session::flashSet('error', 'Il doit rester au moins un forfait.');
             redirect('/admin/forfaits/' . $slug);

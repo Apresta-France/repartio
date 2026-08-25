@@ -81,6 +81,10 @@ class AppController
             Session::flashSet('error', 'Saisissez « supprimer » pour confirmer.');
             redirect('/app/reglages');
         }
+        if (($user['role'] ?? '') === 'admin' && User::countAdmins() <= 1) {
+            Session::flashSet('error', 'Impossible de supprimer le dernier administrateur.');
+            redirect('/app/reglages');
+        }
         Auth::logout();
         User::delete((int) $user['id']);
         Session::flashSet('success', 'Compte et circuits supprimés.');

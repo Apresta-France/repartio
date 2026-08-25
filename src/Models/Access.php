@@ -74,7 +74,10 @@ class Access
     public static function countForOwner(int $ownerId): int
     {
         $row = Database::fetch(
-            'SELECT COUNT(*) AS n FROM account_members WHERE owner_id = ?',
+            'SELECT COUNT(*) AS n FROM account_members
+             WHERE owner_id = ?
+               AND (status = "active"
+                    OR (status = "pending" AND (expires_at IS NULL OR expires_at > NOW())))',
             [$ownerId]
         );
         return (int) ($row['n'] ?? 0);

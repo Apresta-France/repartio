@@ -218,12 +218,13 @@ if (pwd) {
   const checks = document.querySelectorAll('[data-pwd-check]');
   pwd.addEventListener('input', () => {
     const v = pwd.value;
+    const len = Array.from(v).length;
     const rules = [
-      v.length >= 12,
+      len >= 12,
       /[a-z]/.test(v) && /[A-Z]/.test(v),
       /[0-9\W]/.test(v),
     ];
-    const score = rules.filter(Boolean).length + (v.length >= 16 ? 1 : 0);
+    const score = rules.filter(Boolean).length + (len >= 16 ? 1 : 0);
     bars.forEach((bar, i) => bar.classList.toggle('on', i < score));
     checks.forEach((el, i) => {
       el.textContent = (rules[i] ? '✓ ' : '· ') + el.getAttribute('data-label');
@@ -238,9 +239,9 @@ if (noteSearch) {
   const catalogItems = () => [...document.querySelectorAll('[data-note-group] [data-note-q]')];
   const visibleNotes = () => catalogItems().filter((el) => !el.hidden).length;
   noteSearch.addEventListener('input', () => {
-    const q = noteSearch.value.trim().toLowerCase();
+    const q = foldText(noteSearch.value).trim();
     catalogItems().forEach((item) => {
-      const text = item.getAttribute('data-note-q') || '';
+      const text = foldText(item.getAttribute('data-note-q') || '');
       item.hidden = q !== '' && !text.includes(q);
     });
     document.querySelectorAll('[data-note-group]').forEach((group) => {
@@ -269,9 +270,9 @@ if (faqSearch) {
   let lastSearch = '';
   const visibleFaqCount = () => [...document.querySelectorAll('[data-faq-q]')].filter((el) => !el.hidden).length;
   faqSearch.addEventListener('input', () => {
-    const q = faqSearch.value.trim().toLowerCase();
+    const q = foldText(faqSearch.value).trim();
     document.querySelectorAll('[data-faq-q]').forEach((item) => {
-      const text = item.getAttribute('data-faq-q') || '';
+      const text = foldText(item.getAttribute('data-faq-q') || '');
       item.hidden = q !== '' && !text.includes(q);
     });
     window.clearTimeout(searchTimer);

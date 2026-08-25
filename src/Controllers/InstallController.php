@@ -30,7 +30,7 @@ class InstallController
                 'db_port' => $_ENV['DB_PORT'] ?? '3306',
                 'db_name' => $_ENV['DB_NAME'] ?? 'repartio',
                 'db_user' => $_ENV['DB_USER'] ?? 'root',
-                'db_pass' => $_ENV['DB_PASS'] ?? '',
+                'db_pass' => '',
                 'mail_driver' => $_ENV['MAIL_DRIVER'] ?? 'file',
                 'mail_host' => $_ENV['MAIL_HOST'] ?? '127.0.0.1',
                 'mail_port' => $_ENV['MAIL_PORT'] ?? '587',
@@ -44,6 +44,21 @@ class InstallController
     {
         if (is_installed()) {
             redirect('/');
+        }
+
+        foreach ($this->checks() as $check) {
+            if (!$check[1]) {
+                Session::flashSet('error', 'Corrigez les prérequis manquants avant d’installer.');
+                redirect('/install');
+            }
+        }
+
+        try {
+            if (User::count() > 0) {
+                Session::flashSet('error', 'Des comptes existent déjà. Restaurez storage/installed.lock plutôt que de réinstaller.');
+                redirect('/install');
+            }
+        } catch (Throwable) {
         }
 
         $appUrl = rtrim(trim((string) ($_POST['app_url'] ?? '')), '/');
@@ -103,6 +118,7 @@ class InstallController
         ]);
 
         Config::load(BASE_PATH . '/.env');
+        Database::reset();
 
         try {
             $pdo = Database::connect();
@@ -117,15 +133,22 @@ class InstallController
                 ]);
                 User::markVerified((int) $user['id']);
             }
+            if (User::count() === 0) {
+                throw new \RuntimeException('Le compte administrateur n’a pas pu être créé.');
+            }
         } catch (Throwable $e) {
             Session::flashSet('error', 'Installation interrompue : ' . $e->getMessage());
             redirect('/install');
         }
 
-        file_put_contents(
+        $lock = file_put_contents(
             BASE_PATH . '/storage/installed.lock',
             json_encode(['installed_at' => date('c'), 'migrations' => $applied ?? []], JSON_PRETTY_PRINT)
         );
+        if ($lock === false) {
+            Session::flashSet('error', 'Le compte est créé, mais storage/installed.lock n’a pas pu être écrit. Recréez-le avant de recharger.');
+            redirect('/connexion');
+        }
 
         Session::flashSet('success', 'repartio est installé. Connectez-vous avec le compte créé.');
         redirect('/connexion');

@@ -100,6 +100,9 @@ class AuthController
 
     public function verify(string $token): void
     {
+        if (self::isHead()) {
+            return;
+        }
         $row = Token::consume($token, 'verify');
         if ($row) {
             User::markVerified((int) $row['user_id']);
@@ -185,6 +188,9 @@ class AuthController
 
     public function magicConsume(string $token): void
     {
+        if (self::isHead()) {
+            return;
+        }
         $row = Token::consume($token, 'magic');
         if (!$row) {
             Session::flashSet('error', 'Lien de connexion invalide ou expiré.');
@@ -213,6 +219,11 @@ class AuthController
         }
         (new ProjectController())->resumePendingTemplate();
         redirect('/app');
+    }
+
+    private static function isHead(): bool
+    {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'HEAD';
     }
 
     private static function pendingCircuitTitle(): string

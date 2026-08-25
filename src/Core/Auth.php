@@ -8,19 +8,30 @@ use App\Models\User;
 
 class Auth
 {
+    private static bool $resolved = false;
+    private static ?array $cachedUser = null;
+
     public static function user(): ?array
     {
+        if (self::$resolved) {
+            return self::$cachedUser;
+        }
         $id = Session::get('user_id');
         if (!$id) {
-            return self::fromRemember();
+            self::$cachedUser = self::fromRemember();
+            self::$resolved = true;
+            return self::$cachedUser;
         }
-        static $cached = false;
-        static $user = null;
-        if ($cached === true) {
-            return $user;
-        }
-        $cached = true;
         $user = User::find((int) $id);
+        if (!$user || !self::passwordMatches($user)) {
+            Session::forget('user_id');
+            Session::forget('pwd_sig');
+            self::$cachedUser = $user ? null : self::fromRemember();
+            self::$resolved = true;
+            return self::$cachedUser;
+        }
+        self::$resolved = true;
+        self::$cachedUser = $user;
         return $user;
     }
 
@@ -38,7 +49,7 @@ class Auth
     public static function login(array $user, bool $remember = false): void
     {
         Session::regenerate();
-        Session::set('user_id', (int) $user['id']);
+        self::bindSession($user);
         if ($remember) {
             self::issueRemember((int) $user['id']);
         }
@@ -55,7 +66,10 @@ class Auth
         }
         self::clearRememberCookie();
         Session::forget('user_id');
+        Session::forget('pwd_sig');
         Session::regenerate();
+        self::$resolved = true;
+        self::$cachedUser = null;
     }
 
     public static function revokeAllTokens(int $userId): void
@@ -101,15 +115,47 @@ class Auth
             [hash('sha256', $raw), 'remember']
         );
         if (!$row) {
+            self::clearRememberCookie();
             return null;
         }
         $user = User::find((int) $row['user_id']);
         if ($user) {
             Session::regenerate();
-            Session::set('user_id', (int) $user['id']);
+            self::bindSession($user);
             self::issueRemember((int) $user['id'], $raw);
+            return $user;
         }
-        return $user;
+        Database::query(
+            'DELETE FROM auth_tokens WHERE token_hash = ? AND purpose = ?',
+            [hash('sha256', $raw), 'remember']
+        );
+        self::clearRememberCookie();
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     */
+    private static function bindSession(array $user): void
+    {
+        Session::set('user_id', (int) $user['id']);
+        Session::set('pwd_sig', hash('sha256', (string) ($user['password_hash'] ?? '')));
+        self::$resolved = true;
+        self::$cachedUser = $user;
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     */
+    private static function passwordMatches(array $user): bool
+    {
+        $expected = hash('sha256', (string) ($user['password_hash'] ?? ''));
+        $sig = Session::get('pwd_sig');
+        if (!is_string($sig) || $sig === '') {
+            Session::set('pwd_sig', $expected);
+            return true;
+        }
+        return hash_equals($sig, $expected);
     }
 
     private static function issueRemember(int $userId, ?string $previous = null): void

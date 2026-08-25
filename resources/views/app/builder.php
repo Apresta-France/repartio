@@ -386,7 +386,7 @@ foreach ($scenarios as $key => $t) {
     <p class="scenario-empty" data-filter-empty="scenarios" hidden>Aucun scénario ne correspond à cette recherche.</p>
   </div>
 </div>
-<script type="application/json" data-scenarios><?= json_encode($scenarioCatalog, JSON_UNESCAPED_UNICODE) ?></script>
+<script type="application/json" data-scenarios><?= json_encode($scenarioCatalog, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
 
 <?php require BASE_PATH . '/resources/views/partials/builder-report-modal.php'; ?>
 

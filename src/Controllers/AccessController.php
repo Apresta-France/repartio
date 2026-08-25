@@ -51,9 +51,17 @@ class AccessController
             Session::flashSet('error', 'Choisissez au moins un circuit, avec un niveau de droit.');
             redirect('/app/acces');
         }
-        if (Access::findByOwnerEmail($ownerId, $email)) {
-            Session::flashSet('error', 'Cette personne a déjà un accès. Modifiez ses droits ci-dessous.');
-            redirect('/app/acces');
+        $existing = Access::findByOwnerEmail($ownerId, $email);
+        if ($existing) {
+            $expired = $existing['status'] === 'pending'
+                && !empty($existing['expires_at'])
+                && strtotime((string) $existing['expires_at']) < time();
+            if ($expired) {
+                Access::revoke((int) $existing['id'], $ownerId);
+            } else {
+                Session::flashSet('error', 'Cette personne a déjà un accès. Modifiez ses droits ci-dessous.');
+                redirect('/app/acces');
+            }
         }
         $memberLimit = Access::memberLimitFor($user);
         if ($memberLimit <= 0 || Access::countForOwner($ownerId) >= $memberLimit) {

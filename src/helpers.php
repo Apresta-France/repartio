@@ -78,10 +78,10 @@ function old(string $key, mixed $default = ''): mixed
 
 function password_is_strong(string $password): bool
 {
-    return strlen($password) >= 12
-        && (bool) preg_match('/[a-z]/', $password)
-        && (bool) preg_match('/[A-Z]/', $password)
-        && (bool) preg_match('/[0-9\W]/', $password);
+    return mb_strlen($password) >= 12
+        && (bool) preg_match('/[a-z]/u', $password)
+        && (bool) preg_match('/[A-Z]/u', $password)
+        && (bool) preg_match('/[0-9\W]/u', $password);
 }
 
 function wants_json(): bool

@@ -93,7 +93,7 @@ class Billing
         $name = (string) ($profile['type'] === 'company'
             ? ($profile['company_name'] ?: $profile['name'])
             : ($profile['name'] ?: ($user['first_name'] ?? '')));
-        return $email !== ''
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false
             && $name !== ''
             && $profile['line1'] !== ''
             && $profile['postal_code'] !== ''
@@ -158,6 +158,7 @@ class Billing
         }
 
         $active = null;
+        $inactive = null;
         foreach ($items as $item) {
             if (!is_array($item) || ($item['type'] ?? '') !== 'subscription') {
                 continue;
@@ -166,27 +167,95 @@ class Billing
                 $active = $item;
                 break;
             }
+            $inactive ??= $item;
         }
 
-        $product = is_array($active) ? (string) ($active['product_code'] ?? '') : '';
-        $status = is_array($active) ? (string) ($active['status'] ?? '') : '';
-        $price = is_array($active) ? (string) ($active['price_code'] ?? '') : '';
-        $periodEnd = is_array($active) ? self::normalizeDate($active['current_period_end'] ?? null) : null;
-        $cancelAtEnd = is_array($active) && !empty($active['cancel_at_period_end']);
-        $reinventId = is_array($active) && isset($active['id']) ? (int) $active['id'] : null;
-        $stripeId = is_array($active) ? (string) ($active['stripe_subscription_id'] ?? '') : '';
+        if (is_array($active)) {
+            self::persistSubscription($userId, $active);
+            $product = (string) ($active['product_code'] ?? '');
+            if ($product !== '' && Plan::exists($product)) {
+                $current = User::find($userId);
+                if ($current && (string) ($current['plan'] ?? '') !== $product) {
+                    User::updatePlan($userId, $product);
+                    try {
+                        Project::log($userId, 'Forfait passé en ' . Plan::label($product) . ' (paiement)');
+                    } catch (Throwable) {
+                    }
+                }
+            }
+            return;
+        }
+
+        $existing = self::subscription($userId);
+        $periodEndTs = false;
+        foreach ([$inactive, $existing] as $row) {
+            if (is_array($row) && !empty($row['current_period_end'])) {
+                $periodEndTs = strtotime((string) $row['current_period_end']);
+                if ($periodEndTs !== false) {
+                    break;
+                }
+            }
+        }
+        $periodOver = $periodEndTs !== false && $periodEndTs < time();
+        $keepAccess = $existing && !$periodOver && (
+            in_array((string) ($existing['status'] ?? ''), ['active', 'trialing', 'past_due'], true)
+            || !empty($existing['cancel_at_period_end'])
+        );
+
+        if ($keepAccess || ($existing && $inactive && !$periodOver)) {
+            if (is_array($inactive)) {
+                self::persistSubscription($userId, $inactive + $existing);
+            }
+            return;
+        }
+
+        if (!$existing && $inactive === null) {
+            return;
+        }
+
+        if ($existing || $inactive) {
+            self::persistSubscription($userId, is_array($inactive) ? $inactive : [
+                'status' => 'canceled',
+                'cancel_at_period_end' => 0,
+            ]);
+        }
+
+        $current = User::find($userId);
+        if ($current && (string) ($current['plan'] ?? Plan::LIBRE) !== Plan::LIBRE) {
+            User::updatePlan($userId, Plan::LIBRE);
+            try {
+                Project::log($userId, 'Forfait revenu en Libre (abonnement inactif)');
+            } catch (Throwable) {
+            }
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private static function persistSubscription(int $userId, array $item): void
+    {
+        $product = (string) ($item['product_code'] ?? '');
+        $status = (string) ($item['status'] ?? '');
+        $price = (string) ($item['price_code'] ?? '');
+        $periodEnd = self::normalizeDate($item['current_period_end'] ?? null);
+        $cancelAtEnd = !empty($item['cancel_at_period_end']);
+        $reinventId = isset($item['id']) || isset($item['reinvent_id'])
+            ? (int) ($item['id'] ?? $item['reinvent_id'])
+            : null;
+        $stripeId = (string) ($item['stripe_subscription_id'] ?? '');
 
         Database::query(
             'INSERT INTO billing_subscriptions
                 (user_id, reinvent_id, stripe_subscription_id, product_code, price_code, status, current_period_end, cancel_at_period_end, synced_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
              ON DUPLICATE KEY UPDATE
-                reinvent_id = VALUES(reinvent_id),
-                stripe_subscription_id = VALUES(stripe_subscription_id),
-                product_code = VALUES(product_code),
-                price_code = VALUES(price_code),
-                status = VALUES(status),
-                current_period_end = VALUES(current_period_end),
+                reinvent_id = COALESCE(VALUES(reinvent_id), reinvent_id),
+                stripe_subscription_id = COALESCE(VALUES(stripe_subscription_id), stripe_subscription_id),
+                product_code = COALESCE(VALUES(product_code), product_code),
+                price_code = COALESCE(VALUES(price_code), price_code),
+                status = COALESCE(VALUES(status), status),
+                current_period_end = COALESCE(VALUES(current_period_end), current_period_end),
                 cancel_at_period_end = VALUES(cancel_at_period_end),
                 synced_at = NOW(),
                 updated_at = NOW()',
@@ -201,27 +270,6 @@ class Billing
                 $cancelAtEnd ? 1 : 0,
             ]
         );
-
-        if ($product !== '' && Plan::exists($product)) {
-            $current = User::find($userId);
-            if ($current && (string) ($current['plan'] ?? '') !== $product) {
-                User::updatePlan($userId, $product);
-                try {
-                    Project::log($userId, 'Forfait passé en ' . Plan::label($product) . ' (paiement)');
-                } catch (Throwable) {
-                }
-            }
-            return;
-        }
-
-        $current = User::find($userId);
-        if ($current && (string) ($current['plan'] ?? Plan::LIBRE) !== Plan::LIBRE) {
-            User::updatePlan($userId, Plan::LIBRE);
-            try {
-                Project::log($userId, 'Forfait revenu en Libre (abonnement inactif)');
-            } catch (Throwable) {
-            }
-        }
     }
 
     public static function cycleFromPrice(?string $priceCode): string

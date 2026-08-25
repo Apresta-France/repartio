@@ -56,7 +56,7 @@ $statuses = [
         <div class="project-card-foot">
           <span class="mono"><?= e(time_ago($p['updated_at'])) ?> · <?= $blocks ?> bloc<?= $blocks > 1 ? 's' : '' ?></span>
           <div class="project-actions">
-            <?php if ($canManage): ?>
+            <?php if ($canManage && $status !== 'archive'): ?>
               <a href="<?= e(url('/app/circuits/' . $p['id'] . '/partage')) ?>">Partager</a>
               <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/dupliquer')) ?>"><?= csrf_field() ?><button type="submit">Dupliquer</button></form>
               <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/archiver')) ?>"><?= csrf_field() ?><button type="submit"><?= $status === 'archive' ? 'Réactiver' : 'Archiver' ?></button></form>

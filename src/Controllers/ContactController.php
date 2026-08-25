@@ -34,7 +34,7 @@ class ContactController
         $body = trim((string) ($_POST['message'] ?? ''));
         $ok = isset($_POST['privacy']);
 
-        if ($first === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($body) < 12 || !$ok) {
+        if ($first === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($body) < 12 || !$ok) {
             Session::flashSet('error', 'Merci de remplir les champs nécessaires et d’accepter la conservation du message.');
             Session::flashSet('_old', compact('topic', 'first') + ['email' => $email, 'message' => $body]);
             redirect('/contact');
