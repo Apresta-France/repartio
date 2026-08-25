@@ -56,7 +56,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
         <div class="billing-sub-actions">
           <form method="post" action="<?= e(url('/app/forfait/portail')) ?>">
             <?= csrf_field() ?>
-            <button class="btn btn-ghost" type="submit">Carte et factures Stripe</button>
+            <button class="btn btn-ghost" type="submit">Carte, adresse et factures Stripe</button>
           </form>
           <?php if (!$cancelAtEnd): ?>
             <form method="post" action="<?= e(url('/app/forfait/resilier')) ?>" onsubmit="return confirm('Résilier à la fin de la période déjà réglée ?');">
@@ -89,7 +89,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
     <div>
       <span class="eyebrow">Facturation</span>
       <h2>Coordonnées pour la facture</h2>
-      <p class="lede">Nécessaires avant un paiement : la TVA est calculée par Stripe selon l’adresse.</p>
+      <p class="lede">Stripe Tax calcule la TVA selon le pays (et le n° TVA intra-communautaire s’il est renseigné). La facture Stripe reprend HT, TVA et TTC.</p>
     </div>
     <div class="fields-2">
       <label class="field">
@@ -212,24 +212,39 @@ $profileType = (string) ($profile['type'] ?? 'individual');
     <?php endforeach; ?>
   </div>
 
-  <?php if ($invoices !== []): ?>
-    <div class="card card-pad billing-invoices">
-      <h2>Factures</h2>
+  <div class="card card-pad billing-invoices">
+    <div>
+      <span class="eyebrow">Factures Stripe</span>
+      <h2>Historique et TVA</h2>
+      <p class="lede">Chaque encaissement produit une facture Stripe (PDF + page hébergée) avec la TVA applicable. Changer de carte ou d’adresse se fait dans le portail Stripe.</p>
+    </div>
+    <?php if ($invoices === []): ?>
+      <p class="lede">Aucune facture pour l’instant. Elle apparaîtra ici après le premier paiement.</p>
+    <?php else: ?>
       <div class="billing-invoice-list">
         <?php foreach ($invoices as $invoice):
-            $when = !empty($invoice['created_at']) ? strtotime((string) $invoice['created_at']) : false;
-            $amount = isset($invoice['amount_paid']) ? ((int) $invoice['amount_paid']) / 100 : 0;
+            $when = !empty($invoice['created_at']) ? strtotime((string) ($invoice['created_at'] ?? '')) : false;
+            $paid = isset($invoice['amount_paid']) ? ((int) $invoice['amount_paid']) / 100 : (isset($invoice['total']) ? ((int) $invoice['total']) / 100 : 0);
+            $tax = isset($invoice['tax']) ? ((int) $invoice['tax']) / 100 : (isset($invoice['amount_tax']) ? ((int) $invoice['amount_tax']) / 100 : null);
             $href = (string) ($invoice['hosted_invoice_url'] ?? $invoice['invoice_pdf'] ?? '');
             ?>
           <div>
             <strong><?= e((string) ($invoice['invoice_number'] ?? $invoice['stripe_invoice_id'] ?? 'Facture')) ?></strong>
-            <span><?= $when ? date('d/m/Y', $when) : '' ?> · <?= e(number_format($amount, 2, ',', ' ')) ?> €</span>
+            <span><?= $when ? date('d/m/Y', $when) : '' ?>
+              · <?= e(number_format($paid, 2, ',', ' ')) ?> € TTC
+              <?php if ($tax !== null): ?> dont <?= e(number_format($tax, 2, ',', ' ')) ?> € TVA<?php endif; ?></span>
             <?php if ($href !== ''): ?>
-              <a href="<?= e($href) ?>" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+              <a href="<?= e($href) ?>" target="_blank" rel="noopener noreferrer">Ouvrir sur Stripe</a>
             <?php endif; ?>
           </div>
         <?php endforeach; ?>
       </div>
-    </div>
-  <?php endif; ?>
+    <?php endif; ?>
+    <?php if ($subActive): ?>
+      <form method="post" action="<?= e(url('/app/forfait/portail')) ?>">
+        <?= csrf_field() ?>
+        <button class="btn btn-ghost" type="submit">Ouvrir le portail Stripe</button>
+      </form>
+    <?php endif; ?>
+  </div>
 </section>

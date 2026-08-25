@@ -26,7 +26,7 @@ class BillingController
             $reason = Project::atPlanLimit($user) ? 'circuits' : '';
         }
         if (!empty($_GET['annule'])) {
-            Session::flashSet('error', 'Paiement annulé. Votre forfait n’a pas changé.');
+            redirect('/app/forfait/echec');
         }
 
         $sub = null;
@@ -86,6 +86,8 @@ class BillingController
         $cycle = (string) ($_POST['cycle'] ?? 'monthly') === 'yearly' ? 'yearly' : 'monthly';
         $reason = (string) ($_POST['reason'] ?? '');
         Session::set('billing_reason', $reason);
+        Session::set('billing_retry_plan', $slug);
+        Session::set('billing_retry_cycle', $cycle);
 
         if (!Plan::exists($slug)) {
             Session::flashSet('error', 'Ce forfait n’existe pas.');
@@ -152,12 +154,16 @@ class BillingController
         $user = Auth::requireUser();
         $reason = (string) Session::get('billing_reason', '');
         Session::forget('billing_reason');
+        Session::forget('billing_retry_plan');
+        Session::forget('billing_retry_cycle');
 
+        $active = false;
         if (ReInvent::enabled()) {
             for ($i = 0; $i < 4; $i++) {
                 try {
                     $data = Billing::syncUser((int) $user['id']);
-                    if (!empty($data['active'])) {
+                    $active = !empty($data['active']);
+                    if ($active) {
                         break;
                     }
                 } catch (Throwable) {
@@ -169,13 +175,42 @@ class BillingController
         }
 
         $user = User::find((int) $user['id']) ?? $user;
-        Session::flashSet('success', 'Forfait ' . Plan::label($user) . ' activé. ' . Plan::blurb($user));
         track_rv('purchase', [
             'amount' => (float) Plan::of($user)['price_monthly_ht'],
             'currency' => 'EUR',
             'plan' => Plan::slug($user),
         ]);
-        $this->redirectAfterChange($reason);
+
+        View::render('app/billing-success', [
+            'title' => 'Paiement confirmé',
+            'nav' => 'forfait',
+            'user' => $user,
+            'recents' => Access::recentsForUser((int) $user['id']),
+            'reason' => $reason,
+            'activated' => $active || Plan::slug($user) !== Plan::LIBRE,
+        ], 'layouts/app');
+    }
+
+    public function failed(): void
+    {
+        $user = Auth::requireUser();
+        $plan = (string) Session::get('billing_retry_plan', '');
+        $cycle = (string) Session::get('billing_retry_cycle', 'monthly');
+        if ($plan !== '' && !Plan::exists($plan)) {
+            $plan = '';
+        }
+        if ($cycle !== 'yearly') {
+            $cycle = 'monthly';
+        }
+
+        View::render('app/billing-failed', [
+            'title' => 'Paiement interrompu',
+            'nav' => 'forfait',
+            'user' => $user,
+            'recents' => Access::recentsForUser((int) $user['id']),
+            'retryPlan' => $plan,
+            'retryCycle' => $cycle,
+        ], 'layouts/app');
     }
 
     public function portal(): void

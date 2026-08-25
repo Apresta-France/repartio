@@ -113,6 +113,7 @@ class App
         $router->post('/app/forfait', [BillingController::class, 'changePlan']);
         $router->post('/app/forfait/facturation', [BillingController::class, 'saveProfile']);
         $router->get('/app/forfait/succes', [BillingController::class, 'success']);
+        $router->get('/app/forfait/echec', [BillingController::class, 'failed']);
         $router->post('/app/forfait/portail', [BillingController::class, 'portal']);
         $router->post('/app/forfait/resilier', [BillingController::class, 'cancel']);
         $router->post('/webhooks/reinvent', [BillingController::class, 'webhook']);

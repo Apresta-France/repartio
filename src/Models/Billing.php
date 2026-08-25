@@ -258,7 +258,7 @@ class Billing
             ReInvent::priceCode($plan, $cycle),
             self::customerPayload($user),
             app_url('/app/forfait/succes'),
-            app_url('/app/forfait?annule=1')
+            app_url('/app/forfait/echec')
         );
         $url = (string) ($session['checkout_url'] ?? '');
         if ($url === '') {
