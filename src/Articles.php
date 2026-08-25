@@ -8,12 +8,209 @@ class Articles
 {
     public static function featuredSlug(): string
     {
-        return 'couple-12338';
+        return 'reussir-a-epargner';
     }
 
     public static function index(): array
     {
         return [
+            [
+                'slug' => 'reussir-a-epargner',
+                'tag' => 'Méthode',
+                'read' => '9 min',
+                'date' => '25 août 2026',
+                't' => 'Réussir à épargner : payer le livret avant le quotidien',
+                'd' => 'L’épargne qui reste « s’il en reste » n’arrive jamais. Le geste qui tient : un fil fixe vers le livret, dès le salaire, avant les sorties.',
+                'interactive' => true,
+                'featured' => true,
+                'guide' => true,
+                'guideMeta' => 'Payez-vous d’abord',
+                'topics' => ['Budget', 'Épargne'],
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir un modèle d’épargne'],
+                'figures' => [
+                    ['k' => 'Ordre', 'v' => 'Livret d’abord', 'tone' => 'teal'],
+                    ['k' => 'Exemple', 'v' => '300 € / mois', 'tone' => 'ink'],
+                    ['k' => '1 000 €', 'v' => '4 mois', 'tone' => 'teal'],
+                ],
+            ],
+            [
+                'slug' => 'comment-faire-un-budget',
+                'tag' => 'Méthode',
+                'read' => '10 min',
+                'date' => '25 août 2026',
+                't' => 'Comment faire un budget qui tient tout le mois',
+                'd' => 'Nommer les entrées, séparer les fixes du quotidien, et n’arrêter que lorsque chaque euro a une destination.',
+                'interactive' => true,
+                'guide' => true,
+                'guideMeta' => 'Quatre passes, un compteur à zéro',
+                'topics' => ['Budget'],
+            ],
+            [
+                'slug' => 'cest-quoi-livret-a',
+                'tag' => 'Réglementaire',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'C’est quoi un Livret A ?',
+                'd' => '1,70 % net, 22 950 € de plafond, un par personne, disponible tout de suite. À quoi il sert dans un mois type — et ce qu’il ne fait pas.',
+                'interactive' => true,
+                'guide' => true,
+                'guideMeta' => 'Taux · plafond · intérêts 2026',
+                'topics' => ['Épargne'],
+            ],
+            [
+                'slug' => 'cest-quoi-ldds',
+                'tag' => 'Réglementaire',
+                'read' => '6 min',
+                'date' => '25 août 2026',
+                't' => 'C’est quoi un LDDS ?',
+                'd' => 'Même taux que le Livret A, plafond plus bas. Pourquoi le saturer souvent avant, et comment le câbler à côté.',
+                'interactive' => false,
+                'topics' => ['Épargne'],
+            ],
+            [
+                'slug' => 'livret-jeune',
+                'tag' => 'Réglementaire',
+                'read' => '6 min',
+                'date' => '25 août 2026',
+                't' => 'Livret Jeune : le premier livret d’un ado',
+                'd' => '12–25 ans, 1 600 € de plafond, au moins le taux du Livret A. Comment le remplir sans vider l’enveloppe permis.',
+                'interactive' => false,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir le modèle Seize ans'],
+                'topics' => ['Épargne'],
+            ],
+            [
+                'slug' => 'payer-soi-meme-dabord',
+                'tag' => 'Méthode',
+                'read' => '7 min',
+                'date' => '25 août 2026',
+                't' => 'Se payer d’abord : 10 %, 20 %, ou un fixe ?',
+                'd' => 'Le circuit « Premier salaire » verse 20 % à l’épargne avant le quotidien. Voyez ce qui reste vraiment, selon le pourcentage.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Premier salaire'],
+                'topics' => ['Budget', 'Épargne'],
+            ],
+            [
+                'slug' => 'epargner-petit-revenu',
+                'tag' => 'Méthode',
+                'read' => '7 min',
+                'date' => '25 août 2026',
+                't' => 'Épargner avec un petit revenu, sans se mentir',
+                'd' => '50 € par mois, c’est 600 € en un an. Le montant compte moins que la régularité — et que le fil ne soit pas le dernier servi.',
+                'interactive' => true,
+                'topics' => ['Épargne', 'Budget'],
+            ],
+            [
+                'slug' => 'charges-fixes-variables',
+                'tag' => 'Méthode',
+                'read' => '6 min',
+                'date' => '25 août 2026',
+                't' => 'Charges fixes, enveloppe quotidienne : deux natures',
+                'd' => 'Le loyer se prélève. Les courses se plafonnent. Mélanger les deux dans une seule ligne, c’est l’arbitrage du 30 chaque mois.',
+                'interactive' => false,
+                'topics' => ['Budget'],
+            ],
+            [
+                'slug' => 'enveloppe-projet',
+                'tag' => 'Méthode',
+                'read' => '7 min',
+                'date' => '25 août 2026',
+                't' => 'Permis, vacances, voyage : une enveloppe à date',
+                'd' => 'Une cible, un nombre de mois, un versement. Le reste du surplus reste sur le Livret A — les deux objectifs ne se marchent pas dessus.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Projet à date'],
+                'topics' => ['Épargne'],
+            ],
+            [
+                'slug' => 'objectif-apport',
+                'tag' => 'Étude de cas',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'Épargner pour un apport : la date avant le total',
+                'd' => 'Deux salaires, les charges du foyer, puis LEP, Livret A, et tout le reste vers l’apport. La projection donne le mois, pas un vœu.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Objectif apport'],
+                'topics' => ['Épargne', 'Foyer'],
+            ],
+            [
+                'slug' => 'premier-salaire-budget',
+                'tag' => 'Étude de cas',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'Premier salaire : 1 900 €, loyer, et 20 % avant le reste',
+                'd' => 'Le circuit type d’un premier emploi. Ce qui tient, ce qui casse si le loyer monte, et pourquoi l’épargne part avant les sorties.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Premier salaire'],
+                'topics' => ['Budget'],
+                'topic' => 'Budget',
+            ],
+            [
+                'slug' => 'budget-etudiant',
+                'tag' => 'Étude de cas',
+                'read' => '7 min',
+                'date' => '25 août 2026',
+                't' => 'Budget étudiant : bourse, job, colocation, le reste sur Livret A',
+                'd' => 'Deux petites entrées, trois fixes, et un surplus souvent mince. Le circuit tient si le quotidien a un plafond — pas une liste ouverte.',
+                'interactive' => false,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir le modèle Étudiant'],
+                'topics' => ['Budget'],
+                'topic' => 'Budget',
+            ],
+            [
+                'slug' => 'colocation-partager',
+                'tag' => 'Étude de cas',
+                'read' => '6 min',
+                'date' => '25 août 2026',
+                't' => 'Colocation : qui paie quoi, sans tableur partagé',
+                'd' => 'Loyer, charges, courses communes : chaque coloc verse sa part vers un compte « toit », le reste reste personnel.',
+                'interactive' => false,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir le modèle Colocation'],
+                'topics' => ['Budget'],
+                'topic' => 'Budget',
+            ],
+            [
+                'slug' => 'couple-qui-paie-quoi',
+                'tag' => 'Étude de cas',
+                'read' => '9 min',
+                'date' => '25 août 2026',
+                't' => 'Couple : 50/50, prorata, ou tout en commun ?',
+                'd' => 'Salaires inégaux, factures communes. Trois câblages, trois lectures de « c’est juste ». Le simulateur compare les parts.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Voir les modèles couple'],
+                'topics' => ['Foyer', 'Budget'],
+            ],
+            [
+                'slug' => 'credit-immobilier-budget',
+                'tag' => 'Étude de cas',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'Crédit immobilier : le loyer a changé de nom',
+                'd' => 'Mensualité, copro, taxe foncière, enveloppe travaux. Ce qui reste à vivre une fois le bien payé — et ce qu’il faut provisionner.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Propriétaire avec crédit'],
+                'topics' => ['Foyer', 'Budget'],
+            ],
+            [
+                'slug' => 'budget-conge-parental',
+                'tag' => 'Étude de cas',
+                'read' => '7 min',
+                'date' => '25 août 2026',
+                't' => 'Congé parental : un salaire en moins, les mêmes factures',
+                'd' => 'Le circuit doit tenir sur le revenu qui reste. L’épargne se réduit ; les fixes, eux, ne négocient pas.',
+                'interactive' => false,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Congé parental'],
+                'topics' => ['Foyer'],
+            ],
+            [
+                'slug' => 'revenu-saisonnier',
+                'tag' => 'Méthode',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'Revenu saisonnier : lisser pour tenir les mois bas',
+                'd' => 'Six mois chargés, six mois calmes. Le mois type est une moyenne ; la réserve, elle, se calcule sur les creux.',
+                'interactive' => true,
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir Revenu saisonnier'],
+                'topics' => ['Budget', 'Épargne'],
+            ],
             [
                 'slug' => 'urssaf-auto-entrepreneur',
                 'tag' => 'Activité',
@@ -93,17 +290,6 @@ class Articles
                 't' => 'Un salaire et une auto-entreprise : qui encaisse le choc ?',
                 'd' => 'Le fixe tient les factures. Le variable nourrit l’épargne — jusqu’au mois où il ne le fait plus.',
                 'interactive' => true,
-            ],
-            [
-                'slug' => 'journal-versions',
-                'tag' => 'Produit',
-                'read' => '4 min',
-                'date' => '25 août 2026',
-                't' => 'Journal des versions',
-                'd' => 'Ce qui a changé dans le moteur, le canvas et les projections — mois par mois, sans rummage.',
-                'interactive' => true,
-                'guide' => true,
-                'guideMeta' => 'Nouveautés produit, par mois',
             ],
             [
                 'slug' => 'taux-plafonds-2026',
@@ -290,8 +476,8 @@ class Articles
     public static function doors(): array
     {
         return [
-            ['q' => 'J’ai un tableur', 'a' => 'Le migrer en vingt minutes', 'slug' => 'tableur-vers-circuit'],
-            ['q' => 'Je veux les barèmes', 'a' => 'Taux et plafonds 2026', 'slug' => 'taux-plafonds-2026'],
+            ['q' => 'Je veux épargner', 'a' => 'Payer le livret d’abord', 'slug' => 'reussir-a-epargner'],
+            ['q' => 'C’est quoi un Livret A', 'a' => 'Taux, plafond, à quoi il sert', 'slug' => 'cest-quoi-livret-a'],
             ['q' => 'Je suis auto-entrepreneur', 'a' => 'Provisionner l’URSSAF 2026', 'slug' => 'urssaf-auto-entrepreneur'],
             ['q' => 'Je veux un foyer réel', 'a' => '6 280 €, zéro euro non affecté', 'slug' => 'couple-12338'],
         ];
@@ -302,46 +488,67 @@ class Articles
     {
         return [
             [
+                'id' => 'budget',
+                'kicker' => '01 · Budget',
+                'title' => 'Poser un mois qui tient',
+                'lead' => 'Nommer les entrées, séparer les fixes du quotidien, et se payer avant de dépenser le reste.',
+                'slugs' => ['reussir-a-epargner', 'comment-faire-un-budget', 'payer-soi-meme-dabord', 'charges-fixes-variables'],
+            ],
+            [
+                'id' => 'livrets',
+                'kicker' => '02 · Livrets',
+                'title' => 'Comprendre les livrets',
+                'lead' => 'Livret A, LDDS, LEP, Livret Jeune : à quoi chacun sert, dans quel ordre les remplir.',
+                'slugs' => ['cest-quoi-livret-a', 'cest-quoi-ldds', 'livret-jeune', 'taux-plafonds-2026', 'ordre-livrets', 'eligibilite-lep'],
+            ],
+            [
+                'id' => 'objectifs',
+                'kicker' => '03 · Objectifs',
+                'title' => 'Une date, une enveloppe',
+                'lead' => 'Matelas, projet à date, apport : des cibles que la projection peut dater.',
+                'slugs' => ['matelas-trois-mois', 'enveloppe-projet', 'objectif-apport', 'epargner-petit-revenu'],
+            ],
+            [
+                'id' => 'situations',
+                'kicker' => '04 · Situations',
+                'title' => 'Des mois types déjà câblés',
+                'lead' => 'Premier salaire, étudiant, couple, crédit, saisonnier : partir d’un circuit plutôt que d’une feuille vide.',
+                'slugs' => ['premier-salaire-budget', 'budget-etudiant', 'colocation-partager', 'couple-qui-paie-quoi', 'credit-immobilier-budget', 'budget-conge-parental', 'revenu-saisonnier'],
+            ],
+            [
                 'id' => 'commencer',
-                'kicker' => '01 · Commencer',
+                'kicker' => '05 · Méthode',
                 'title' => 'Quitter le tableur',
                 'lead' => 'Traduire une feuille en chemins, puis comprendre ce qu’un répartiteur force à écrire.',
                 'slugs' => ['tableur-vers-circuit', 'budget-tableur', 'anatomie-repartiteur'],
             ],
             [
                 'id' => 'baremes',
-                'kicker' => '02 · Barèmes',
+                'kicker' => '06 · Barèmes',
                 'title' => 'Les chiffres du moteur',
                 'lead' => 'Taux, plafonds, ordre de remplissage : ce que le circuit porte, sans conseil de placement.',
-                'slugs' => ['taux-plafonds-2026', 'ordre-livrets', 'plafond-atteint', 'eligibilite-lep'],
+                'slugs' => ['plafond-atteint', 'pourcentages-ou-fixes', 'fil-tout-le-reste'],
             ],
             [
                 'id' => 'activite',
-                'kicker' => '03 · Activité',
+                'kicker' => '07 · Activité',
                 'title' => 'Auto-entreprise, sans surprise',
                 'lead' => 'Provisionner les cotisations, lire les plafonds, choisir le libératoire, lisser un CA irrégulier.',
                 'slugs' => ['urssaf-auto-entrepreneur', 'plafonds-micro-tva-2026', 'versement-liberatoire', 'ca-irregulier'],
             ],
             [
                 'id' => 'cas',
-                'kicker' => '04 · Cas réels',
+                'kicker' => '08 · Cas réels',
                 'title' => 'Des circuits commentés',
                 'lead' => 'Lire un foyer déjà câblé, puis baisser un revenu pour voir ce qui s’arrête.',
                 'slugs' => ['couple-12338', 'famille-de-quatre', 'salaire-et-autoentreprise'],
             ],
             [
                 'id' => 'mecanique',
-                'kicker' => '05 · Mécanique',
+                'kicker' => '09 · Foyer',
                 'title' => 'Les gestes qui tiennent',
-                'lead' => 'Joints, fixes, pourcentages, débordement : les décisions qui suppriment l’arbitrage du 30.',
-                'slugs' => ['compte-joint-factures', 'pourcentages-ou-fixes', 'fil-tout-le-reste', 'matelas-trois-mois'],
-            ],
-            [
-                'id' => 'produit',
-                'kicker' => '06 · Produit',
-                'title' => 'Ce qui a changé',
-                'lead' => 'Le journal du moteur, du canvas et des projections.',
-                'slugs' => ['journal-versions', 'scenarios-compares'],
+                'lead' => 'Joints, fixes, pourcentages : les décisions qui suppriment l’arbitrage du 30.',
+                'slugs' => ['compte-joint-factures', 'scenarios-compares'],
             ],
         ];
     }
@@ -445,7 +652,23 @@ class Articles
             'taux-plafonds-2026' => self::taux(),
             'anatomie-repartiteur' => self::repart(),
             'tableur-vers-circuit' => self::migrate(),
-            'journal-versions' => self::journal(),
+            'reussir-a-epargner' => self::epargner(),
+            'comment-faire-un-budget' => self::budgetMois(),
+            'cest-quoi-livret-a' => self::livretA(),
+            'cest-quoi-ldds' => self::ldds(),
+            'livret-jeune' => self::livretJeune(),
+            'payer-soi-meme-dabord' => self::payfirst(),
+            'epargner-petit-revenu' => self::petitRevenu(),
+            'charges-fixes-variables' => self::chargesNatures(),
+            'enveloppe-projet' => self::enveloppe(),
+            'objectif-apport' => self::apport(),
+            'premier-salaire-budget' => self::premierSalaire(),
+            'budget-etudiant' => self::etudiant(),
+            'colocation-partager' => self::colo(),
+            'couple-qui-paie-quoi' => self::prorata(),
+            'credit-immobilier-budget' => self::creditImmo(),
+            'budget-conge-parental' => self::conge(),
+            'revenu-saisonnier' => self::saison(),
             default => [],
         };
     }
@@ -746,14 +969,354 @@ class Articles
         ];
     }
 
-    private static function journal(): array
+    private static function epargner(): array
     {
         return [
-            ['type' => 'h', 'text' => 'Ce qui entre dans ce journal'],
-            ['type' => 'p', 'text' => 'Les changements qui modifient un circuit déjà posé, une projection, ou la façon de câbler. Pas les correctifs de rendu. Filtrez par famille, puis ouvrez une entrée pour le détail.'],
-            ['type' => 'widget', 'id' => 'changelog'],
-            ['type' => 'h', 'text' => 'Ce qui ne change pas'],
-            ['type' => 'p', 'text' => 'Pas de connexion bancaire, pas de conseil en placement, pas de revente de données. Quand un barème réglementaire bouge, vos circuits gardent les taux saisis ; le préréglage neuf, lui, suit le barème.'],
+            ['type' => 'h', 'text' => 'L’épargne « s’il en reste » n’arrive jamais'],
+            ['type' => 'p', 'text' => 'La plupart des mois se terminent avec l’intention d’épargner, et un compte courant qui a tout pris. Ce n’est pas un manque de volonté : c’est l’ordre des gestes. Tant que le livret est servi en dernier, il reçoit ce qui reste — souvent zéro, parfois 40 € qu’on rapatrie le 3 du mois suivant.'],
+            ['type' => 'p', 'text' => 'Le geste qui change la lecture : le jour du salaire, un virement fixe part vers le livret, avant les courses, avant les sorties. Le quotidien s’ajuste sur ce qui reste. C’est exactement le câblage du circuit « Premier salaire » : 20 % vers l’épargne, puis tout le reste vers le quotidien.'],
+            ['type' => 'widget', 'id' => 'epargne'],
+            ['type' => 'h', 'text' => 'Un fixe, pas un vœu'],
+            ['type' => 'list', 'items' => [
+                'Choisissez un montant que le mois bas tient encore — pas le mois où tout va bien.',
+                'Posez-le en premier, après le loyer et les prélèvements, avant l’enveloppe quotidienne.',
+                'Si le fixe casse le mois, baissez-le. Un petit versement qui part tous les mois bat un gros versement « dès que possible ».',
+            ]],
+            ['type' => 'h', 'text' => 'Où le poser'],
+            ['type' => 'p', 'text' => 'Sur un livret disponible tout de suite — Livret A ou LDDS, LEP s’il est ouvert. Ce n’est pas encore de l’épargne longue. C’est le premier bac : précaution, projet, ou simplement « de l’argent qui n’est plus sur le courant ». Une fois le bac nommé, la projection dit en combien de mois il se remplit.'],
+            ['type' => 'quote', 'text' => 'On a arrêté d’attendre la fin du mois. Le livret est servi le 1er. Le quotidien a ce qui reste. Point.', 'by' => 'Lecture d’un circuit à 20 % d’abord'],
+            ['type' => 'h', 'text' => 'Ce qu’on ne fait pas ici'],
+            ['type' => 'p', 'text' => 'Pas de conseil de placement, pas de « meilleur livret selon votre profil ». Le circuit décrit un chemin : salaire → charges → livret. Le taux et le plafond, eux, sont dans le guide du Livret A et dans les barèmes 2026.'],
+            ['type' => 'callout', 'title' => 'Trois mois de charges d’abord', 'text' => 'Avant un apport ou un voyage, un matelas de trois mois de charges — pas de revenus — évite de casser le livret au premier imprévu. Le guide dédié calcule la cible et la date.'],
+        ];
+    }
+
+    private static function budgetMois(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Un budget, ce n’est pas une liste de catégories'],
+            ['type' => 'p', 'text' => 'Beaucoup de feuilles commencent par « loyer, courses, essence, restos, loisirs, divers ». C’est une photographie de ce qui est déjà parti. Un budget qui tient décrit d’abord d’où l’argent entre, par quel compte il transite, et quelle enveloppe a le droit de le prendre.'],
+            ['type' => 'p', 'text' => 'Quatre passes suffisent. À la dernière, chaque euro du mois type a une destination. S’il en reste un « non affecté », le mois n’est pas encore décrit — ce n’est pas un oubli cosmétique.'],
+            ['type' => 'widget', 'id' => 'budget'],
+            ['type' => 'h', 'text' => 'Les quatre passes'],
+            ['type' => 'list', 'items' => [
+                'Les entrées : salaires, aides, CA moyen — jamais le meilleur mois, jamais un bonus « peut-être ».',
+                'Les fixes : tout ce qui se prélève ou se doit au centime. Loyer, énergie, assurances, crédit, forfaits.',
+                'Le quotidien : une enveloppe, pas trente lignes. Courses, transports, sorties, « on verra ».',
+                'L’épargne et le reste : un fil vers le livret, puis éventuellement un projet. S’il reste encore de l’argent, le compteur le dit.',
+            ]],
+            ['type' => 'h', 'text' => 'Le piège du « divers »'],
+            ['type' => 'p', 'text' => 'Dès que « divers » dépasse 10 % des charges, c’est qu’on n’a pas nommé. Soit c’est du quotidien — alors ça rentre dans l’enveloppe — soit c’est un fixe oublié (mutuelle, impôt lissé, abonnement). Un circuit n’accepte pas une ligne orpheline : il force à choisir.'],
+            ['type' => 'quote', 'text' => 'On savait que 2 200 € entraient. On ne savait plus si le loyer était déjà payé ou s’il fallait encore y penser.', 'by' => 'Note de terrain, premier budget'],
+            ['type' => 'h', 'text' => 'Quand le mois ne tient pas'],
+            ['type' => 'p', 'text' => 'Si les fixes dépassent les entrées, ce n’est plus un budget : c’est un découvert annoncé. On ne « répartit » pas un déficit. On baisse un fixe, on augmente une entrée, ou on dit clairement que l’épargne est à zéro jusqu’à ce que ça passe. Le simulateur ci-dessus le montre tout de suite.'],
+            ['type' => 'callout', 'title' => 'Garder le tableur pour l’historique', 'text' => 'Le circuit décrit le mois type. Les relevés, eux, archivent le mois réel. Les deux outils ne se remplacent pas.'],
+        ];
+    }
+
+    private static function livretA(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Un livret, pas un compte courant habillé'],
+            ['type' => 'p', 'text' => 'Le Livret A est un produit d’épargne réglementé : l’État en fixe le taux et le plafond. Au 1er août 2026, il sert 1,70 % net d’impôt et de prélèvements sociaux, jusqu’à 22 950 € de versements. Un seul par personne. L’argent reste disponible : un retrait n’attend pas une échéance.'],
+            ['type' => 'p', 'text' => 'Ce n’est pas un compte pour payer le loyer. C’est un bac : on y pose ce qu’on ne veut plus voir sur le courant, on le reprend si besoin. Les intérêts courent sur le stock, même quand on n’ajoute plus rien — et même au-delà du plafond, une fois celui-ci atteint par capitalisation.'],
+            ['type' => 'table', 'head' => 'Règle', 'headRight' => 'Livret A · 2026', 'rows' => [
+                ['k' => 'Taux (depuis le 1er août)', 'v' => '1,70 % net', 'c' => 'teal'],
+                ['k' => 'Plafond de versement', 'v' => '22 950 €', 'c' => 'blue'],
+                ['k' => 'Nombre par personne', 'v' => '1', 'c' => 'navy'],
+                ['k' => 'Disponibilité', 'v' => 'À tout moment', 'c' => 'blue'],
+                ['k' => 'Fiscalité des intérêts', 'v' => 'Exonérés', 'c' => 'teal'],
+            ]],
+            ['type' => 'widget', 'id' => 'livreta'],
+            ['type' => 'h', 'text' => 'À quoi il sert dans un mois type'],
+            ['type' => 'list', 'items' => [
+                'Premier bac de précaution, souvent après le LEP s’il est ouvert — ou tout de suite s’il ne l’est pas.',
+                'Débordement quand le LDDS est plein : même taux, plus de place.',
+                'Enveloppe visible pour un projet, à condition de ne pas la mélanger avec le matelas d’urgence.',
+            ]],
+            ['type' => 'h', 'text' => 'Ce qu’il ne fait pas'],
+            ['type' => 'p', 'text' => 'Il ne bat pas un LEP à 2,50 %. Il ne remplace pas un apport logé ailleurs une fois le plafond touché. Il ne « travaille » pas davantage si on y laisse dormir 80 € : le taux s’applique au stock, un petit stock produit peu. D’où l’intérêt d’un versement régulier, même modeste.'],
+            ['type' => 'callout', 'title' => 'Prochaine révision', 'text' => 'Les taux des livrets réglementés sont revus en principe au 1er février et au 1er août. Le moteur garde les taux saisis sur un circuit déjà créé ; recharger un préréglage applique le barème neuf.'],
+            ['type' => 'links', 'title' => 'Sources officielles', 'items' => [
+                ['label' => 'Service-Public — Taux Livret A et LEP au 1er août 2026', 'href' => 'https://www.service-public.gouv.fr/particuliers/actualites/A18000'],
+                ['label' => 'Service-Public — Livret A (F2365)', 'href' => 'https://www.service-public.gouv.fr/particuliers/vosdroits/F2365'],
+            ]],
+        ];
+    }
+
+    private static function ldds(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le voisin du Livret A'],
+            ['type' => 'p', 'text' => 'Le LDDS — livret de développement durable et solidaire — sert le même taux que le Livret A : 1,70 % net au 1er août 2026. Son plafond de versement est plus bas : 12 000 €. Un par personne, disponible à tout moment, intérêts exonérés. Sur le papier, c’est un second Livret A plus petit.'],
+            ['type' => 'p', 'text' => 'Dans un circuit, cette taille plus petite est précisément ce qui le rend utile. Saturer d’abord le LDDS libère plus tôt un fil de débordement vers le Livret A. Si on fait l’inverse, le Livret A s’approche de 22 950 € pendant que le LDDS reste à moitié vide — et le surplus n’a nulle part où aller le jour où le A est plein.'],
+            ['type' => 'table', 'head' => 'Produit', 'headMid' => 'Taux', 'headRight' => 'Plafond', 'rows' => [
+                ['k' => 'LDDS', 'mid' => '1,70 %', 'v' => '12 000 €', 'c' => 'blue'],
+                ['k' => 'Livret A', 'mid' => '1,70 %', 'v' => '22 950 €', 'c' => 'blue'],
+                ['k' => 'LEP (si éligible)', 'mid' => '2,50 %', 'v' => '10 000 €', 'c' => 'teal'],
+            ]],
+            ['type' => 'h', 'text' => 'Qui peut l’ouvrir'],
+            ['type' => 'p', 'text' => 'Toute personne majeure domiciliée en France, en principe un seul. Pas de condition de revenu — contrairement au LEP. Un mineur ne l’ouvre pas : pour un ado, c’est le Livret Jeune ou le Livret A.'],
+            ['type' => 'h', 'text' => 'Comment le câbler'],
+            ['type' => 'list', 'items' => [
+                'Après le LEP s’il est ouvert, avant le Livret A : même taux, plafond atteint plus vite.',
+                'Un fil fixe tant qu’il n’est pas saturé, puis un débordement automatique vers le Livret A.',
+                'Ne pas y loger le matelas d’urgence et l’apport en même temps : deux bacs, deux dates, deux lectures.',
+            ]],
+            ['type' => 'callout', 'title' => 'Ordre mécanique, pas un conseil', 'text' => 'LEP → LDDS → Livret A, c’est l’arithmétique des barèmes que le moteur porte. Le guide « ordre de remplissage » le simule avec vos versements.'],
+        ];
+    }
+
+    private static function livretJeune(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le premier livret qui n’est pas celui des parents'],
+            ['type' => 'p', 'text' => 'Le Livret Jeune s’ouvre entre 12 et 25 ans. Plafond de versement : 1 600 €. Le taux est fixé par chaque banque, sans pouvoir descendre sous celui du Livret A — 1,70 % au 1er août 2026. Les intérêts sont exonérés. Un seul par personne. À 25 ans, il se clôture ou se transforme.'],
+            ['type' => 'p', 'text' => 'Dans le circuit « Seize ans », l’argent de poche et le job du week-end servent d’abord les abonnements, puis une part part vers le Livret Jeune, le reste vers une enveloppe permis. Le livret n’est pas là pour « faire comme les adultes » : il sépare ce qu’on ne touche pas de ce qu’on a le droit de dépenser.'],
+            ['type' => 'table', 'head' => 'Règle', 'headRight' => 'Livret Jeune', 'rows' => [
+                ['k' => 'Âge', 'v' => '12 à 25 ans', 'c' => 'navy'],
+                ['k' => 'Plafond', 'v' => '1 600 €', 'c' => 'blue'],
+                ['k' => 'Taux plancher', 'v' => '≥ Livret A (1,70 %)', 'c' => 'teal'],
+                ['k' => 'Cumul possible', 'v' => 'Avec un Livret A', 'c' => 'blue'],
+            ]],
+            ['type' => 'h', 'text' => '1 600 €, ça va vite'],
+            ['type' => 'p', 'text' => 'À 50 € par mois, le plafond est touché en 32 mois si on part de zéro — moins de deux ans à 80 €. Passé cette date, le versement doit basculer : enveloppe permis, Livret A, ou simplement le quotidien. Sans débordement, ces 50 € redeviennent « non affectés » dans la projection.'],
+            ['type' => 'h', 'text' => 'Ce qu’on câble pour un ado'],
+            ['type' => 'list', 'items' => [
+                'Un compte ado qui reçoit poche + job, pas le compte des parents.',
+                'Les abonnements en fixe (téléphone, transports) — servis en premier.',
+                'Un fixe vers le Livret Jeune, un fixe ou un reste vers l’enveloppe projet (permis, voyage).',
+                'Le quotidien — sorties — prend ce qui reste, pas l’inverse.',
+            ]],
+            ['type' => 'callout', 'title' => 'Le taux réel de votre banque', 'text' => 'Le moteur utilise 1,70 % comme plancher. Si votre banque sert davantage, saisissez le taux sur le bloc. Ça change peu le délai de saturation — le plafond est bas — ça change le stock à 24 mois.'],
+        ];
+    }
+
+    private static function payfirst(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le pourcentage avant les envies'],
+            ['type' => 'p', 'text' => '« Se payer d’abord » veut dire : le jour où l’argent arrive, une part part vers le livret, et le quotidien s’écrit avec ce qui reste. Ce n’est pas 50-30-20 gravé dans le marbre. C’est un ordre. Le circuit « Premier salaire » pose 20 % : sur 1 900 €, 380 € vers l’épargne, le loyer à 650 €, et 870 € pour le reste du mois.'],
+            ['type' => 'p', 'text' => 'À 10 %, le livret se remplit deux fois plus lentement, mais le quotidien respire. À 30 %, l’épargne accélère — et le mois casse dès que le loyer ou une assurance bouge. Le bon pourcentage est celui que votre mois bas tient encore.'],
+            ['type' => 'widget', 'id' => 'payfirst'],
+            ['type' => 'h', 'text' => 'Pourcentage ou montant fixe'],
+            ['type' => 'p', 'text' => 'Le pourcentage suit une augmentation : le livret grossit sans que vous y touchiez. Il suit aussi une baisse : l’épargne fond le mois où on aurait le plus besoin d’un fixe. Un montant fixe protège le livret, et laisse le quotidien encaisser l’écart — à condition que les fixes totaux ne dépassent pas l’entrée.'],
+            ['type' => 'list', 'items' => [
+                'Premier emploi, salaire stable : un pourcentage est simple à tenir.',
+                'Loyer lourd ou charges déjà hautes : un petit fixe vaut mieux qu’un 20 % qui met le courant à découvert.',
+                'Revenu variable : le pourcentage se calcule sur la moyenne, pas sur le dernier mois chargé.',
+            ]],
+            ['type' => 'quote', 'text' => 'On a baissé de 20 à 12 %. Le livret a continué de bouger. Le quotidien a arrêté de grignoter le 28.', 'by' => 'Lecture d’un circuit premier salaire'],
+        ];
+    }
+
+    private static function petitRevenu(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le montant n’est pas le sujet'],
+            ['type' => 'p', 'text' => 'À 1 400 € par mois, « épargner 20 % » est souvent une phrase d’un autre budget. 50 €, c’est 600 € en douze mois. 80 €, c’est 960 €. Ce n’est pas un matelas de trois mois. C’est déjà un bac qui n’est plus sur le courant — une réparation, un aller-retour, un mois de loyer en moins à trouver en urgence.'],
+            ['type' => 'p', 'text' => 'Le piège, avec un petit revenu, est d’attendre d’avoir « assez » pour commencer. Assez n’arrive pas. Le fil utile est petit, fixe, servi après le loyer, avant les sorties. S’il casse le mois, on le baisse à 20 €. On ne l’annule pas « jusqu’à plus tard ».'],
+            ['type' => 'widget', 'id' => 'petit'],
+            ['type' => 'h', 'text' => 'Ce qui aide vraiment'],
+            ['type' => 'list', 'items' => [
+                'Un seul livret, visible, pas trois enveloppes à 12 €.',
+                'Le virement le jour du salaire ou de la bourse — pas le 28 « s’il reste ».',
+                'Couper une ligne de quotidien plutôt que de viser un pourcentage de magazine.',
+                'Si un LEP est ouvert, ces 50 € y vont d’abord : le taux le plus haut du moteur, un plafond qu’on n’atteindra pas tout de suite.',
+            ]],
+            ['type' => 'quote', 'text' => 'On a posé 40 €. Au bout d’un an on a arrêté de dire qu’on ne pouvait rien mettre de côté.', 'by' => 'Note de terrain, petit revenu'],
+            ['type' => 'callout', 'title' => 'Aides et irrégulier', 'text' => 'Bourse, APL, job : additionnez une moyenne, pas le meilleur mois. Le circuit étudiant fait exactement ça — deux entrées, trois fixes, le reste sur Livret A.'],
+        ];
+    }
+
+    private static function chargesNatures(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Deux questions, pas vingt catégories'],
+            ['type' => 'p', 'text' => 'Une charge fixe se doit au centime, ou presque : loyer, crédit, assurance, forfait, impôt lissé. Une enveloppe quotidienne est un plafond : courses, essence, restos, « on verra ». La première se câble en fixe. La seconde aussi — mais c’est un maximum, pas une liste à épuiser.'],
+            ['type' => 'p', 'text' => 'Quand les deux circulent dans la même ligne « dépenses », chaque fin de mois redevient un procès : est-ce le weekend ou la mutuelle qui a trop pris ? Séparer les natures ne change pas le total. Ça change le nombre de décisions.'],
+            ['type' => 'h', 'text' => 'Comment trancher une ligne douteuse'],
+            ['type' => 'list', 'items' => [
+                'Ça sort tout seul, le même jour, le même montant ? C’est un fixe.',
+                'Ça varie, et on peut le baisser sans rompre un contrat ? C’est du quotidien.',
+                'C’est rare mais prévisible (assurance annuelle, taxe foncière) ? On le lisse en fixe mensuel — on ne l’attend pas dans « divers ».',
+                'On ne sait pas ? Pendant un mois, on le met dans le quotidien. S’il revient identique, on le sort en fixe.',
+            ]],
+            ['type' => 'h', 'text' => 'Pourquoi le circuit insiste'],
+            ['type' => 'p', 'text' => 'Un répartiteur sert les fixes d’abord. Si vous avez mis les courses en fixe trop haut et l’épargne en pourcentage, le livret s’arrête dès que le mois est juste. L’inverse tient mieux : fixes vrais, quotidien en enveloppe, épargne en fixe ou en reste. C’est le même raisonnement que les deux comptes joints — factures d’un côté, quotidien de l’autre.'],
+            ['type' => 'quote', 'text' => 'On a arrêté de flicquer les tickets de caisse. Le quotidien a une enveloppe. Les prélèvements ont la leur.', 'by' => 'Lecture d’un circuit à deux natures'],
+        ];
+    }
+
+    private static function enveloppe(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Une date transforme un vœu en versement'],
+            ['type' => 'p', 'text' => '« On mettra de côté pour les vacances » ne dit ni combien, ni quand. Une enveloppe projet, si : un montant cible, un nombre de mois, un versement. Le circuit « Projet à date » pose 400 € vers l’enveloppe, le reste sur Livret A. Les deux objectifs ne se marchent pas dessus.'],
+            ['type' => 'p', 'text' => 'Le calcul est une division. Cible moins déjà posé, divisé par les mois restants. Si le versement casse le mois, on recule la date ou on baisse la cible — on ne « verra plus tard ». Plus tard, le billet est déjà acheté trop cher, ou le permis a encore attendu.'],
+            ['type' => 'widget', 'id' => 'projet'],
+            ['type' => 'h', 'text' => 'Ne pas mélanger avec le matelas'],
+            ['type' => 'p', 'text' => 'Le livret de précaution sert si la voiture lâche. L’enveloppe permis, elle, doit être encore là en juin. Même support réglementé, deux blocs dans le circuit. Sinon le premier imprévu mange le voyage, et on recommence à zéro les deux compteurs.'],
+            ['type' => 'list', 'items' => [
+                'Un bloc « projet » avec une note : la date et la cible.',
+                'Un fixe mensuel calé sur cette division — servi après les charges, avant le « reste » du Livret A.',
+                'Quand la date est tenue, le fixe s’arrête ou bascule : on ne continue pas par habitude à nourrir un bac plein.',
+            ]],
+            ['type' => 'callout', 'title' => 'Permis, voyage, mariage', 'text' => 'Le modèle ne change pas. Seuls le titre du bloc et le versement changent. Ouvrez « Projet à date », renommez, lisez la projection.'],
+        ];
+    }
+
+    private static function apport(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le total ne dit rien sans le mois'],
+            ['type' => 'p', 'text' => '« Il nous faut 40 000 € d’apport » est une cible. La question utile est : à 800 € par mois après les charges, en combien de mois, et que se passe-t-il quand le LEP sature en chemin ? Le circuit « Objectif apport » pose deux salaires, les charges du foyer, 200 € vers le LEP, 300 € vers le Livret A, et tout le reste vers un bac apport.'],
+            ['type' => 'p', 'text' => 'L’ordre n’est pas un détail. Tant que le LEP n’est pas plein, une part du surplus y va — meilleur taux du moteur. Ensuite le flux bascule. Sans débordement câblé, la projection affiche un trou le mois où le livret est saturé, alors que le mois type, lui, reste à zéro.'],
+            ['type' => 'widget', 'id' => 'apport'],
+            ['type' => 'h', 'text' => 'Ce que cinq ans déplacent'],
+            ['type' => 'p', 'text' => 'Monter les livrets enfants, garder un quotidien plus large, ou accélérer l’apport : chaque euro posé ailleurs recule la date. Dans le circuit famille, passer de 30 à 55 € par enfant reculait l’apport de quatre mois. Voir les deux dates sur la même projection clôt le débat plus vite qu’un tableur à scénarios cachés.'],
+            ['type' => 'list', 'items' => [
+                'Garder un matelas de précaution à part : on n’achète pas avec les trois mois de charges.',
+                'Saturer LEP puis LDDS avant de tout verser sur un bac non réglementé.',
+                'Dupliquer le circuit pour tester « +200 € / mois » : un seul fil change, l’horizon reste le même.',
+            ]],
+            ['type' => 'callout', 'title' => 'Pas un conseil immobilier', 'text' => 'repartio date un bac. Il ne dit pas si vous devez acheter, ni quel apport un prêteur exigera. Les 40 000 € du simulateur sont un exemple.'],
+        ];
+    }
+
+    private static function premierSalaire(): array
+    {
+        return [
+            ['type' => 'h', 'text' => '1 900 €, et déjà trop de destinations'],
+            ['type' => 'p', 'text' => 'Le circuit type « Premier salaire » est volontairement simple : un salaire, un compte, un loyer à 650 €, un quotidien, un répartiteur d’épargne. 20 % du compte part vers l’épargne avant le reste. Sur 1 900 €, ça fait 380 € vers les livrets — 250 € vers le LEP s’il est ouvert, le reste vers le Livret A — et 870 € pour courses, transports, sorties, divers.'],
+            ['type' => 'table', 'head' => 'Bloc', 'headRight' => 'Par mois', 'rows' => [
+                ['k' => 'Salaire', 'v' => '1 900 €', 'c' => 'teal'],
+                ['k' => 'Loyer + charges', 'v' => '650 €', 'c' => 'orange'],
+                ['k' => 'Épargne (20 %)', 'v' => '380 €', 'c' => 'blue'],
+                ['k' => 'Quotidien (le reste)', 'v' => '870 €', 'c' => 'navy'],
+            ]],
+            ['type' => 'widget', 'id' => 'premier'],
+            ['type' => 'h', 'text' => 'Ce qui casse en premier'],
+            ['type' => 'p', 'text' => 'Montez le loyer à 800 € dans le simulateur : le quotidien fond, l’épargne tient encore — parce qu’elle est servie avant. C’est le contraire du réflexe « je paierai le livret s’il reste ». Ici, c’est le quotidien qui encaisse le choc. Si le loyer mange aussi les 20 %, le circuit passe sous zéro : ce n’est plus une répartition, c’est un mois trop cher pour ce salaire.'],
+            ['type' => 'list', 'items' => [
+                'Garder le 20 % tant que le quotidien reste vivable — sinon baisser à 10 % plutôt que tout couper.',
+                'LEP d’abord si éligible : à 250 € / mois, 10 000 € se saturent en quarante mois en partant de zéro.',
+                'Le quotidien est une enveloppe unique. Pas six catégories à flicquer le premier mois d’emploi.',
+            ]],
+            ['type' => 'quote', 'text' => 'Le premier salaire donne l’impression de pouvoir tout faire. Le circuit, lui, montre ce qui reste après le loyer.', 'by' => 'Lecture du modèle Premier salaire'],
+        ];
+    }
+
+    private static function etudiant(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Deux petites rentrées, pas un salaire'],
+            ['type' => 'p', 'text' => 'Le circuit « Étudiant » additionne une bourse / APL à 550 € et un job à 450 €. Total : 1 000 €. Le loyer de colocation prend 420 €, le quotidien 280 €, les transports 50 €. Il reste 250 € — tout le reste — vers le Livret A. Ce n’est pas confortable. C’est lisible.'],
+            ['type' => 'table', 'head' => 'Poste', 'headRight' => 'Mois type', 'rows' => [
+                ['k' => 'Bourse / APL', 'v' => '550 €', 'c' => 'teal'],
+                ['k' => 'Job étudiant', 'v' => '450 €', 'c' => 'teal'],
+                ['k' => 'Loyer colocation', 'v' => '420 €', 'c' => 'orange'],
+                ['k' => 'Courses et resto', 'v' => '280 €', 'c' => 'navy'],
+                ['k' => 'Transports', 'v' => '50 €', 'c' => 'navy'],
+                ['k' => 'Livret A (reste)', 'v' => '250 €', 'c' => 'blue'],
+            ]],
+            ['type' => 'h', 'text' => 'Ce qui tient, ce qui ne tient plus'],
+            ['type' => 'p', 'text' => 'Si le job tombe à zéro un mois, il reste 550 € pour 750 € de fixes + quotidien. Le circuit est en déficit. Deux lectures possibles : baisser le quotidien ce mois-là, ou avoir déjà 200 € sur le Livret A pour encaisser le creux. D’où l’intérêt de verser le surplus les mois travaillés, même 80 €, plutôt que de « se payer un mois normal ».'],
+            ['type' => 'list', 'items' => [
+                'Le loyer est un fixe. On ne l’arrondit pas « avec les sorties ».',
+                'Courses et restos partagent une enveloppe : si le resto prend trop, ce sont les courses qui trinquent, pas le livret.',
+                'Le job est une moyenne. Un mois à 0 € doit déjà être prévu dans le bac, pas découvert le 5.',
+            ]],
+            ['type' => 'callout', 'title' => 'Alternant, mêmes gestes, autres montants', 'text' => 'Le modèle Alternant part d’un salaire à 1 100 € plus 180 € d’aides. Le câblage est le même : loyer, quotidien, formation, reste sur Livret A. Seuls les chiffres changent.'],
+        ];
+    }
+
+    private static function colo(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Un toit commun, des comptes personnels'],
+            ['type' => 'p', 'text' => 'La colocation casse les budgets dès qu’on mélange loyer, courses de la semaine et bières du vendredi sur le même compte. Le câblage qui tient : un compte (ou un livret) « toit » qui ne reçoit que les parts de loyer et de charges, et chaque coloc garde son quotidien de son côté.'],
+            ['type' => 'p', 'text' => 'Dans le modèle Colocation, chacun verse sa part vers le toit. Le surplus personnel va au Livret A, pas dans la cagnotte commune. Le 30 du mois, on ne se demande plus qui a trop pris sur le pack d’eau : le toit est déjà soldé, le quotidien est une enveloppe privée.'],
+            ['type' => 'h', 'text' => 'La règle des trois lignes'],
+            ['type' => 'list', 'items' => [
+                'Toit : loyer + charges + internet, au centime, divisé par le nombre de colocs — ou au prorata des chambres si c’est le deal.',
+                'Courses communes : une petite enveloppe, ou chacun ses courses. Dès que ça dépasse le papier toilette, mieux vaut séparer.',
+                'Le reste : personnel. Sorties, transports, épargne. Pas de tableur partagé à douze colonnes.',
+            ]],
+            ['type' => 'quote', 'text' => 'On a arrêté l’appli de dépenses partagées. Le toit a un virement. Le frigo, chacun voit.', 'by' => 'Lecture d’un circuit colocation'],
+            ['type' => 'callout', 'title' => 'Caution et départ', 'text' => 'La caution n’est pas une épargne. C’est un dépôt bloqué. Ne la comptez pas dans le Livret A du circuit : le jour du départ, elle revient — ou pas — hors du mois type.'],
+        ];
+    }
+
+    private static function prorata(): array
+    {
+        return [
+            ['type' => 'h', 'text' => '« C’est juste » n’a pas une seule arithmétique'],
+            ['type' => 'p', 'text' => 'Deux salaires, 2 000 € et 3 000 €. Des factures à 2 000 €, un quotidien à 1 400 €. À 50/50, chacun verse 1 700 € vers le commun : l’un pose 85 % de son salaire, l’autre 57 %. Au prorata 40/60, A verse 1 360 €, B verse 2 040 €. Chacun garde la même proportion. Tout en commun : les deux salaires tombent sur un joint, plus de parts à négocier — plus d’épargne personnelle visible non plus.'],
+            ['type' => 'p', 'text' => 'repartio ne choisit pas la justice du foyer. Il rend les trois câblages lisibles. Le modèle « Couple au prorata » fait exactement le 40/60 : chacun alimente Factures et Quotidien à sa part, puis verse le reste sur son propre Livret A.'],
+            ['type' => 'widget', 'id' => 'prorata'],
+            ['type' => 'h', 'text' => 'Ce que chaque câblage protège'],
+            ['type' => 'list', 'items' => [
+                '50/50 : simple, dur dès que les salaires s’écartent. Le plus petit revenu n’a plus d’épargne.',
+                'Prorata : chacun garde un reste comparable en pourcentage. Il faut recalculer si un salaire bouge.',
+                'Tout en commun : zéro arbitrage de parts. L’épargne devient celle du foyer — à câbler après les charges, pas « s’il en reste sur mon compte ».',
+            ]],
+            ['type' => 'h', 'text' => 'Deux joints restent utiles'],
+            ['type' => 'p', 'text' => 'Même au prorata, séparer Factures et Quotidien évite la bagarre du 30. Les parts alimentent deux enveloppes, pas une. Le guide du compte joint « factures » détaille le geste ; ici, on ne tranche que la clé de répartition.'],
+            ['type' => 'quote', 'text' => 'On n’a pas choisi le prorata par idéologie. On l’a choisi parce que le 50/50 vidait un des deux livrets.', 'by' => 'Lecture d’un circuit couple 40/60'],
+        ];
+    }
+
+    private static function creditImmo(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le loyer a changé de nom, pas de nature'],
+            ['type' => 'p', 'text' => 'Une mensualité de crédit est un fixe, comme un loyer — souvent plus haut, et accompagné de charges que le locataire ne voyait pas : copropriété, taxe foncière, énergie du bien, et tôt ou tard des travaux. Le circuit « Propriétaire avec crédit » pose 1 180 € de mensualité, 480 € de charges du bien, 1 600 € de quotidien, 420 € d’assurances et impôts, puis 300 € vers une enveloppe travaux et le reste sur Livret A.'],
+            ['type' => 'p', 'text' => 'Le risque n’est pas « on est propriétaires, on peut relâcher l’épargne ». C’est d’avoir remplacé un loyer par un fixe plus lourd, sans bac pour la chaudière. La projection le montre : sans l’enveloppe travaux, tout le surplus va au Livret A, et le premier ravalement le vide d’un coup.'],
+            ['type' => 'widget', 'id' => 'credit'],
+            ['type' => 'h', 'text' => 'Lisser ce qui n’est pas mensuel'],
+            ['type' => 'list', 'items' => [
+                'Taxe foncière : divisez l’avis par douze, posez un fixe. Pas une ligne « divers » en octobre.',
+                'Copropriété : le courant + les provisions. Une régularisation, c’est un pic — mieux vaut un petit surplus déjà là.',
+                'Travaux : un bac dédié, même 200 € par mois. Ce n’est pas de l’épargne-projet plaisir, c’est le bien qui vieillit.',
+            ]],
+            ['type' => 'callout', 'title' => 'Reste à vivre', 'text' => 'Le simulateur soustrait crédit + charges du bien + quotidien. Ce qui sort n’est pas un taux d’endettement bancaire. C’est ce qui reste à câbler — livret ou enveloppe — une fois le toit payé.'],
+        ];
+    }
+
+    private static function conge(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Un salaire en moins, les mêmes prélèvements'],
+            ['type' => 'p', 'text' => 'Le congé parental ne négocie pas le loyer. Le circuit type part d’un salaire qui reste, d’allocations, parfois d’une indemnité, et des mêmes fixes qu’avant. L’épargne est ce qui s’arrête en premier — et c’est souvent le bon choix, à condition que le matelas existe déjà.'],
+            ['type' => 'p', 'text' => 'La question à poser avant le premier mois, pas pendant : le revenu qui reste couvre-t-il Factures + un quotidien réduit ? Si non, le foyer pioche dans le livret, et il faut le dire dans le circuit : le fil d’épargne s’inverse, ou simplement tombe à zéro, et le stock baisse dans la projection.'],
+            ['type' => 'h', 'text' => 'Ce qu’on recâble, ce qu’on laisse'],
+            ['type' => 'list', 'items' => [
+                'Les fixes du toit : inchangés, sauf si vous changez de logement. On ne « lisse » pas un loyer qu’on paie encore.',
+                'Le quotidien : une enveloppe plus basse, assumée, plutôt que trente micro-coupes illisibles.',
+                'L’épargne personnelle : en pause, ou un tout petit fixe pour ne pas perdre le geste.',
+                'Le livret enfant, s’il existe : c’est souvent le dernier qu’on coupe — voyez la date d’apport ou de projet si vous le gardez.',
+            ]],
+            ['type' => 'quote', 'text' => 'On a dupliqué le circuit avant le congé. Le mois bas était déjà là, sur le papier. On n’a pas découvert le trou en novembre.', 'by' => 'Lecture d’un circuit congé parental'],
+            ['type' => 'callout', 'title' => 'Dupliquer, ne pas écraser', 'text' => 'Gardez le circuit « avant » et un circuit « pendant ». Même horizon. Un seul écart à lire : ce qui s’arrête, et en combien de mois le matelas suffit.'],
+        ];
+    }
+
+    private static function saison(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le mois type d’un saisonnier est une moyenne'],
+            ['type' => 'p', 'text' => 'Six mois à 4 200 €, six mois à 1 400 € : le foyer ne vit pas « un mois à 4 200 ». Il vit 2 800 €, si — et seulement si — les mois chargés ont nourri une réserve. Le circuit « Revenu saisonnier » pose cette moyenne, les charges, 400 € vers la réserve, le reste sur LDDS.'],
+            ['type' => 'p', 'text' => 'La réserve n’est pas de l’épargne-projet. C’est ce qu’on reprend les mois bas pour que le loyer ne saute pas. La tailler trop juste, c’est revivre le yoyo. La tailler trop large, c’est sous-alimenter le reste. Le simulateur calcule l’écart à couvrir, mois creux par mois creux.'],
+            ['type' => 'widget', 'id' => 'saison'],
+            ['type' => 'h', 'text' => 'Trois règles pour que ça tienne'],
+            ['type' => 'list', 'items' => [
+                'Le revenu du circuit est la moyenne annuelle, y compris les zéros — pas « un mois de saison ».',
+                'Les charges du foyer sont en fixe, calées sur ce qu’on paie vraiment en creux, pas sur le standing d’août.',
+                'La réserve vise au moins (charges − revenu creux) × nombre de mois bas, déjà là avant le premier creux.',
+            ]],
+            ['type' => 'quote', 'text' => 'On a arrêté de se verser tout en juillet. Le compte garde la moyenne. L’hiver ne se voit plus sur le découvert.', 'by' => 'Note de terrain, revenu saisonnier'],
+            ['type' => 'callout', 'title' => 'Auto-entreprise saisonnière', 'text' => 'Même logique, plus l’Urssaf. La provision se calcule sur la moyenne, et sort aussi les mois à 0 €, depuis le matelas pro. Le guide « CA en dents de scie » détaille le geste.'],
         ];
     }
 

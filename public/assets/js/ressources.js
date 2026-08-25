@@ -732,38 +732,291 @@
     });
   };
 
-  const changelog = (root) => {
-    const { html } = api(root);
-    const entries = [
-      { date: '25 août 2026', tag: 'Barème', t: 'Barèmes 2026 revus, guides activité', d: 'BNC régime général à 25,6 % (plus 24,6 %). CFP, ACRE et versement libératoire dans le simulateur URSSAF. Nouveaux guides : plafonds micro / TVA, libératoire, CA irrégulier, éligibilité LEP, matelas, salaire + AE. Livrets au 1er août : A et LDDS 1,70 %, LEP 2,50 %.' },
-      { date: '22 août 2026', tag: 'Canvas', t: 'Notes de terrain interactives', d: 'Les fiches ressources portent désormais un simulateur : ordre des livrets, provision URSSAF, choc de revenu, comparaison de scénarios.' },
-      { date: '18 août 2026', tag: 'Canvas', t: 'Circuit commenté du couple', d: 'Le modèle à 23 blocs est lisible en démo guidée, avec les dates de saturation et les débordements à câbler.' },
-      { date: '24 juin 2026', tag: 'Moteur', t: 'Fil « tout le reste »', d: 'Un mode de fil qui emporte le solde d’un bloc après les fixes. Le compteur non affecté survit aux augmentations.' },
-      { date: '2 juin 2026', tag: 'Moteur', t: 'Scénarios comparés', d: 'Deux variantes d’un même circuit, même horizon, un seul fil modifié. L’écart de patrimoine se lit à 12, 36 et 60 mois.' },
-      { date: '12 févr. 2026', tag: 'Barème', t: 'Taux 2026 dans les préréglages', d: 'Livret A et LDDS à 1,70 %, LEP à 2,50 %. Les circuits déjà saisis gardent leurs taux ; recharger un préréglage applique le barème neuf.' },
-      { date: '9 janv. 2026', tag: 'Moteur', t: 'Débordement à la saturation', d: 'Quand un livret atteint son plafond, le surplus suit le fil câblé. Sans fil, il redevient non affecté dans la projection — pas dans le mois type.' },
-    ];
-    let filter = 'Tout';
-    const paint = () => {
-      root.querySelectorAll('[data-log]').forEach((btn) => btn.classList.toggle('active', btn.dataset.log === filter));
-      const shown = filter === 'Tout' ? entries : entries.filter((e) => e.tag === filter);
-      html('list', shown.map((e) => `
-        <details>
-          <summary><span class="mono">${e.date}</span><span class="chip">${e.tag}</span><span>${e.t}</span></summary>
-          <p>${e.d}</p>
-        </details>
-      `).join(''));
-    };
-    root.querySelectorAll('[data-log]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        filter = btn.dataset.log;
-        paint();
-      });
+  const flowHtml = (rows) => rows.map(([label, p, val]) => `
+        <div class="lab-flow-row">
+          <span>${label}</span>
+          <i><em style="width:${p}%"></em></i>
+          <b class="mono">${val}</b>
+        </div>
+      `).join('');
+
+  const epargne = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    onChange(() => {
+      const income = num(inn('income'));
+      const bills = num(inn('bills'));
+      const save = num(inn('save'));
+      const daily = income - bills - save;
+      set('income', euro(income));
+      set('bills', euro(bills));
+      set('save', euro(save));
+      set('daily', euro(Math.max(0, daily)), daily < 0);
+      set('pct', income > 0 ? `${Math.round((save / income) * 100)} %` : '—');
+      set('when', save > 0 ? monthsLabel(1000 / save) : 'jamais');
+      const base = Math.max(income, 1);
+      html('flow', flowHtml([
+        ['Fixes', clamp((bills / base) * 100, 0, 100), euro(bills)],
+        ['Livret', clamp((save / base) * 100, 0, 100), euro(save)],
+        ['Quotidien', clamp((Math.max(0, daily) / base) * 100, 0, 100), euro(Math.max(0, daily))],
+      ]));
+      if (daily < 0) set('note', `Le mois casse de ${euro(-daily)}. Baissez le livret ou les fixes : un versement qui met le courant à découvert ne tiendra pas.`);
+      else if (save === 0) set('note', 'Sans versement, le quotidien prend tout le surplus. C’est précisément l’épargne « s’il en reste ».');
+      else set('note', `${euro(save)} partent vers le livret. Il reste ${euro(daily)} pour le quotidien. 1 000 € sont là en ${monthsLabel(1000 / save)}.`);
     });
-    paint();
   };
 
-  const labs = { couple, tableur, ordre, joints, urssaf, plafond, mix, reste, famille, scenarios, taux, repart, migrate, changelog, plafonds, liberatoire, irregulier, lep, matelas, mixte };
+  const budget = (root) => {
+    const { inn, set, onChange } = api(root);
+    onChange(() => {
+      const income = num(inn('income'));
+      const bills = num(inn('bills'));
+      const daily = num(inn('daily'));
+      const save = num(inn('save'));
+      const used = bills + daily + save;
+      const left = income - used;
+      set('income', euro(income));
+      set('bills', euro(bills));
+      set('daily', euro(daily));
+      set('save', euro(save));
+      set('used', euro(used));
+      set('left', euro(left), left !== 0);
+      if (left < 0) {
+        set('state', 'Déficit', true);
+        set('note', `Il manque ${euro(-left)}. Ce n’est plus une répartition : un fixe doit baisser, ou une entrée monter.`);
+      } else if (left === 0) {
+        set('state', 'À zéro');
+        set('note', 'Chaque euro a une destination. C’est un mois type complet — le compteur non affecté est à zéro.');
+      } else {
+        set('state', 'Reste');
+        set('note', `${euro(left)} n’ont pas encore de destination. Posez-les sur le livret, ou dites que c’est du quotidien.`);
+      }
+    });
+  };
+
+  const livreta = (root) => {
+    const { inn, set, out, onChange } = api(root);
+    const cap = 22950;
+    const rate = 1.7;
+    onChange(() => {
+      const start = clamp(num(inn('start')), 0, cap);
+      const pay = num(inn('pay'));
+      const room = Math.max(0, cap - start);
+      const when = fillMonths(start, cap, pay);
+      set('start', euro(start));
+      set('pay', euro(pay));
+      set('room', euro(room));
+      set('when', monthsLabel(when));
+      set('interest', euro(start * (rate / 100)));
+      const fill = out('fill');
+      if (fill) fill.style.width = `${clamp((start / cap) * 100, 0, 100)}%`;
+      if (room <= 0) set('note', 'Le plafond de versement est atteint. Les intérêts peuvent encore faire monter le solde ; le virement mensuel doit partir ailleurs.');
+      else if (pay <= 0) set('note', `Il reste ${euro(room)} avant 22 950 €. Sans versement, seuls les intérêts (~${euro(start * rate / 100)} / an sur le stock actuel) bougent.`);
+      else set('note', `À ${euro(pay)} / mois, le livret sature en ${monthsLabel(when)}. Après cette date, câblez un débordement — LDDS s’il a de la place, ou un bac suivant.`);
+    });
+  };
+
+  const payfirst = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    let pctSave = 20;
+    chipGroup(root, 'data-pct', '20', (v) => { pctSave = Number(v); });
+    onChange(() => {
+      const income = num(inn('income'));
+      const rent = num(inn('rent'));
+      const save = income * (pctSave / 100);
+      const daily = income - rent - save;
+      set('income', euro(income));
+      set('rent', euro(rent));
+      set('save', euro(save));
+      set('daily', euro(Math.max(0, daily)), daily < 0);
+      const base = Math.max(income, 1);
+      html('flow', flowHtml([
+        ['Loyer / fixes', clamp((rent / base) * 100, 0, 100), euro(rent)],
+        [`Livret ${pctSave} %`, clamp((save / base) * 100, 0, 100), euro(save)],
+        ['Quotidien', clamp((Math.max(0, daily) / base) * 100, 0, 100), euro(Math.max(0, daily))],
+      ]));
+      if (daily < 0) {
+        set('state', 'Ça casse', true);
+        set('note', `À ${pctSave} %, le livret et le loyer dépassent le salaire de ${euro(-daily)}. Baissez le pourcentage, ou le mois ne tient pas.`);
+      } else {
+        set('state', 'Tenue');
+        set('note', `${euro(save)} vers le livret, ${euro(daily)} pour le quotidien. C’est le câblage « se payer d’abord » : le 20 % du modèle Premier salaire se règle ici.`);
+      }
+    });
+  };
+
+  const petit = (root) => {
+    const { inn, set, onChange } = api(root);
+    onChange(() => {
+      const pay = num(inn('pay'));
+      const years = num(inn('years'));
+      const months = years * 12;
+      const useRate = inn('rate')?.checked ?? true;
+      const paid = pay * months;
+      let end = paid;
+      if (useRate) {
+        const r = 0.017 / 12;
+        end = r === 0 ? paid : pay * ((Math.pow(1 + r, months) - 1) / r);
+      }
+      set('pay', euro(pay));
+      const span = years > 1 ? years + ' ans' : 'un an';
+      set('years', years > 1 ? years + ' ans' : '1 an');
+      set('paid', euro(paid));
+      set('end', euro(end));
+      set('gain', euro(Math.max(0, end - paid)));
+      set('note', useRate
+        ? euro(pay) + ' pendant ' + span + ' : ' + euro(paid) + ' versés, environ ' + euro(end) + ' si le taux du Livret A reste à 1,70 %. Les taux sont révisés deux fois par an.'
+        : euro(pay) + ' pendant ' + span + ' : ' + euro(paid) + ' de côté, sans compter les intérêts. La régularité compte plus que le taux.');
+    });
+  };
+
+  const projet = (root) => {
+    const { inn, set, onChange } = api(root);
+    onChange(() => {
+      const target = num(inn('target'));
+      const have = num(inn('have'));
+      const months = num(inn('months'));
+      const gap = Math.max(0, target - have);
+      const pay = months > 0 ? gap / months : 0;
+      set('target', euro(target));
+      set('have', euro(have));
+      set('months', months > 1 ? `${months} mois` : '1 mois');
+      set('gap', euro(gap));
+      set('pay', euro(pay));
+      set('ok', pay <= 400 ? 'oui' : 'non', pay > 400);
+      if (gap <= 0) set('note', 'La cible est déjà là. Le fixe peut s’arrêter, ou basculer vers le Livret A.');
+      else if (pay > 400) set('note', `Il faudrait ${euro(pay)} / mois. Au-dessus des 400 € du modèle « Projet à date » : reculez l’échéance, ou baissez la cible.`);
+      else set('note', `${euro(pay)} / mois pendant ${months} mois. Le reste du surplus peut rester sur le Livret A, sans mélanger les deux bacs.`);
+    });
+  };
+
+  const apport = (root) => {
+    const { inn, set, out, onChange } = api(root);
+    onChange(() => {
+      const target = num(inn('target'));
+      const have = num(inn('have'));
+      const pay = num(inn('pay'));
+      const gap = Math.max(0, target - have);
+      const when = pay > 0 ? gap / pay : Infinity;
+      set('target', euro(target));
+      set('have', euro(have));
+      set('pay', euro(pay));
+      set('gap', euro(gap));
+      set('when', monthsLabel(when));
+      set('total', pay > 0 && Number.isFinite(when) ? euro(pay * Math.ceil(when)) : '—');
+      const fill = out('fill');
+      if (fill) fill.style.width = `${clamp((have / Math.max(target, 1)) * 100, 0, 100)}%`;
+      if (gap <= 0) set('note', 'La cible est atteinte. Gardez le matelas de précaution à part : on n’achète pas avec les trois mois de charges.');
+      else if (pay <= 0) set('note', `Il manque ${euro(gap)}. Sans versement, la date n’existe pas.`);
+      else set('note', `À ${euro(pay)} / mois, l’apport est là en ${monthsLabel(when)}. En chemin, saturer LEP puis LDDS avant de tout verser dans ce bac.`);
+    });
+  };
+
+  const premier = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    onChange(() => {
+      const income = num(inn('income'));
+      const rent = num(inn('rent'));
+      const save = income * 0.2;
+      const daily = income - rent - save;
+      set('income', euro(income));
+      set('rent', euro(rent));
+      set('save', euro(save));
+      set('daily', euro(Math.max(0, daily)), daily < 0);
+      const base = Math.max(income, 1);
+      html('flow', flowHtml([
+        ['Loyer', clamp((rent / base) * 100, 0, 100), euro(rent)],
+        ['Épargne 20 %', clamp((save / base) * 100, 0, 100), euro(save)],
+        ['Quotidien', clamp((Math.max(0, daily) / base) * 100, 0, 100), euro(Math.max(0, daily))],
+      ]));
+      if (daily < 0) {
+        set('state', 'Trop cher', true);
+        set('note', `Loyer + 20 % dépassent le salaire de ${euro(-daily)}. Ce n’est plus le modèle Premier salaire : le logement mange l’épargne, puis le mois.`);
+      } else if (daily < 500) {
+        set('state', 'Juste', true);
+        set('note', `Il reste ${euro(daily)} pour le quotidien. L’épargne tient encore (elle est servie avant). Le quotidien, lui, est déjà serré.`);
+      } else {
+        set('state', 'Tenue');
+        set('note', `Comme le modèle : ${euro(save)} vers LEP puis Livret A, ${euro(daily)} pour le quotidien. Montez le loyer pour voir ce qui encaisse le choc.`);
+      }
+    });
+  };
+
+  const prorata = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    onChange(() => {
+      const a = num(inn('a'));
+      const b = num(inn('b'));
+      const shared = num(inn('shared'));
+      const total = a + b;
+      set('a', euro(a));
+      set('b', euro(b));
+      set('shared', euro(shared));
+      const halfA = shared / 2;
+      const halfB = shared / 2;
+      const proA = total > 0 ? shared * (a / total) : 0;
+      const proB = total > 0 ? shared * (b / total) : 0;
+      const row = (title, left, right, leftShare, rightShare) => `
+        <div class="lab-col-title">${title}</div>
+        <div><span>A verse</span><b class="mono">${euro(left)} <span style="color:var(--faint);font-weight:500">${Math.round(leftShare)} %</span></b></div>
+        <div><span>B verse</span><b class="mono">${euro(right)} <span style="color:var(--faint);font-weight:500">${Math.round(rightShare)} %</span></b></div>
+        <div><span>Reste A</span><b class="mono${a - left < 0 ? ' is-bad' : ''}">${euro(a - left)}</b></div>
+        <div><span>Reste B</span><b class="mono${b - right < 0 ? ' is-bad' : ''}">${euro(b - right)}</b></div>
+      `;
+      html('half', row('50 / 50', halfA, halfB, a ? (halfA / a) * 100 : 0, b ? (halfB / b) * 100 : 0));
+      html('pro', row('Prorata', proA, proB, a ? (proA / a) * 100 : 0, b ? (proB / b) * 100 : 0));
+      if (a - halfA < 0 || b - halfB < 0) set('note', 'À 50/50, l’un des deux comptes passe sous zéro. Le prorata évite ça : chacun verse la même part de son salaire.');
+      else set('note', `À 50/50, A pose ${Math.round((halfA / Math.max(a, 1)) * 100)} % de son salaire, B ${Math.round((halfB / Math.max(b, 1)) * 100)} %. Au prorata, les deux restent à ${Math.round((shared / Math.max(total, 1)) * 100)} %.`);
+    });
+  };
+
+  const credit = (root) => {
+    const { inn, set, onChange } = api(root);
+    onChange(() => {
+      const income = num(inn('income'));
+      const loan = num(inn('loan'));
+      const house = num(inn('house'));
+      const daily = num(inn('daily'));
+      const roof = loan + house;
+      const left = income - roof - daily;
+      const works = 300;
+      set('income', euro(income));
+      set('loan', euro(loan));
+      set('house', euro(house));
+      set('daily', euro(daily));
+      set('roof', euro(roof));
+      set('left', euro(left), left < 0);
+      set('works', left >= works ? 'tenu' : (left < 0 ? 'impossible' : 'trop juste'), left < works);
+      if (left < 0) set('note', `Il manque ${euro(-left)} une fois le toit et le quotidien servis. Le crédit a remplacé le loyer par un fixe trop lourd pour ce foyer.`);
+      else if (left < works) set('note', `Il reste ${euro(left)}. L’enveloppe travaux à 300 € du modèle ne tient pas : baissez le quotidien, ou acceptez un bac travaux plus petit.`);
+      else set('note', `${euro(left)} après le toit et le quotidien. 300 € peuvent aller aux travaux, ${euro(left - works)} au Livret A — c’est le câblage du modèle Propriétaire.`);
+    });
+  };
+
+  const saison = (root) => {
+    const { inn, set, onChange } = api(root);
+    onChange(() => {
+      const highn = num(inn('highn'));
+      const high = num(inn('high'));
+      const low = num(inn('low'));
+      const bills = num(inn('bills'));
+      const lown = 12 - highn;
+      const avg = ((high * highn) + (low * lown)) / 12;
+      const gap = Math.max(0, bills - low);
+      const reserve = gap * lown;
+      set('highn', highn > 1 ? `${highn} mois` : '1 mois');
+      set('high', euro(high));
+      set('low', euro(low));
+      set('bills', euro(bills));
+      set('avg', euro(avg));
+      set('gap', euro(gap));
+      set('reserve', euro(reserve), reserve === 0);
+      if (avg < bills) set('note', `La moyenne annuelle (${euro(avg)}) ne couvre pas les charges. Lisser ne suffit pas : le foyer est structurellement trop juste.`);
+      else if (gap === 0) set('note', 'Même un mois creux couvre les charges. La réserve sert alors d’imprévu, pas de pont saisonnier.');
+      else set('note', `Un creux manque de ${euro(gap)}. Sur ${lown} mois bas, il faut ${euro(reserve)} déjà là — nourris par les mois chargés, pas « s’il reste en août ».`);
+    });
+  };
+
+  const labs = { couple, tableur, ordre, joints, urssaf, plafond, mix, reste, famille, scenarios, taux, repart, migrate, plafonds, liberatoire, irregulier, lep, matelas, mixte, epargne, budget, livreta, payfirst, petit, projet, apport, premier, prorata, credit, saison };
   document.querySelectorAll('[data-lab]').forEach((root) => {
     const fn = labs[root.getAttribute('data-lab')];
     if (fn) fn(root);

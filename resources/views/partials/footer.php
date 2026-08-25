@@ -24,9 +24,9 @@
     <span class="eyebrow">Ressources</span>
     <a href="<?= e(url('/ressources')) ?>">Guides</a>
     <a href="<?= e(url('/faq')) ?>">FAQ</a>
-    <a href="<?= e(url('/ressources/taux-plafonds-2026')) ?>">Guide des livrets</a>
-    <a href="<?= e(url('/ressources/urssaf-auto-entrepreneur')) ?>">URSSAF 2026</a>
-    <a href="<?= e(url('/ressources/journal-versions')) ?>">Journal des versions</a>
+    <a href="<?= e(url('/ressources/reussir-a-epargner')) ?>">Réussir à épargner</a>
+    <a href="<?= e(url('/ressources/cest-quoi-livret-a')) ?>">C’est quoi un Livret A</a>
+    <a href="<?= e(url('/ressources/taux-plafonds-2026')) ?>">Taux et plafonds 2026</a>
   </div>
   <div class="footer-col">
     <span class="eyebrow">Société</span>

@@ -64,6 +64,9 @@ class SiteController
 
     public function article(string $slug): void
     {
+        if ($slug === 'journal-versions') {
+            redirect('/ressources', 301);
+        }
         $post = Content::post($slug);
         if (!$post) {
             http_response_code(404);

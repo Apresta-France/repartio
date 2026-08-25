@@ -346,21 +346,6 @@ $widget = $widget ?? '';
     <div class="lab-checks" data-out="steps"></div>
   </div>
 
-<?php elseif ($widget === 'changelog'): ?>
-  <div class="lab" data-lab="changelog">
-    <div class="lab-head">
-      <span class="eyebrow">Journal</span>
-      <strong>Filtrer, puis ouvrir une entrée</strong>
-    </div>
-    <div class="chips">
-      <button type="button" class="chip active" data-log="Tout">Tout</button>
-      <button type="button" class="chip" data-log="Moteur">Moteur</button>
-      <button type="button" class="chip" data-log="Canvas">Canvas</button>
-      <button type="button" class="chip" data-log="Barème">Barème</button>
-    </div>
-    <div class="lab-log" data-out="list"></div>
-  </div>
-
 <?php elseif ($widget === 'plafonds'): ?>
   <div class="lab" data-lab="plafonds">
     <div class="lab-head">
@@ -520,6 +505,312 @@ $widget = $widget ?? '';
       <div><span>Net AE après URSSAF</span><strong data-out="net">—</strong></div>
       <div><span>Épargne possible</span><strong data-out="save">—</strong></div>
       <div><span>Mois sans AE</span><strong data-out="cut">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'epargne'): ?>
+  <div class="lab" data-lab="epargne">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Ce qui reste, si le livret part en premier</strong>
+      <p>Le virement épargne est servi après les fixes, avant le quotidien. Baissez-le si le mois casse.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Revenus du mois</span><b data-out="income">2 200 €</b></div>
+      <input type="range" min="800" max="6000" step="50" value="2200" data-in="income">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Charges fixes</span><b data-out="bills">1 200 €</b></div>
+      <input type="range" min="200" max="4000" step="50" value="1200" data-in="bills">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Versement livret</span><b data-out="save">300 €</b></div>
+      <input type="range" min="0" max="1500" step="25" value="300" data-in="save">
+    </div>
+    <div class="lab-flow" data-out="flow"></div>
+    <div class="lab-kpis">
+      <div><span>Quotidien restant</span><strong data-out="daily">—</strong></div>
+      <div><span>Part épargnée</span><strong data-out="pct">—</strong></div>
+      <div><span>1 000 € atteints</span><strong data-out="when">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'budget'): ?>
+  <div class="lab" data-lab="budget">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Le mois tient-il, une fois tout nommé ?</strong>
+      <p>Entrées, fixes, quotidien, épargne. Le compteur dit s’il reste un euro — ou s’il en manque.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Entrées</span><b data-out="income">2 400 €</b></div>
+      <input type="range" min="700" max="8000" step="50" value="2400" data-in="income">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Fixes (loyer, prélèvements)</span><b data-out="bills">1 100 €</b></div>
+      <input type="range" min="200" max="4500" step="50" value="1100" data-in="bills">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Enveloppe quotidienne</span><b data-out="daily">900 €</b></div>
+      <input type="range" min="150" max="3500" step="50" value="900" data-in="daily">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Épargne posée</span><b data-out="save">250 €</b></div>
+      <input type="range" min="0" max="2000" step="25" value="250" data-in="save">
+    </div>
+    <div class="lab-kpis">
+      <div><span>Affecté</span><strong data-out="used">—</strong></div>
+      <div><span>Non affecté</span><strong data-out="left">—</strong></div>
+      <div><span>État du mois</span><strong data-out="state">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'livreta'): ?>
+  <div class="lab" data-lab="livreta">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur · 1,70 % · 22 950 €</span>
+      <strong>En combien de mois le Livret A sature-t-il ?</strong>
+      <p>Les intérêts continuent après le plafond. Le versement, lui, doit alors partir ailleurs.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Déjà sur le livret</span><b data-out="start">2 000 €</b></div>
+      <input type="range" min="0" max="22950" step="50" value="2000" data-in="start">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Versement mensuel</span><b data-out="pay">250 €</b></div>
+      <input type="range" min="20" max="2000" step="10" value="250" data-in="pay">
+    </div>
+    <div class="lab-bar is-tall"><i data-out="fill"></i><em></em></div>
+    <div class="lab-kpis">
+      <div><span>Place restante</span><strong data-out="room">—</strong></div>
+      <div><span>Plafond atteint</span><strong data-out="when">—</strong></div>
+      <div><span>Intérêts / an (stock actuel)</span><strong data-out="interest">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'payfirst'): ?>
+  <div class="lab" data-lab="payfirst">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>10 %, 20 % ou 30 % — que reste-t-il pour vivre ?</strong>
+      <p>Le pourcentage part vers le livret avant le quotidien. Le loyer, lui, est déjà servi.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Salaire net</span><b data-out="income">1 900 €</b></div>
+      <input type="range" min="1100" max="4000" step="50" value="1900" data-in="income">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Loyer et fixes</span><b data-out="rent">650 €</b></div>
+      <input type="range" min="300" max="1800" step="25" value="650" data-in="rent">
+    </div>
+    <div class="chips">
+      <button type="button" class="chip" data-pct="10">10 %</button>
+      <button type="button" class="chip active" data-pct="20">20 %</button>
+      <button type="button" class="chip" data-pct="30">30 %</button>
+    </div>
+    <div class="lab-flow" data-out="flow"></div>
+    <div class="lab-kpis">
+      <div><span>Vers le livret</span><strong data-out="save">—</strong></div>
+      <div><span>Quotidien</span><strong data-out="daily">—</strong></div>
+      <div><span>Le mois</span><strong data-out="state">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'petit'): ?>
+  <div class="lab" data-lab="petit">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Un petit fixe, sur la durée</strong>
+      <p>Sans promesse de rendement : juste le stock accumulé, à 1,70 % si vous cochez les intérêts du Livret A.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Versement mensuel</span><b data-out="pay">50 €</b></div>
+      <input type="range" min="10" max="250" step="5" value="50" data-in="pay">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Durée</span><b data-out="years">3 ans</b></div>
+      <input type="range" min="1" max="8" step="1" value="3" data-in="years">
+    </div>
+    <label class="lab-check">
+      <input type="checkbox" data-in="rate" checked>
+      <span>Compter 1,70 % (Livret A)</span>
+    </label>
+    <div class="lab-kpis">
+      <div><span>Versé</span><strong data-out="paid">—</strong></div>
+      <div><span>À l’arrivée</span><strong data-out="end">—</strong></div>
+      <div><span>Dont intérêts</span><strong data-out="gain">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'projet'): ?>
+  <div class="lab" data-lab="projet">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Quelle mensualité pour tenir la date ?</strong>
+      <p>Cible moins déjà posé, divisé par les mois restants. Si ça casse le mois, reculez la date.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Cible</span><b data-out="target">2 400 €</b></div>
+      <input type="range" min="400" max="15000" step="100" value="2400" data-in="target">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Déjà de côté</span><b data-out="have">400 €</b></div>
+      <input type="range" min="0" max="8000" step="50" value="400" data-in="have">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Mois restants</span><b data-out="months">12 mois</b></div>
+      <input type="range" min="2" max="36" step="1" value="12" data-in="months">
+    </div>
+    <div class="lab-kpis">
+      <div><span>Il manque</span><strong data-out="gap">—</strong></div>
+      <div><span>Versement / mois</span><strong data-out="pay">—</strong></div>
+      <div><span>Tenable à 400 €</span><strong data-out="ok">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'apport'): ?>
+  <div class="lab" data-lab="apport">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>À quelle date l’apport est-il là ?</strong>
+      <p>Exemple : 40 000 €. Le versement est ce qui reste après charges. Ce n’est pas un avis bancaire.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Cible d’apport</span><b data-out="target">40 000 €</b></div>
+      <input type="range" min="8000" max="80000" step="1000" value="40000" data-in="target">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Déjà de côté</span><b data-out="have">6 000 €</b></div>
+      <input type="range" min="0" max="40000" step="500" value="6000" data-in="have">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Versement mensuel</span><b data-out="pay">800 €</b></div>
+      <input type="range" min="100" max="2500" step="50" value="800" data-in="pay">
+    </div>
+    <div class="lab-bar is-tall"><i data-out="fill"></i><em></em></div>
+    <div class="lab-kpis">
+      <div><span>Il manque</span><strong data-out="gap">—</strong></div>
+      <div><span>Date</span><strong data-out="when">—</strong></div>
+      <div><span>Versé d’ici là</span><strong data-out="total">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'premier'): ?>
+  <div class="lab" data-lab="premier">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur · Premier salaire</span>
+      <strong>Et si le loyer monte ?</strong>
+      <p>20 % partent vers l’épargne avant le quotidien. C’est le quotidien qui encaisse l’écart — jusqu’à ce que le mois casse.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Salaire</span><b data-out="income">1 900 €</b></div>
+      <input type="range" min="1400" max="2800" step="50" value="1900" data-in="income">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Loyer + charges</span><b data-out="rent">650 €</b></div>
+      <input type="range" min="400" max="1200" step="25" value="650" data-in="rent">
+    </div>
+    <div class="lab-flow" data-out="flow"></div>
+    <div class="lab-kpis">
+      <div><span>Épargne 20 %</span><strong data-out="save">—</strong></div>
+      <div><span>Quotidien</span><strong data-out="daily">—</strong></div>
+      <div><span>Le mois</span><strong data-out="state">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'prorata'): ?>
+  <div class="lab" data-lab="prorata">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>50/50 ou au prorata des salaires</strong>
+      <p>Mêmes factures communes. Seule la clé de répartition change. Regardez ce qui reste à chacun.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Salaire A</span><b data-out="a">2 000 €</b></div>
+      <input type="range" min="1200" max="5000" step="50" value="2000" data-in="a">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Salaire B</span><b data-out="b">3 000 €</b></div>
+      <input type="range" min="1200" max="6000" step="50" value="3000" data-in="b">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Charges communes</span><b data-out="shared">3 400 €</b></div>
+      <input type="range" min="800" max="5500" step="50" value="3400" data-in="shared">
+    </div>
+    <div class="lab-split">
+      <div class="lab-col" data-out="half"></div>
+      <div class="lab-col" data-out="pro"></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'credit'): ?>
+  <div class="lab" data-lab="credit">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Que reste-t-il une fois le crédit servi ?</strong>
+      <p>Mensualité + charges du bien + quotidien. Le surplus, s’il existe, peut nourrir travaux et Livret A.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Revenus du foyer</span><b data-out="income">5 000 €</b></div>
+      <input type="range" min="2500" max="9000" step="50" value="5000" data-in="income">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Mensualité de crédit</span><b data-out="loan">1 180 €</b></div>
+      <input type="range" min="400" max="2800" step="20" value="1180" data-in="loan">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Charges du bien</span><b data-out="house">480 €</b></div>
+      <input type="range" min="100" max="1200" step="20" value="480" data-in="house">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Quotidien</span><b data-out="daily">1 600 €</b></div>
+      <input type="range" min="600" max="3500" step="50" value="1600" data-in="daily">
+    </div>
+    <div class="lab-kpis">
+      <div><span>Toit (crédit + charges)</span><strong data-out="roof">—</strong></div>
+      <div><span>Reste à câbler</span><strong data-out="left">—</strong></div>
+      <div><span>Dont 300 € travaux</span><strong data-out="works">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'saison'): ?>
+  <div class="lab" data-lab="saison">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Quelle réserve pour tenir les mois bas ?</strong>
+      <p>La moyenne paie le mois type. La réserve, elle, couvre l’écart des creux.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Mois chargés / an</span><b data-out="highn">6 mois</b></div>
+      <input type="range" min="3" max="10" step="1" value="6" data-in="highn">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Revenu d’un mois chargé</span><b data-out="high">4 200 €</b></div>
+      <input type="range" min="1500" max="8000" step="50" value="4200" data-in="high">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Revenu d’un mois creux</span><b data-out="low">1 400 €</b></div>
+      <input type="range" min="0" max="4000" step="50" value="1400" data-in="low">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Charges du foyer</span><b data-out="bills">2 300 €</b></div>
+      <input type="range" min="800" max="5000" step="50" value="2300" data-in="bills">
+    </div>
+    <div class="lab-kpis">
+      <div><span>Moyenne / mois</span><strong data-out="avg">—</strong></div>
+      <div><span>Écart d’un creux</span><strong data-out="gap">—</strong></div>
+      <div><span>Réserve à viser</span><strong data-out="reserve">—</strong></div>
     </div>
     <p class="lab-foot" data-out="note"></p>
   </div>

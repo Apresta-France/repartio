@@ -247,8 +247,8 @@ $C = [
   </div>
   <div class="split cols-3">
     <?php foreach ([
-      ['Activité', '14 min', 'Auto-entrepreneur : provisionner l’URSSAF 2026', 'BNC à 25,6 %, CFP, ACRE, libératoire. Posez le vrai net chaque mois, pas la facture de mars.', 'urssaf-auto-entrepreneur'],
-      ['Épargne', '5 min', 'Taux et plafonds au 1er août 2026', 'Livret A et LDDS à 1,70 %, LEP à 2,50 %. En combien de mois un versement sature-t-il ?', 'taux-plafonds-2026'],
+      ['Budget', '9 min', 'Réussir à épargner sans attendre « s’il reste »', 'Un fil fixe vers le livret, dès le salaire, avant les sorties. Le simulateur montre ce qui reste pour le quotidien.', 'reussir-a-epargner'],
+      ['Épargne', '8 min', 'C’est quoi un Livret A ?', '1,70 %, 22 950 €, disponible tout de suite. À quoi il sert, ce qu’il ne fait pas, et en combien de mois un versement le remplit.', 'cest-quoi-livret-a'],
       ['Foyer', '12 min', 'Un couple, 6 280 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
     ] as $p): ?>
       <a href="<?= e(url('/ressources/' . $p[4])) ?>" style="padding:24px 26px;color:inherit;display:flex;flex-direction:column;gap:10px;">
