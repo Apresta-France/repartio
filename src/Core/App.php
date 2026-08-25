@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Core;
 
 use App\Controllers\AccessController;
+use App\Controllers\AdminController;
 use App\Controllers\AppController;
 use App\Controllers\AuthController;
 use App\Controllers\ContactController;
@@ -120,5 +121,28 @@ class App
         $router->post('/app/profil', [AppController::class, 'updateProfile']);
         $router->get('/app/reglages', [AppController::class, 'settings']);
         $router->post('/app/reglages/supprimer', [AppController::class, 'deleteAccount']);
+
+        $router->get('/admin', [AdminController::class, 'dashboard']);
+        $router->get('/admin/clients', [AdminController::class, 'clients']);
+        $router->get('/admin/clients/nouveau', [AdminController::class, 'clientCreate']);
+        $router->post('/admin/clients', [AdminController::class, 'clientStore']);
+        $router->get('/admin/clients/{id}', [AdminController::class, 'clientShow']);
+        $router->post('/admin/clients/{id}', [AdminController::class, 'clientUpdate']);
+        $router->post('/admin/clients/{id}/mot-de-passe', [AdminController::class, 'clientPassword']);
+        $router->post('/admin/clients/{id}/verifier', [AdminController::class, 'clientVerify']);
+        $router->post('/admin/clients/{id}/supprimer', [AdminController::class, 'clientDelete']);
+        $router->get('/admin/forfaits', [AdminController::class, 'plans']);
+        $router->get('/admin/forfaits/nouveau', [AdminController::class, 'planCreate']);
+        $router->post('/admin/forfaits', [AdminController::class, 'planStore']);
+        $router->get('/admin/forfaits/{slug}', [AdminController::class, 'planEdit']);
+        $router->post('/admin/forfaits/{slug}', [AdminController::class, 'planUpdate']);
+        $router->post('/admin/forfaits/{slug}/supprimer', [AdminController::class, 'planDelete']);
+        $router->get('/admin/environnement', [AdminController::class, 'envForm']);
+        $router->post('/admin/environnement', [AdminController::class, 'envSave']);
+        $router->post('/admin/environnement/cle', [AdminController::class, 'envRegenerateKey']);
+        $router->post('/admin/environnement/test-mail', [AdminController::class, 'envTestMail']);
+        $router->get('/admin/messages', [AdminController::class, 'messages']);
+        $router->post('/admin/messages/{id}/supprimer', [AdminController::class, 'messageDelete']);
+        $router->get('/admin/emails', [AdminController::class, 'emails']);
     }
 }

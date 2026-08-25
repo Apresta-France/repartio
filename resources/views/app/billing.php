@@ -57,7 +57,7 @@ $neededMembers = $reason === 'invitations' ? $invited + 1 : 0;
   </div>
 
   <div class="billing-plans">
-    <?php foreach (\App\Models\Plan::ALL as $slug => $offer):
+    <?php foreach (\App\Models\Plan::all() as $slug => $offer):
         $isCurrent = $slug === $plan['slug'];
         $unlocksCircuit = $neededCircuits > 0 && (int) $offer['circuits'] >= $neededCircuits;
         $unlocksInvite = $neededMembers > 0 && (int) $offer['members'] >= $neededMembers;

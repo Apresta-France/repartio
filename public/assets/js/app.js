@@ -1078,9 +1078,11 @@ document.querySelectorAll('[data-cycle]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const annual = btn.getAttribute('data-cycle') === 'Annuel';
     document.querySelectorAll('[data-cycle]').forEach((el) => el.classList.toggle('active', el === btn));
-    document.querySelectorAll('[data-price="complet"]').forEach((el) => { el.textContent = annual ? '39 € HT' : '3,90 € HT'; });
-    document.querySelectorAll('[data-unit="complet"]').forEach((el) => { el.textContent = annual ? 'par an — 2 mois offerts' : 'par mois'; });
-    document.querySelectorAll('[data-price="foyer"]').forEach((el) => { el.textContent = annual ? '89 € HT' : '8,90 € HT'; });
-    document.querySelectorAll('[data-unit="foyer"]').forEach((el) => { el.textContent = annual ? 'par an — 2 mois offerts' : 'par mois'; });
+    document.querySelectorAll('[data-monthly][data-yearly]').forEach((el) => {
+      el.textContent = annual ? el.getAttribute('data-yearly') : el.getAttribute('data-monthly');
+    });
+    document.querySelectorAll('[data-unit-monthly][data-unit-yearly]').forEach((el) => {
+      el.textContent = annual ? el.getAttribute('data-unit-yearly') : el.getAttribute('data-unit-monthly');
+    });
   });
 });

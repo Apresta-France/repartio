@@ -109,6 +109,7 @@ class InstallController
                     'email' => $email,
                     'password' => $password,
                     'plan' => 'complet',
+                    'role' => 'admin',
                 ]);
                 User::markVerified((int) $user['id']);
             }

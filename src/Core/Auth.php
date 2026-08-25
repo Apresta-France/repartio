@@ -74,6 +74,22 @@ class Auth
         return $user;
     }
 
+    public static function isAdmin(?array $user = null): bool
+    {
+        $user ??= self::user();
+        return $user !== null && ($user['role'] ?? '') === 'admin';
+    }
+
+    public static function requireAdmin(): array
+    {
+        $user = self::requireUser();
+        if (!self::isAdmin($user)) {
+            Session::flashSet('error', 'Cette page est réservée à l’administration.');
+            redirect('/app');
+        }
+        return $user;
+    }
+
     private static function fromRemember(): ?array
     {
         $raw = $_COOKIE['repartio_remember'] ?? null;

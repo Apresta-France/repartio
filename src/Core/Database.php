@@ -76,4 +76,9 @@ class Database
             return false;
         }
     }
+
+    public static function reset(): void
+    {
+        self::$pdo = null;
+    }
 }

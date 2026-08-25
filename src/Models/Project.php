@@ -196,6 +196,24 @@ class Project
         );
     }
 
+    public static function countAll(): int
+    {
+        $row = Database::fetch('SELECT COUNT(*) AS n FROM projects');
+        return (int) ($row['n'] ?? 0);
+    }
+
+    public static function recentActivity(int $limit = 10): array
+    {
+        return Database::fetchAll(
+            'SELECT a.*, p.name AS project_name, u.first_name, u.email
+             FROM activity_logs a
+             LEFT JOIN projects p ON p.id = a.project_id
+             LEFT JOIN users u ON u.id = a.user_id
+             ORDER BY a.created_at DESC
+             LIMIT ' . (int) $limit
+        );
+    }
+
     public static function emptyPayload(?int $horizon = null): array
     {
         return [

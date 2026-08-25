@@ -17,6 +17,9 @@ $bottom = [
     ['profil', 'Mon profil', '/app/profil', 'var(--navy)'],
     ['reglages', 'Réglages', '/app/reglages', 'var(--navy)'],
 ];
+if (\App\Core\Auth::isAdmin($user)) {
+    array_unshift($bottom, ['admin', 'Administration', '/admin', 'var(--orange)']);
+}
 ?>
 <aside class="sidebar" id="app-sidebar">
   <a href="<?= e(url('/app')) ?>" class="logo"><img src="<?= e(asset('img/logo.png')) ?>" alt="repartio.fr"></a>
