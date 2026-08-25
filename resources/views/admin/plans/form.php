@@ -9,7 +9,7 @@ $usersOnPlan = (int) ($usersOnPlan ?? 0);
     <span class="eyebrow"><a href="<?= e(url('/admin/forfaits')) ?>">Forfaits</a><?= $create ? '' : ' · ' . (int) $usersOnPlan . ' client' . ($usersOnPlan > 1 ? 's' : '') ?></span>
   </div>
 </header>
-<section class="admin-page admin-page-narrow">
+<section class="admin-page">
   <form class="card card-pad admin-form" method="post" action="<?= e(url($create ? '/admin/forfaits' : '/admin/forfaits/' . $plan['slug'])) ?>">
     <?= csrf_field() ?>
     <div class="fields-2">
@@ -27,11 +27,9 @@ $usersOnPlan = (int) ($usersOnPlan ?? 0);
       <span>Accroche</span>
       <textarea name="blurb" rows="3"><?= e((string) old('blurb', $plan['blurb'] ?? '')) ?></textarea>
     </label>
-    <div class="fields-2">
+    <div class="fields-4">
       <label class="field"><span>Circuits</span><input type="number" name="circuits" min="1" required value="<?= e((string) old('circuits', $plan['circuits'] ?? 1)) ?>"></label>
       <label class="field"><span>Horizon (mois)</span><input type="number" name="horizon" min="1" max="600" required value="<?= e((string) old('horizon', $plan['horizon'] ?? 24)) ?>"></label>
-    </div>
-    <div class="fields-2">
       <label class="field"><span>Personnes invitées</span><input type="number" name="members" min="0" required value="<?= e((string) old('members', $plan['members'] ?? 0)) ?>"></label>
       <label class="field"><span>Ordre d’affichage</span><input type="number" name="sort_order" value="<?= e((string) old('sort_order', $plan['sort_order'] ?? 0)) ?>"></label>
     </div>

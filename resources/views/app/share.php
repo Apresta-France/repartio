@@ -4,7 +4,7 @@
     <h1>Partager « <?= e($project['name']) ?> »</h1>
   </div>
 </header>
-<section class="share-page">
+<section class="app-page share-page">
   <div class="card share-card">
     <div class="eyebrow"><?= $share && (int) $share['enabled'] === 1 ? 'Lien public actif' : 'Lien d’aperçu' ?></div>
     <h2>Aperçu public</h2>

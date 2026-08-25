@@ -30,28 +30,34 @@ $profileType = (string) ($profile['type'] ?? 'individual');
 <section class="billing-page">
   <?php if ($blocked && $reason === 'circuits'): ?>
     <div class="card billing-limit" role="status">
-      <span class="eyebrow">Limite atteinte</span>
-      <h2>Vous ne pouvez plus ajouter de circuit sur <?= e($plan['label']) ?></h2>
-      <p class="lede">Le forfait <?= e($plan['label']) ?> autorise <?= (int) $limit ?> circuit<?= $limit > 1 ? 's' : '' ?>. Vous en avez <?= (int) $used ?> actif<?= $used > 1 ? 's' : '' ?>. Pour en créer un autre, il faut un forfait avec plus d’emplacements.</p>
+      <div class="billing-banner-copy">
+        <span class="eyebrow">Limite atteinte</span>
+        <h2>Vous ne pouvez plus ajouter de circuit sur <?= e($plan['label']) ?></h2>
+        <p class="lede">Le forfait <?= e($plan['label']) ?> autorise <?= (int) $limit ?> circuit<?= $limit > 1 ? 's' : '' ?>. Vous en avez <?= (int) $used ?> actif<?= $used > 1 ? 's' : '' ?>. Pour en créer un autre, il faut un forfait avec plus d’emplacements.</p>
+      </div>
     </div>
   <?php elseif ($blocked && $reason === 'invitations'): ?>
     <div class="card billing-limit" role="status">
-      <span class="eyebrow">Limite atteinte</span>
-      <h2>Vous ne pouvez plus inviter sur <?= e($plan['label']) ?></h2>
-      <p class="lede"><?= $membersLimit <= 0
-          ? 'Le forfait Libre n’ouvre aucune invitation. Complet permet d’en inviter une, Foyer jusqu’à dix.'
-          : 'Le forfait ' . e($plan['label']) . ' autorise ' . (int) $membersLimit . ' personne' . ($membersLimit > 1 ? 's' : '') . '. Choisissez un forfait avec plus d’invitations.' ?></p>
+      <div class="billing-banner-copy">
+        <span class="eyebrow">Limite atteinte</span>
+        <h2>Vous ne pouvez plus inviter sur <?= e($plan['label']) ?></h2>
+        <p class="lede"><?= $membersLimit <= 0
+            ? 'Le forfait Libre n’ouvre aucune invitation. Complet permet d’en inviter une, Foyer jusqu’à dix.'
+            : 'Le forfait ' . e($plan['label']) . ' autorise ' . (int) $membersLimit . ' personne' . ($membersLimit > 1 ? 's' : '') . '. Choisissez un forfait avec plus d’invitations.' ?></p>
+      </div>
     </div>
   <?php else: ?>
     <div class="card billing-current">
-      <span class="eyebrow">Forfait actuel</span>
-      <h2><?= e($plan['label']) ?></h2>
-      <p class="lede"><?= e(\App\Models\Plan::blurb($user)) ?></p>
-      <?php if ($subActive && $periodEnd): ?>
-        <p class="lede"><?= $cancelAtEnd
-            ? 'Résilié : accès conservé jusqu’au ' . date('d/m/Y', $periodEnd) . '.'
-            : 'Période en cours jusqu’au ' . date('d/m/Y', $periodEnd) . ($currentCycle === 'yearly' ? ' · annuel' : ' · mensuel') . '.' ?></p>
-      <?php endif; ?>
+      <div class="billing-banner-copy">
+        <span class="eyebrow">Forfait actuel</span>
+        <h2><?= e($plan['label']) ?></h2>
+        <p class="lede"><?= e(\App\Models\Plan::blurb($user)) ?></p>
+        <?php if ($subActive && $periodEnd): ?>
+          <p class="lede"><?= $cancelAtEnd
+              ? 'Résilié : accès conservé jusqu’au ' . date('d/m/Y', $periodEnd) . '.'
+              : 'Période en cours jusqu’au ' . date('d/m/Y', $periodEnd) . ($currentCycle === 'yearly' ? ' · annuel' : ' · mensuel') . '.' ?></p>
+        <?php endif; ?>
+      </div>
       <?php if ($subActive): ?>
         <div class="billing-sub-actions">
           <form method="post" action="<?= e(url('/app/forfait/portail')) ?>">
@@ -86,9 +92,11 @@ $profileType = (string) ($profile['type'] ?? 'individual');
 
   <form id="facturation" class="card card-pad billing-profile" method="post" action="<?= e(url('/app/forfait/facturation')) ?>">
     <?= csrf_field() ?>
-    <div>
-      <span class="eyebrow">Facturation</span>
-      <h2>Coordonnées pour la facture</h2>
+    <div class="billing-profile-head">
+      <div>
+        <span class="eyebrow">Facturation</span>
+        <h2>Coordonnées pour la facture</h2>
+      </div>
       <p class="lede">Stripe Tax calcule la TVA selon le pays (et le n° TVA intra-communautaire s’il est renseigné). La facture Stripe reprend HT, TVA et TTC.</p>
     </div>
     <div class="fields-2">
@@ -118,7 +126,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
       <span>Adresse</span>
       <input name="billing_line1" value="<?= e((string) ($profile['line1'] ?? '')) ?>" required>
     </label>
-    <div class="fields-2">
+    <div class="fields-3">
       <label class="field">
         <span>Code postal</span>
         <input name="billing_postal_code" value="<?= e((string) ($profile['postal_code'] ?? '')) ?>" required>
@@ -127,21 +135,21 @@ $profileType = (string) ($profile['type'] ?? 'individual');
         <span>Ville</span>
         <input name="billing_city" value="<?= e((string) ($profile['city'] ?? '')) ?>" required>
       </label>
-    </div>
-    <div class="fields-2">
       <label class="field">
         <span>Pays</span>
         <input name="billing_country" maxlength="2" value="<?= e((string) ($profile['country'] ?? 'FR')) ?>" required>
       </label>
+    </div>
+    <div class="fields-2">
       <label class="field">
         <span>N° TVA (optionnel)</span>
         <input name="billing_vat" value="<?= e((string) ($profile['vat_number'] ?? '')) ?>">
       </label>
+      <label class="field">
+        <span>SIRET (optionnel)</span>
+        <input name="billing_siret" value="<?= e((string) ($profile['siret'] ?? '')) ?>">
+      </label>
     </div>
-    <label class="field">
-      <span>SIRET (optionnel)</span>
-      <input name="billing_siret" value="<?= e((string) ($profile['siret'] ?? '')) ?>">
-    </label>
     <button class="btn btn-navy" type="submit">Enregistrer les coordonnées</button>
   </form>
 
@@ -213,9 +221,11 @@ $profileType = (string) ($profile['type'] ?? 'individual');
   </div>
 
   <div class="card card-pad billing-invoices">
-    <div>
-      <span class="eyebrow">Factures Stripe</span>
-      <h2>Historique et TVA</h2>
+    <div class="billing-section-head">
+      <div>
+        <span class="eyebrow">Factures Stripe</span>
+        <h2>Historique et TVA</h2>
+      </div>
       <p class="lede">Chaque encaissement produit une facture Stripe (PDF + page hébergée) avec la TVA applicable. Changer de carte ou d’adresse se fait dans le portail Stripe.</p>
     </div>
     <?php if ($invoices === []): ?>

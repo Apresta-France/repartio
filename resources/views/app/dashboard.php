@@ -16,7 +16,7 @@
     <div class="kpi"><span class="k"><?= e($k[0]) ?></span><span class="v" style="color:<?= $k[2] ?>"><?= e($k[1]) ?></span></div>
   <?php endforeach; ?>
 </section>
-<section style="padding:24px 28px;">
+<section class="app-page">
   <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
     <h2 style="margin:0;font-size:16.5px;">Activité récente</h2>
     <a href="<?= e(url('/app/circuits')) ?>" style="margin-left:auto;font-size:12.5px;font-weight:600;">Tous mes circuits →</a>

@@ -5,11 +5,13 @@
     <span class="eyebrow"><a href="<?= e(url('/admin/clients')) ?>">Clients</a> · création</span>
   </div>
 </header>
-<section class="admin-page admin-page-narrow">
+<section class="admin-page">
   <form class="card card-pad admin-form" method="post" action="<?= e(url('/admin/clients')) ?>">
     <?= csrf_field() ?>
-    <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>"></label>
-    <label class="field"><span>E-mail</span><input type="email" name="email" required value="<?= e((string) old('email')) ?>"></label>
+    <div class="fields-2">
+      <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) old('first_name')) ?>"></label>
+      <label class="field"><span>E-mail</span><input type="email" name="email" required value="<?= e((string) old('email')) ?>"></label>
+    </div>
     <label class="field">
       <span>Mot de passe</span>
       <input type="password" name="password" required minlength="12" autocomplete="new-password">

@@ -205,7 +205,9 @@ h1.page-title { font-size: clamp(30px, 7vw, 48px) !important; letter-spacing: -.
 .page-split { display: grid; grid-template-columns: minmax(280px, .85fr) 1.15fr; }
 .page-split > :first-child { border-right: 1px solid var(--line); }
 .feature-grid { display: grid; grid-template-columns: 1fr 1fr; }
-.fields-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fields-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; min-width: 0; }
+.fields-3 { display: grid; grid-template-columns: minmax(110px, .75fr) minmax(160px, 1.4fr) minmax(72px, .55fr); gap: 14px; width: 100%; min-width: 0; }
+.fields-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 100%; min-width: 0; }
 .band-2 { display: grid; grid-template-columns: 1fr 1fr; }
 .card { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--paper); }
 a.card:hover,
@@ -218,12 +220,15 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .card-action-title .mono { margin-left: auto; font-size: 10.5px; color: var(--faint); }
 .card-action-body p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
 .card-action-body .btn { margin-top: auto; pointer-events: none; }
-.card-pad { padding: 32px 36px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.card-pad { padding: 28px 32px; display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
 .card-pad > h1,
 .card-pad > h2 { margin: 0; font-weight: 800; letter-spacing: -.035em; line-height: 1.15; }
 .card-pad > h1 { font-size: 27px; }
 .card-pad > h2 { font-size: 22px; }
 .card-pad > .lede { max-width: none; }
+.card-pad > .btn,
+.card-pad > .admin-actions,
+.card-pad > .billing-sub-actions { align-self: start; }
 .card-pad > .btn,
 .card-pad > form { margin-top: 4px; }
 .split { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
@@ -267,7 +272,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .auth-sep { display: flex; align-items: center; gap: 12px; }
 .auth-sep i { flex: 1; height: 1px; background: var(--line); }
 .auth-sep span { font-family: var(--mono); font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: oklch(0.64 0.04 265); }
-.field { display: flex; flex-direction: column; gap: 7px; }
+.field { display: flex; flex-direction: column; gap: 7px; min-width: 0; width: 100%; }
 .field span { font-size: 12.5px; font-weight: 600; color: oklch(0.36 0.05 265); }
 .field input, .field textarea, .field select { padding: 12px 14px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: var(--paper); font-size: 16px; color: var(--navy); outline: none; width: 100%; }
 .field input:focus, .field textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14); }
@@ -787,7 +792,10 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder.is-readonly .node.is-group { cursor: default; }
 .builder.is-readonly .edge-pill { cursor: default; }
 
-.share-page { padding: 28px; max-width: 640px; }
+.app-page { padding: 24px 28px 48px; display: flex; flex-direction: column; gap: 20px; }
+.app-page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.app-page-grid > .card { min-width: 0; }
+.share-page { padding: 24px 28px 48px; }
 .share-card { padding: 24px 26px; display: flex; flex-direction: column; gap: 16px; }
 .share-card:hover { transform: none; box-shadow: none; }
 .share-card h2 { margin: 0; font-size: 24px; letter-spacing: -.03em; }
@@ -933,7 +941,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .project-card-new > button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 220px; background: none; border: 0; color: inherit; cursor: pointer; font: inherit; }
 .project-card-plus { width: 36px; height: 36px; border-radius: 11px; background: oklch(0.96 0.03 38); color: var(--orange-ink); display: grid; place-items: center; font-size: 20px; font-weight: 600; }
 .project-card-new span { font-size: 13px; color: var(--muted); max-width: 22ch; }
-.access-page { padding: 28px; max-width: 760px; display: flex; flex-direction: column; gap: 18px; }
+.access-page { padding: 24px 28px 48px; display: flex; flex-direction: column; gap: 18px; }
 .access-intro { font-size: 15px; }
 .access-card { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
 .access-card:hover { transform: none; box-shadow: none; }
@@ -970,17 +978,18 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder.is-readonly .palette-list,
 .builder.is-readonly .builder-side-label { display: none; }
 
-.billing-page { padding: 24px 28px 48px; display: flex; flex-direction: column; gap: 20px; max-width: 1100px; }
-.billing-limit, .billing-current, .billing-result { padding: 22px 26px; display: flex; flex-direction: column; gap: 8px; }
+.billing-page { padding: 24px 28px 48px; display: flex; flex-direction: column; gap: 20px; }
+.billing-limit, .billing-current, .billing-result { padding: 20px 24px; display: grid; grid-template-columns: 1fr auto; gap: 10px 32px; align-items: center; }
+.billing-banner-copy { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .billing-limit { border-color: oklch(0.72 0.14 38); background: oklch(0.98 0.02 70); }
 .billing-result.is-success { border-color: oklch(0.72 0.08 192); background: oklch(0.97 0.02 192); }
 .billing-result.is-fail { border-color: oklch(0.72 0.14 38); background: oklch(0.98 0.02 70); }
 .billing-limit h2, .billing-current h2, .billing-result h2 { margin: 0; font-size: 22px; letter-spacing: -.03em; }
-.billing-limit .lede, .billing-current .lede, .billing-result .lede { margin: 0; font-size: 14.5px; }
+.billing-limit .lede, .billing-current .lede, .billing-result .lede { margin: 0; font-size: 14.5px; max-width: none; }
 .billing-usage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.billing-usage > div { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); display: flex; flex-direction: column; gap: 4px; }
-.billing-usage span { font-size: 12px; color: var(--muted); }
-.billing-usage strong { font-size: 18px; }
+.billing-usage > div { padding: 16px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: 12px; }
+.billing-usage span { font-size: 12.5px; color: var(--muted); }
+.billing-usage strong { font-size: 22px; letter-spacing: -.03em; }
 .billing-usage .is-over { color: oklch(0.5 0.16 38); }
 .billing-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .billing-plan { padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -996,14 +1005,18 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .billing-plan-note { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .billing-plan .btn, .billing-plan form { width: 100%; margin-top: auto; }
 .billing-plan .btn:disabled { opacity: .55; cursor: default; }
-.billing-sub-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.billing-sub-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .billing-profile { display: flex; flex-direction: column; gap: 14px; }
+.billing-profile-head, .billing-section-head { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.15fr); gap: 6px 40px; align-items: end; width: 100%; }
+.billing-profile-head .lede, .billing-section-head .lede { margin: 0; font-size: 14.5px; max-width: none; }
 .billing-profile h2, .billing-invoices h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
 .billing-cycle { margin: 0; }
-.billing-invoices { display: flex; flex-direction: column; gap: 12px; }
-.billing-invoice-list { display: flex; flex-direction: column; gap: 8px; }
-.billing-invoice-list > div { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; font-size: 14px; }
+.billing-invoices { display: flex; flex-direction: column; gap: 14px; }
+.billing-invoice-list { display: flex; flex-direction: column; gap: 0; width: 100%; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.billing-invoice-list > div { display: grid; grid-template-columns: 1.1fr 1.6fr auto; gap: 8px 20px; align-items: baseline; padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--line-soft); }
+.billing-invoice-list > div:last-child { border-bottom: 0; }
 .billing-invoice-list span { color: var(--muted); }
+.table-invoices { grid-template-columns: 1.1fr 1.4fr .9fr auto; min-width: 520px; }
 
 .project-upsell { margin: 0 28px 40px; padding: 20px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .project-upsell > div { display: flex; flex-direction: column; gap: 4px; }
@@ -1058,7 +1071,10 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
   .page-split, .band-2, .auth-grid, .legal-layout, .grid-2, .feature-grid, .dark-band { grid-template-columns: 1fr !important; }
   .page-split > :first-child { border-right: 0; border-bottom: 1px solid var(--line); }
   .page-split > *, .band-2 > * { padding: 28px 20px !important; }
-  .fields-2 { grid-template-columns: 1fr; }
+  .fields-4 { grid-template-columns: 1fr 1fr; }
+  .app-page-grid { grid-template-columns: 1fr; }
+  .billing-profile-head, .billing-section-head { grid-template-columns: 1fr; }
+  .admin-env-fields { grid-template-columns: 1fr; }
 
   .app-mobile-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 36; }
   .app-mobile-bar img { height: 46px; }
@@ -1109,6 +1125,11 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
   .canvas-zoom [data-fit] { display: none; }
   .billing-page { padding: 16px 16px 36px; }
   .billing-usage, .billing-plans { grid-template-columns: 1fr; }
+  .billing-usage > div { flex-direction: column; gap: 4px; }
+  .billing-limit, .billing-current, .billing-result { grid-template-columns: 1fr; }
+  .billing-invoice-list > div { grid-template-columns: 1fr; }
+  .fields-2, .fields-3, .fields-4 { grid-template-columns: 1fr; }
+  .app-page { padding: 16px 16px 36px; }
   .grid-3, .split, .split.cols-2, .split.cols-3, .split.cols-4, .split.cols-5, .cols-2, .cols-3, .cols-4, .cols-5 { grid-template-columns: 1fr !important; }
   .stat-grid { grid-template-columns: 1fr; }
   .hero-canvas { min-height: 280px; }
@@ -1456,10 +1477,10 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .admin-badge { align-self: flex-start; background: var(--navy); color: #fff; border-color: var(--navy); }
 .app-mobile-bar .admin-badge { margin-left: auto; }
 .admin-page { padding: 24px 28px 40px; display: flex; flex-direction: column; gap: 22px; }
-.admin-page-narrow { max-width: 720px; }
 .admin-page h2 { margin: 0; font-size: 16.5px; }
-.admin-form { gap: 14px; }
+.admin-form { gap: 14px; width: 100%; }
 .admin-form > h2 { margin-bottom: 2px; }
+.admin-form > .btn { align-self: start; }
 .admin-filters { display: grid; grid-template-columns: 1.6fr .9fr .7fr auto; gap: 12px; align-items: end; }
 .admin-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .admin-split { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: start; }
@@ -1478,7 +1499,8 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .admin-pager { display: flex; align-items: center; gap: 12px; }
 .admin-danger { border-color: oklch(0.86 0.06 25); gap: 12px; }
 .admin-env { display: flex; flex-direction: column; gap: 18px; }
-.admin-env-fields { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+.admin-env-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+.admin-env-fields > .check { grid-column: 1 / -1; }
 .admin-message p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--ink); white-space: pre-wrap; }
 .chip-warn { color: oklch(0.42 0.12 25); border-color: oklch(0.88 0.06 25); background: oklch(0.97 0.03 25); }
 .table-head { font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--faint); background: oklch(0.975 0.005 250); }
@@ -1495,6 +1517,7 @@ a.table-row:hover { background: oklch(0.975 0.005 250); color: inherit; }
 @media (max-width: 980px) {
   .admin-filters { grid-template-columns: 1fr 1fr; }
   .admin-split, .admin-quick { grid-template-columns: 1fr; }
+  .fields-4 { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 720px) {

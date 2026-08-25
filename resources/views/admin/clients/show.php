@@ -25,8 +25,10 @@ $isSelf = (int) ($user['id'] ?? 0) === (int) ($client['id'] ?? 0);
     <form class="card card-pad admin-form" method="post" action="<?= e(url('/admin/clients/' . $client['id'])) ?>">
       <?= csrf_field() ?>
       <h2>Fiche</h2>
-      <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) $client['first_name']) ?>"></label>
-      <label class="field"><span>E-mail</span><input type="email" name="email" required value="<?= e((string) $client['email']) ?>"></label>
+      <div class="fields-2">
+        <label class="field"><span>Prénom</span><input name="first_name" required value="<?= e((string) $client['first_name']) ?>"></label>
+        <label class="field"><span>E-mail</span><input type="email" name="email" required value="<?= e((string) $client['email']) ?>"></label>
+      </div>
       <div class="fields-2">
         <label class="field">
           <span>Forfait</span>

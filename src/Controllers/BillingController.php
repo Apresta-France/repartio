@@ -133,6 +133,7 @@ class BillingController
                 Billing::syncUser((int) $user['id']);
                 $user = User::find((int) $user['id']) ?? $user;
                 Session::flashSet('success', 'Forfait mis à jour : ' . Plan::label($user) . '.');
+                $this->trackPurchase($slug, $cycle);
                 $this->redirectAfterChange($reason);
             } catch (RuntimeException $e) {
                 Session::flashSet('error', $e->getMessage());
@@ -153,6 +154,8 @@ class BillingController
     {
         $user = Auth::requireUser();
         $reason = (string) Session::get('billing_reason', '');
+        $paidPlan = (string) Session::get('billing_retry_plan', '');
+        $paidCycle = (string) Session::get('billing_retry_cycle', 'monthly');
         Session::forget('billing_reason');
         Session::forget('billing_retry_plan');
         Session::forget('billing_retry_cycle');
@@ -175,11 +178,14 @@ class BillingController
         }
 
         $user = User::find((int) $user['id']) ?? $user;
-        track_rv('purchase', [
-            'amount' => (float) Plan::of($user)['price_monthly_ht'],
-            'currency' => 'EUR',
-            'plan' => Plan::slug($user),
-        ]);
+        if (Plan::exists($paidPlan)) {
+            $this->trackPurchase($paidPlan, $paidCycle === 'yearly' ? 'yearly' : 'monthly');
+        } else {
+            $this->trackPurchase(
+                Plan::slug($user),
+                Billing::cycleFromPrice((Billing::subscription((int) $user['id']) ?? [])['price_code'] ?? null)
+            );
+        }
 
         View::render('app/billing-success', [
             'title' => 'Paiement confirmé',
@@ -319,5 +325,20 @@ class BillingController
             redirect('/app/circuits');
         }
         redirect('/app/forfait');
+    }
+
+    private function trackPurchase(string $slug, string $cycle): void
+    {
+        $offer = Plan::of($slug);
+        $amount = $cycle === 'yearly'
+            ? (float) $offer['price_yearly_ht']
+            : (float) $offer['price_monthly_ht'];
+        if ($amount <= 0) {
+            return;
+        }
+        track_rv('purchase', [
+            'amount' => $amount,
+            'currency' => 'EUR',
+        ]);
     }
 }

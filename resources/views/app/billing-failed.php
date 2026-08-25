@@ -12,9 +12,11 @@ $canRetry = $retryPlan !== '' && \App\Models\Plan::exists($retryPlan);
 
 <section class="billing-page">
   <div class="card billing-result is-fail">
-    <span class="eyebrow">Échec ou annulation</span>
-    <h2>Le paiement n’a pas abouti</h2>
-    <p class="lede">Vous avez quitté Stripe, ou la carte a été refusée. Votre forfait n’a pas changé. Vous pouvez réessayer tout de suite, ou revenir choisir une autre offre.</p>
+    <div class="billing-banner-copy">
+      <span class="eyebrow">Échec ou annulation</span>
+      <h2>Le paiement n’a pas abouti</h2>
+      <p class="lede">Vous avez quitté Stripe, ou la carte a été refusée. Votre forfait n’a pas changé. Vous pouvez réessayer tout de suite, ou revenir choisir une autre offre.</p>
+    </div>
     <div class="billing-sub-actions">
       <?php if ($canRetry): ?>
         <form method="post" action="<?= e(url('/app/forfait')) ?>">
