@@ -113,6 +113,7 @@ class App
         $router->post('/app/circuits/{id}/partage/reactiver', [ShareController::class, 'restore']);
         $router->post('/app/circuits/{id}/dupliquer', [ProjectController::class, 'duplicate']);
         $router->post('/app/circuits/{id}/archiver', [ProjectController::class, 'archive']);
+        $router->post('/app/circuits/{id}/quitter', [ProjectController::class, 'leave']);
         $router->post('/app/circuits/{id}/supprimer', [ProjectController::class, 'destroy']);
         $router->get('/p/{slug}', [ShareController::class, 'preview']);
         $router->get('/app/forfait', [BillingController::class, 'show']);

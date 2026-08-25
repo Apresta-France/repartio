@@ -44,6 +44,8 @@ class BillingController
             }
         }
 
+        $needed = max(0, (int) ($_GET['besoin'] ?? 0));
+
         View::render('app/billing', [
             'title' => 'Forfait & facturation',
             'nav' => 'forfait',
@@ -52,6 +54,7 @@ class BillingController
             'activeCount' => Project::activeCount((int) $user['id']),
             'memberCount' => Access::countForOwner((int) $user['id']),
             'reason' => $reason,
+            'needed' => $needed,
             'profile' => Billing::profile((int) $user['id']),
             'subscription' => $sub,
             'invoices' => $invoices,

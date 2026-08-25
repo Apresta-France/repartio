@@ -60,8 +60,8 @@ $inviteSlots = max(0, $membersLimit - $invited);
             <span class="eyebrow">Circuit</span>
             <strong>Plus de place sur <?= e($plan['label']) ?></strong>
             <p><?= $nextPlan
-                ? 'Archivez un circuit, ou passez en ' . e($nextPlan) . ' pour en ouvrir un autre.'
-                : 'Archivez un circuit pour libérer un emplacement.' ?></p>
+                ? 'Archivez un circuit, quittez un partage, ou passez en ' . e($nextPlan) . ' pour en ouvrir un autre.'
+                : 'Archivez un circuit ou quittez un partage pour libérer un emplacement.' ?></p>
             <span class="btn btn-ghost">Gérer mon forfait</span>
           </a>
         <?php else: ?>

@@ -7,7 +7,7 @@ $invited = (int) ($memberCount ?? 0);
 $reason = (string) ($reason ?? '');
 $atCircuitLimit = $used >= $limit;
 $atInviteLimit = $membersLimit <= 0 || $invited >= $membersLimit;
-$neededCircuits = $reason === 'circuits' ? $used + 1 : 0;
+$neededCircuits = $reason === 'circuits' ? max($used + 1, (int) ($needed ?? 0)) : 0;
 $neededMembers = $reason === 'invitations' ? $invited + 1 : 0;
 $profile = $profile ?? [];
 $subscription = $subscription ?? null;
@@ -33,7 +33,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
       <div class="billing-banner-copy">
         <span class="eyebrow">Limite atteinte</span>
         <h2>Vous ne pouvez plus ajouter de circuit sur <?= e($plan['label']) ?></h2>
-        <p class="lede">Le forfait <?= e($plan['label']) ?> autorise <?= (int) $limit ?> circuit<?= $limit > 1 ? 's' : '' ?>. Vous en avez <?= (int) $used ?> actif<?= $used > 1 ? 's' : '' ?>. Pour en créer un autre, il faut un forfait avec plus d’emplacements.</p>
+        <p class="lede">Le forfait <?= e($plan['label']) ?> autorise <?= (int) $limit ?> circuit<?= $limit > 1 ? 's' : '' ?>. Vous en avez <?= (int) $used ?> actif<?= $used > 1 ? 's' : '' ?> (y compris les circuits partagés). Pour en ajouter un autre, il faut un forfait avec plus d’emplacements.</p>
       </div>
     </div>
   <?php elseif ($reason === 'invitations' && $atInviteLimit): ?>

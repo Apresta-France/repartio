@@ -144,6 +144,7 @@
     tx: 24,
     ty: 24,
     selected: null,
+    selection: [],
     openEdge: null,
     connectFrom: null,
     connectSide: null,
@@ -1064,7 +1065,7 @@
     const stage = root.querySelector('.builder-time-stage');
     const C = lastCompute;
     if (!tip || !stage || !C?.series) return;
-    const selected = nodeById(state.selected);
+    const selected = state.selection.length === 1 ? nodeById(state.selected) : null;
     const liv = selected?.kind === 'livret' ? livretOf(C, selected.id) : null;
     const total = liv ? (liv.balances[month] || 0) : (C.series.total[month] || 0);
     const prev = liv
@@ -1122,7 +1123,7 @@
         }
       }
     });
-    if (propsForm && !propsForm.hidden) {
+    if (propsForm && !propsForm.hidden && state.selection.length === 1) {
       const n = nodeById(state.selected);
       if (n && !isAnnotation(n)) {
         const stats = nodeStats(n, C);
@@ -1410,7 +1411,7 @@
       el.dataset.node = n.id;
       el.style.left = n.x + 'px';
       el.style.top = n.y + 'px';
-      const selected = state.selected === n.id ? ' is-selected' : '';
+      const selected = isSelected(n.id) ? ' is-selected' : '';
       const kill = readonly ? '' : `<button type="button" class="node-kill" data-del="${escapeAttr(n.id)}" title="Supprimer">×</button>`;
       if (!readonly) el.setAttribute('data-drag', n.id);
 
@@ -1573,7 +1574,12 @@
   }
 
   function renderProps() {
-    const n = nodeById(state.selected);
+    const picked = selectedNodes();
+    if (picked.length > 1) {
+      renderMultiProps(picked);
+      return;
+    }
+    const n = picked[0] || nodeById(state.selected);
     if (!n) {
       if (propsEmpty) propsEmpty.hidden = false;
       if (propsForm) { propsForm.hidden = true; propsForm.innerHTML = ''; }
@@ -1749,6 +1755,34 @@
     `;
   }
 
+  function renderMultiProps(nodes) {
+    if (propsEmpty) propsEmpty.hidden = true;
+    if (!propsForm) return;
+    const ids = nodes.map((n) => n.id);
+    const links = edgesTouching(ids);
+    const linkLabel = links.length === 1
+      ? 'Supprimer la liaison'
+      : `Supprimer les ${links.length} liaisons`;
+    propsForm.hidden = false;
+    propsForm.innerHTML = `
+      <div class="prop-block">
+        <div class="prop-head">
+          <span class="dot" style="background:var(--orange)"></span>
+          <div>
+            <div class="eyebrow">Sélection</div>
+            <div class="prop-kind">${nodes.length} blocs</div>
+          </div>
+        </div>
+        <ul class="prop-selection">
+          ${nodes.map((n) => `<li>${escapeHtml(n.title || KINDS[n.kind]?.label || n.kind)}</li>`).join('')}
+        </ul>
+        <p class="builder-hint">Glissez un bloc sélectionné pour déplacer tout le groupe. Suppr retire les blocs.</p>
+        ${links.length ? `<button type="button" class="btn btn-ghost" data-del-selected-edges>${linkLabel}</button>` : '<p class="builder-hint">Aucune liaison sur ces blocs.</p>'}
+        <button type="button" class="btn btn-ghost" data-del-selected>Supprimer les blocs</button>
+      </div>
+    `;
+  }
+
   function render(opts = {}) {
     lastCompute = compute();
     syncPlayBound();
@@ -1887,19 +1921,44 @@
     }).join('');
   }
 
-  function markSelected(id) {
-    state.selected = id;
+  function selectedNodes() {
+    return state.selection.map(nodeById).filter(Boolean);
+  }
+
+  function isSelected(id) {
+    return state.selection.includes(id);
+  }
+
+  function edgesTouching(ids) {
+    const set = new Set(ids);
+    return state.edges.filter((e) => set.has(e.from) || set.has(e.to));
+  }
+
+  function markSelection(ids) {
+    const unique = [];
+    const seen = {};
+    (ids || []).forEach((id) => {
+      if (!id || seen[id] || !nodeById(id)) return;
+      seen[id] = 1;
+      unique.push(id);
+    });
+    state.selection = unique;
+    state.selected = unique.length === 1 ? unique[0] : (unique[0] || null);
     state.openEdge = null;
-    if (id) root.classList.add('is-props-open');
+    if (unique.length) root.classList.add('is-props-open');
     else root.classList.remove('is-props-open');
     const toggle = root.querySelector('[data-props-toggle]');
-    if (toggle) toggle.setAttribute('aria-expanded', id ? 'true' : 'false');
-    if (id && state.edges.some((e) => e.from === id)) dismissSplitCoach();
+    if (toggle) toggle.setAttribute('aria-expanded', unique.length ? 'true' : 'false');
+    if (unique.length === 1 && state.edges.some((e) => e.from === unique[0])) dismissSplitCoach();
+  }
+
+  function markSelected(id) {
+    markSelection(id ? [id] : []);
   }
 
   function paintSelection() {
     layer?.querySelectorAll('.node').forEach((el) => {
-      el.classList.toggle('is-selected', el.dataset.node === state.selected);
+      el.classList.toggle('is-selected', isSelected(el.dataset.node));
     });
   }
 
@@ -1909,11 +1968,26 @@
   }
 
   function selectNodeLive(id) {
-    if (state.selected === id) {
+    if (state.selection.length === 1 && state.selected === id) {
       paintSelection();
       return;
     }
     markSelected(id);
+    paintSelection();
+    renderProps();
+  }
+
+  function selectNodes(ids) {
+    markSelection(ids);
+    render();
+  }
+
+  function toggleSelectedLive(id) {
+    if (!id) return;
+    const next = isSelected(id)
+      ? state.selection.filter((x) => x !== id)
+      : state.selection.concat(id);
+    markSelection(next);
     paintSelection();
     renderProps();
   }
@@ -1958,8 +2032,23 @@
   function removeNode(id) {
     state.nodes = state.nodes.filter((n) => n.id !== id);
     state.edges = state.edges.filter((e) => e.from !== id && e.to !== id);
-    if (state.selected === id) state.selected = null;
+    state.selection = state.selection.filter((x) => x !== id);
+    state.selected = state.selection.length === 1 ? state.selection[0] : (state.selection[0] || null);
     if (state.connectFrom === id) cancelLink();
+  }
+
+  function removeSelectedNodes() {
+    const ids = state.selection.slice();
+    ids.forEach(removeNode);
+    markSelection([]);
+  }
+
+  function removeSelectedEdges() {
+    const drop = new Set(edgesTouching(state.selection).map((e) => e.id));
+    if (!drop.size) return;
+    state.edges = state.edges.filter((e) => !drop.has(e.id));
+    if (state.openEdge && drop.has(state.openEdge)) state.openEdge = null;
+    if (hoverEdgeId && drop.has(hoverEdgeId)) hoverEdgeId = null;
   }
 
   function removeEdge(id) {
@@ -2602,8 +2691,11 @@
   let paletteDrag = null;
   let drag = null;
   let pan = null;
+  let marquee = null;
+  let spaceHeld = false;
   let linkJustEnded = false;
   let ignoreClick = false;
+  let marqueeEl = null;
 
   function swallowNextClick() {
     ignoreClick = true;
@@ -2614,6 +2706,86 @@
     const dx = x - from.sx;
     const dy = y - from.sy;
     return (dx * dx) + (dy * dy) >= threshold * threshold;
+  }
+
+  function typingTarget(el) {
+    return !!el && ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
+  }
+
+  function wantsPan(e) {
+    return readonly || spaceHeld || e.altKey || e.button === 1 || e.button === 2;
+  }
+
+  function startPan(e) {
+    if (e.button === 1 || e.button === 2) e.preventDefault();
+    pan = { sx: e.clientX, sy: e.clientY, ox: state.tx, oy: state.ty, btn: e.button, moved: false };
+    canvas.classList.add('is-grabbing');
+  }
+
+  function selectionMovers() {
+    const seen = {};
+    const movers = [];
+    const add = (n) => {
+      if (!n || seen[n.id]) return;
+      seen[n.id] = 1;
+      movers.push({
+        id: n.id,
+        ox: n.x,
+        oy: n.y,
+        el: layer.querySelector(`[data-node="${CSS.escape(n.id)}"]`),
+      });
+    };
+    selectedNodes().forEach((n) => {
+      add(n);
+      if (n.kind === 'groupe') nodesInside(n).forEach(add);
+    });
+    return movers;
+  }
+
+  function ensureMarquee() {
+    if (marqueeEl && marqueeEl.isConnected) return marqueeEl;
+    marqueeEl = document.createElement('div');
+    marqueeEl.className = 'builder-marquee';
+    marqueeEl.setAttribute('data-marquee', '');
+    marqueeEl.hidden = true;
+    canvas.appendChild(marqueeEl);
+    return marqueeEl;
+  }
+
+  function paintMarqueeBox(ax, ay, bx, by) {
+    const r = canvas.getBoundingClientRect();
+    const x1 = Math.min(ax, bx) - r.left;
+    const y1 = Math.min(ay, by) - r.top;
+    const x2 = Math.max(ax, bx) - r.left;
+    const y2 = Math.max(ay, by) - r.top;
+    const el = ensureMarquee();
+    el.hidden = false;
+    el.style.left = x1 + 'px';
+    el.style.top = y1 + 'px';
+    el.style.width = Math.max(0, x2 - x1) + 'px';
+    el.style.height = Math.max(0, y2 - y1) + 'px';
+  }
+
+  function hideMarquee() {
+    if (marqueeEl) marqueeEl.hidden = true;
+    canvas.classList.remove('is-selecting');
+  }
+
+  function idsInMarquee(ax, ay, bx, by) {
+    const a = screenToWorld(ax, ay);
+    const b = screenToWorld(bx, by);
+    const x1 = Math.min(a.x, b.x);
+    const y1 = Math.min(a.y, b.y);
+    const x2 = Math.max(a.x, b.x);
+    const y2 = Math.max(a.y, b.y);
+    return state.nodes.filter((n) => {
+      const box = nodeBox(n);
+      return box.x < x2 && box.x + box.w > x1 && box.y < y2 && box.y + box.h > y1;
+    }).map((n) => n.id);
+  }
+
+  function syncSpaceCursor() {
+    canvas.classList.toggle('is-space', spaceHeld && !readonly);
   }
 
   root.querySelectorAll('[data-add]').forEach((btn) => {
@@ -2690,6 +2862,12 @@
 
   layer.addEventListener('mousedown', (e) => {
     if (readonly) return;
+    if (wantsPan(e) && e.target.closest('[data-drag]')) {
+      e.preventDefault();
+      e.stopPropagation();
+      startPan(e);
+      return;
+    }
     const kill = e.target.closest('[data-del]');
     if (kill) {
       e.preventDefault();
@@ -2718,7 +2896,7 @@
       const id = resize.getAttribute('data-resize');
       const node = nodeById(id);
       if (!node) return;
-      selectNodeLive(id);
+      if (!isSelected(id) || state.selection.length === 1) selectNodeLive(id);
       drag = { type: 'resize', id, sx: e.clientX, sy: e.clientY, ow: node.w || 560, oh: node.h || 340, el: resize.closest('.node'), moved: false };
       return;
     }
@@ -2730,26 +2908,45 @@
     e.preventDefault();
     e.stopPropagation();
     window.getSelection()?.removeAllRanges();
-    selectNodeLive(id);
-    const riders = node.kind === 'groupe'
-      ? nodesInside(node).map((n) => ({ id: n.id, ox: n.x, oy: n.y, el: layer.querySelector(`[data-node="${n.id}"]`) }))
-      : [];
-    drag = { type: 'node', id, sx: e.clientX, sy: e.clientY, ox: node.x, oy: node.y, el: handle.closest('.node'), riders, moved: false };
+    if (e.shiftKey) toggleSelectedLive(id);
+    else if (!isSelected(id)) selectNodeLive(id);
+    if (!isSelected(id)) return;
+    const movers = selectionMovers();
+    drag = { type: 'node', id, sx: e.clientX, sy: e.clientY, ox: node.x, oy: node.y, el: handle.closest('.node'), riders: movers, moved: false };
   });
 
   canvas.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.node, .edge-label, .edge-pill, .builder-wire-hit, .link-coach, button, input, select')) return;
-    pan = { sx: e.clientX, sy: e.clientY, ox: state.tx, oy: state.ty };
-    canvas.classList.add('is-grabbing');
+    if (e.target.closest('.node, .edge-label, .edge-pill, .builder-wire-hit, .link-coach, .canvas-dock, button, input, select')) return;
+    if (wantsPan(e)) {
+      startPan(e);
+      return;
+    }
+    if (e.button !== 0 || readonly) return;
+    e.preventDefault();
+    marquee = {
+      sx: e.clientX,
+      sy: e.clientY,
+      additive: e.shiftKey,
+      base: e.shiftKey ? state.selection.slice() : [],
+      moved: false,
+    };
+  });
+
+  canvas.addEventListener('auxclick', (e) => {
+    if (e.button === 1) e.preventDefault();
+  });
+
+  canvas.addEventListener('contextmenu', (e) => {
+    if (pan && pan.btn === 2) e.preventDefault();
   });
 
   document.addEventListener('selectstart', (e) => {
-    if (drag || pan || state.connectFrom) e.preventDefault();
+    if (drag || pan || marquee || state.connectFrom) e.preventDefault();
   });
 
   document.addEventListener('mousemove', (e) => {
     noteCollabPointer(e.clientX, e.clientY);
-    if (drag || pan || state.connectFrom) {
+    if (drag || pan || marquee || state.connectFrom) {
       e.preventDefault();
       window.getSelection()?.removeAllRanges();
     }
@@ -2769,16 +2966,8 @@
     } else if (drag && drag.type === 'node') {
       if (!drag.moved && !pointerMoved(drag, e.clientX, e.clientY)) return;
       drag.moved = true;
-      const node = nodeById(drag.id);
-      if (!node) return;
       const dx = (e.clientX - drag.sx) / state.scale;
       const dy = (e.clientY - drag.sy) / state.scale;
-      node.x = Math.round(drag.ox + dx);
-      node.y = Math.round(drag.oy + dy);
-      if (drag.el) {
-        drag.el.style.left = node.x + 'px';
-        drag.el.style.top = node.y + 'px';
-      }
       (drag.riders || []).forEach((r) => {
         const rider = nodeById(r.id);
         if (!rider) return;
@@ -2792,7 +2981,19 @@
       lastCompute = lastCompute || compute();
       redrawWires();
       scheduleLivePush(160);
+    } else if (marquee) {
+      if (!marquee.moved && !pointerMoved(marquee, e.clientX, e.clientY)) return;
+      if (!marquee.moved) {
+        marquee.moved = true;
+        canvas.classList.add('is-selecting');
+      }
+      paintMarqueeBox(marquee.sx, marquee.sy, e.clientX, e.clientY);
+      const hits = idsInMarquee(marquee.sx, marquee.sy, e.clientX, e.clientY);
+      const next = marquee.additive ? marquee.base.concat(hits) : hits;
+      markSelection(next);
+      paintSelection();
     } else if (pan) {
+      if (!pan.moved && pointerMoved(pan, e.clientX, e.clientY)) pan.moved = true;
       state.tx = pan.ox + (e.clientX - pan.sx);
       state.ty = pan.oy + (e.clientY - pan.sy);
       applyTransform();
@@ -2807,8 +3008,20 @@
         swallowNextClick();
       }
     }
+    if (marquee) {
+      if (marquee.moved) {
+        const hits = idsInMarquee(marquee.sx, marquee.sy, e.clientX, e.clientY);
+        const next = marquee.additive ? marquee.base.concat(hits) : hits;
+        hideMarquee();
+        selectNodes(next);
+        swallowNextClick();
+      } else {
+        hideMarquee();
+      }
+    }
     drag = null;
     pan = null;
+    marquee = null;
     canvas.classList.remove('is-grabbing');
     if (state.connectFrom) {
       finishLink(e.clientX, e.clientY);
@@ -2830,10 +3043,15 @@
     const node = e.target.closest('[data-node]');
     if (node) {
       const id = node.getAttribute('data-node');
-      const already = state.selected === id;
-      selectNode(id);
+      if (e.shiftKey) {
+        e.stopPropagation();
+        return;
+      }
+      const already = state.selection.length === 1 && state.selected === id;
+      const collapse = state.selection.length > 1 && isSelected(id);
+      if (!already || collapse) selectNode(id);
       const n = nodeById(id);
-      if (n && (n.kind === 'groupe' || n.kind === 'note') && (already || e.target.closest('.group-title, .group-label, .node-title'))) {
+      if (n && state.selection.length === 1 && (n.kind === 'groupe' || n.kind === 'note') && (already || e.target.closest('.group-title, .group-label, .node-title'))) {
         const field = propsForm?.querySelector('[data-prop="title"]');
         field?.focus();
         field?.select();
@@ -2844,7 +3062,7 @@
   function openEdgeProps(edgeId) {
     const edge = state.edges.find((x) => x.id === edgeId);
     if (!edge) return;
-    state.selected = edge.from;
+    markSelected(edge.from);
     state.openEdge = edge.id;
     root.classList.add('is-props-open');
     dismissSplitCoach();
@@ -2891,7 +3109,7 @@
     if (linkJustEnded || ignoreClick) return;
     if (e.target.closest('.node, .edge-label, .edge-pill, .builder-wire-hit, .port, .link-coach, button')) return;
     if (state.connectFrom) { cancelLink(); return; }
-    if (state.selected) selectNode(null);
+    if (state.selection.length) selectNode(null);
   });
 
   canvas.addEventListener('wheel', (e) => {
@@ -3034,8 +3252,13 @@
       render();
       return;
     }
-    if (e.target.closest('[data-del-selected]') && state.selected) {
-      removeNode(state.selected);
+    if (e.target.closest('[data-del-selected-edges]') && state.selection.length) {
+      removeSelectedEdges();
+      render();
+      return;
+    }
+    if (e.target.closest('[data-del-selected]') && state.selection.length) {
+      removeSelectedNodes();
       render();
     }
     if (!e.target.closest('.prop-color')) closeTintMenus();
@@ -3071,7 +3294,7 @@
     if (!confirm('Vider le canvas ?')) return;
     state.nodes = [];
     state.edges = [];
-    state.selected = null;
+    markSelected(null);
     cancelLink();
     render();
   });
@@ -3465,7 +3688,7 @@
     state.nodes = (pack.payload.nodes || []).map(normalizeNode);
     state.edges = (pack.payload.edges || []).map(normalizeEdge);
     state.horizon = clampHorizon(pack.payload.horizon || state.horizon);
-    state.selected = null;
+    markSelected(null);
     state.openEdge = null;
     cancelLink();
     syncHorizonInput();
@@ -3569,13 +3792,30 @@
       if (dismissLinkCoach()) return;
       if (dismissSplitCoach()) return;
       if (dismissItemsCoach()) return;
-      if (state.selected) selectNode(null);
+      if (state.selection.length) selectNode(null);
       return;
     }
-    if ((e.key === 'Delete' || e.key === 'Backspace') && !readonly && state.selected && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
-      removeNode(state.selected);
+    if (e.code === 'Space' && !readonly && !e.repeat && !typingTarget(e.target) && !e.target.closest?.('button, a, [role="dialog"]')) {
+      e.preventDefault();
+      spaceHeld = true;
+      syncSpaceCursor();
+      return;
+    }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !readonly && state.selection.length && !typingTarget(e.target)) {
+      removeSelectedNodes();
       render();
     }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (e.code !== 'Space') return;
+    spaceHeld = false;
+    syncSpaceCursor();
+  });
+
+  window.addEventListener('blur', () => {
+    spaceHeld = false;
+    syncSpaceCursor();
   });
 
   let tourFocus = [];
@@ -3737,7 +3977,7 @@
   }
 
   function isCollabBusy() {
-    return Boolean(drag || pan || state.connectFrom || saving);
+    return Boolean(drag || pan || marquee || state.connectFrom || saving);
   }
 
   function isRemoteBlocked() {
@@ -3818,15 +4058,11 @@
     if (!payload || typeof payload !== 'object') return;
     applyingRemote = true;
     try {
-      const selected = state.selected;
+      const kept = state.selection.filter((id) => (payload.nodes || []).some((n) => n.id === id));
       state.nodes = (payload.nodes || []).map(normalizeNode);
       state.edges = (payload.edges || []).map(normalizeEdge);
       state.horizon = clampHorizon(payload.horizon || state.horizon);
-      if (selected && !state.nodes.some((n) => n.id === selected)) {
-        markSelected(null);
-      } else {
-        state.selected = selected;
-      }
+      markSelection(kept);
       if (typeof data.name === 'string' && nameInput) {
         nameInput.value = data.name;
         document.title = data.name + ' — repartio.fr';

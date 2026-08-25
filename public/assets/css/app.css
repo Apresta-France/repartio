@@ -942,9 +942,14 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder-horizon-unit-menu button[aria-selected="true"] { background: var(--chip); font-weight: 700; }
 .builder-save.is-saved { color: oklch(0.38 0.06 152) !important; background: oklch(0.96 0.012 152); border-color: oklch(0.9 0.02 152); box-shadow: none; font-weight: 600; }
 .builder-save.is-saved:disabled { cursor: default; opacity: 1; }
-.canvas-wrap { position: relative; flex: 1; overflow: hidden; background: var(--grid); cursor: grab; min-height: 0; }
+.canvas-wrap { position: relative; flex: 1; overflow: hidden; background: var(--grid); cursor: default; min-height: 0; }
+.builder.is-readonly .canvas-wrap,
+.canvas-wrap.is-space { cursor: grab; }
 .canvas-wrap.is-grabbing { cursor: grabbing; }
-.canvas-wrap.is-linking { cursor: crosshair; user-select: none; }
+.canvas-wrap.is-linking,
+.canvas-wrap.is-selecting { cursor: crosshair; user-select: none; }
+.builder-marquee { position: absolute; z-index: 5; border: 1.5px solid oklch(0.68 0.18 38 / 0.78); background: oklch(0.68 0.18 38 / 0.12); border-radius: 3px; pointer-events: none; }
+.builder-marquee[hidden] { display: none; }
 .builder-layer { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
 .builder-edges { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; z-index: 1; }
 .builder-wire { fill: none; stroke-linecap: round; }
@@ -1265,6 +1270,8 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .edge-label:hover .edge-kill, .edge-label.is-hover .edge-kill { opacity: 1; pointer-events: auto; }
 .edge-kill:hover { background: var(--chip); color: var(--red); border-color: oklch(0.82 0.06 25); }
 .builder-props-empty p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.prop-selection { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow: auto; }
+.prop-selection li { padding: 7px 10px; border-radius: 8px; background: var(--chip); font-size: 13px; color: var(--ink); }
 .prop-block { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .prop-head { display: flex; align-items: center; gap: 10px; }
 .prop-head .dot { width: 10px; height: 10px; }

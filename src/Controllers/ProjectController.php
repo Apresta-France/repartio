@@ -242,6 +242,27 @@ class ProjectController
         redirect('/app/circuits');
     }
 
+    public function leave(string $id): void
+    {
+        $user = Auth::requireUser();
+        $project = Project::findById((int) $id);
+        if (!$project) {
+            Session::flashSet('error', 'Circuit introuvable.');
+            redirect('/app/circuits');
+        }
+        if (Access::permission((int) $user['id'], (int) $id) === 'proprietaire') {
+            Session::flashSet('error', 'Vous êtes propriétaire de ce circuit.');
+            redirect('/app/circuits');
+        }
+        if (!Access::leaveProject((int) $user['id'], (int) $id)) {
+            Session::flashSet('error', 'Impossible de quitter ce circuit.');
+            redirect('/app/circuits');
+        }
+        Project::log((int) $user['id'], 'Accès partagé quitté', (int) $id);
+        Session::flashSet('success', 'Le circuit partagé a été retiré de votre compte. L’emplacement est libéré.');
+        redirect('/app/circuits');
+    }
+
     public function destroy(string $id): void
     {
         $user = Auth::requireUser();

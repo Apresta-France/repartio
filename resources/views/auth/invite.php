@@ -1,6 +1,10 @@
 <?php
 $ownerName = $owner['first_name'] ?? 'Quelqu’un';
 $circuits = $invite['circuits'] ?? [];
+$neededSlots = (int) ($neededSlots ?? 0);
+$usedSlots = (int) ($usedSlots ?? 0);
+$planLimit = (int) ($planLimit ?? 0);
+$canAccept = $canAccept ?? true;
 ?>
 <div class="auth-grid">
   <div class="auth-form">
@@ -9,7 +13,7 @@ $circuits = $invite['circuits'] ?? [];
       <div>
         <span class="eyebrow" style="color:var(--orange-ink);">Invitation</span>
         <h1><?= e($ownerName) ?> vous invite</h1>
-        <p class="lede">Accès aux circuits de <?= e($ownerName) ?> — uniquement ceux listés, avec le droit indiqué.</p>
+        <p class="lede">Accès aux circuits de <?= e($ownerName) ?> — uniquement ceux listés, avec le droit indiqué. Chaque circuit partagé occupe un emplacement de votre forfait.</p>
       </div>
       <?php if ($circuits): ?>
         <div class="invite-circuits">
@@ -24,10 +28,20 @@ $circuits = $invite['circuits'] ?? [];
       <?php endif; ?>
 
       <?php if ($user && !empty($emailMatch)): ?>
-        <form method="post" action="<?= e(url('/invitation/' . $token)) ?>" style="display:flex;flex-direction:column;gap:14px;">
-          <?= csrf_field() ?>
-          <button class="btn btn-orange" type="submit">Accepter l’accès</button>
-        </form>
+        <p class="field-hint" style="margin:0;">
+          <?= $neededSlots > 0
+              ? 'Cette invitation occupe ' . $neededSlots . ' emplacement' . ($neededSlots > 1 ? 's' : '') . ' sur votre forfait (' . $usedSlots . ' / ' . $planLimit . ').'
+              : 'Aucun circuit actif dans cette invitation : aucun emplacement supplémentaire.' ?>
+        </p>
+        <?php if (!empty($canAccept)): ?>
+          <form method="post" action="<?= e(url('/invitation/' . $token)) ?>" style="display:flex;flex-direction:column;gap:14px;">
+            <?= csrf_field() ?>
+            <button class="btn btn-orange" type="submit">Accepter l’accès</button>
+          </form>
+        <?php else: ?>
+          <p class="lede"><?= e(\App\Models\Project::shareLimitMessage($user, $neededSlots)) ?></p>
+          <a class="btn btn-orange" href="<?= e(url(\App\Models\Project::planChangePath('circuits', $usedSlots + $neededSlots))) ?>">Voir les forfaits</a>
+        <?php endif; ?>
       <?php elseif ($user): ?>
         <p class="lede">Cette invitation est destinée à <strong><?= e($invite['email']) ?></strong>. Vous êtes connecté avec <?= e($user['email']) ?>.</p>
         <form method="post" action="<?= e(url('/deconnexion')) ?>"><?= csrf_field() ?><button class="btn btn-ghost" type="submit">Changer de compte</button></form>

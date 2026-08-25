@@ -311,7 +311,7 @@ class Access
             return [];
         }
         $member['circuits'] = Database::fetchAll(
-            'SELECT amc.project_id, amc.permission, p.name AS project_name
+            'SELECT amc.project_id, amc.permission, p.name AS project_name, p.status AS project_status
              FROM account_member_circuits amc
              INNER JOIN projects p ON p.id = amc.project_id
              WHERE amc.member_row_id = ?
@@ -319,5 +319,81 @@ class Access
             [$id]
         );
         return $member;
+    }
+
+    public static function pendingSlotCost(int $memberRowId): int
+    {
+        $row = Database::fetch(
+            'SELECT COUNT(*) AS n
+             FROM account_member_circuits amc
+             INNER JOIN projects p ON p.id = amc.project_id
+             WHERE amc.member_row_id = ? AND p.status != "archive"',
+            [$memberRowId]
+        );
+        return (int) ($row['n'] ?? 0);
+    }
+
+    /**
+     * @param array<int, string> $assignments
+     */
+    public static function assignmentsExceedMemberPlan(array $member, array $assignments): bool
+    {
+        if (($member['status'] ?? '') !== 'active' || empty($member['member_id'])) {
+            return false;
+        }
+        $user = User::find((int) $member['member_id']);
+        if (!$user) {
+            return true;
+        }
+
+        $newIds = [];
+        foreach (array_keys($assignments) as $projectId) {
+            $project = Project::findById((int) $projectId);
+            if ($project && ($project['status'] ?? '') !== 'archive') {
+                $newIds[(int) $projectId] = true;
+            }
+        }
+
+        $current = Database::fetchAll(
+            'SELECT amc.project_id
+             FROM account_member_circuits amc
+             INNER JOIN projects p ON p.id = amc.project_id
+             WHERE amc.member_row_id = ? AND p.status != "archive"',
+            [(int) $member['id']]
+        );
+        $currentCount = count($current);
+        $used = Project::activeCount((int) $user['id']);
+        $withoutThis = max(0, $used - $currentCount);
+
+        return ($withoutThis + count($newIds)) > Project::planLimit($user);
+    }
+
+    public static function leaveProject(int $userId, int $projectId): bool
+    {
+        $row = Database::fetch(
+            'SELECT amc.id, amc.member_row_id
+             FROM account_member_circuits amc
+             INNER JOIN account_members am ON am.id = amc.member_row_id
+             WHERE amc.project_id = ? AND am.member_id = ? AND am.status = "active"
+             LIMIT 1',
+            [$projectId, $userId]
+        );
+        if (!$row) {
+            return false;
+        }
+
+        Database::query('DELETE FROM account_member_circuits WHERE id = ?', [(int) $row['id']]);
+        $left = Database::fetch(
+            'SELECT COUNT(*) AS n FROM account_member_circuits WHERE member_row_id = ?',
+            [(int) $row['member_row_id']]
+        );
+        if ((int) ($left['n'] ?? 0) === 0) {
+            Database::query(
+                'DELETE FROM account_members WHERE id = ? AND member_id = ?',
+                [(int) $row['member_row_id'], $userId]
+            );
+        }
+
+        return true;
     }
 }

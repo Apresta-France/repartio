@@ -90,6 +90,10 @@ class AccessController
             Session::flashSet('error', 'Laissez au moins un circuit, ou retirez complètement l’accès.');
             redirect('/app/acces');
         }
+        if (Access::assignmentsExceedMemberPlan($member, $assignments)) {
+            Session::flashSet('error', 'Cette personne n’a plus d’emplacement disponible sur son forfait. Retirez un circuit, ou demandez-lui de passer à un forfait supérieur.');
+            redirect('/app/acces');
+        }
         Access::syncCircuits((int) $member['id'], (int) $user['id'], $assignments);
         Project::log((int) $user['id'], 'Droits mis à jour pour ' . $member['email']);
         Session::flashSet('success', 'Droits mis à jour.');
@@ -158,6 +162,10 @@ class AccessController
             Session::flashSet('_old', ['email' => $invite['email']]);
         }
 
+        $needed = Access::pendingSlotCost((int) $invite['id']);
+        $used = $user ? Project::activeCount((int) $user['id']) : 0;
+        $limit = $user ? Project::planLimit($user) : 0;
+
         View::render('auth/invite', [
             'title' => 'Invitation',
             'token' => $token,
@@ -165,6 +173,10 @@ class AccessController
             'owner' => $owner,
             'user' => $user,
             'emailMatch' => $user && mb_strtolower((string) $user['email']) === mb_strtolower((string) $invite['email']),
+            'neededSlots' => $needed,
+            'usedSlots' => $used,
+            'planLimit' => $limit,
+            'canAccept' => !$user || Project::canFit($user, $needed),
         ], 'layouts/auth');
     }
 
@@ -190,6 +202,12 @@ class AccessController
         if ($invite['status'] !== 'pending') {
             Session::flashSet('error', 'Cette invitation n’est plus valable.');
             redirect('/app');
+        }
+
+        $needed = Access::pendingSlotCost((int) $invite['id']);
+        if (!Project::canFit($user, $needed)) {
+            Session::flashSet('error', Project::shareLimitMessage($user, $needed));
+            redirect('/invitation/' . $token);
         }
 
         if (!Access::accept((int) $invite['id'], (int) $user['id'])) {

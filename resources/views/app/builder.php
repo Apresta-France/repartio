@@ -17,7 +17,7 @@ $readonly = !$canEdit;
             <path d="M8 7.35v4" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
           </svg>
         </button>
-        <p class="builder-info-pop" id="info-blocks" hidden>Cliquez un type, ou glissez-le sur le canvas. Pour relier deux blocs, restez cliqué sur un point et glissez jusqu’au point opposé.</p>
+        <p class="builder-info-pop" id="info-blocks" hidden>Cliquez un type, ou glissez-le sur le canvas. Pour relier deux blocs, restez cliqué sur un point et glissez jusqu’au point opposé. Glissez dans le vide pour sélectionner plusieurs blocs ; Espace + glisser déplace le canvas.</p>
       </div>
       <div class="palette-list">
         <?php foreach ([
@@ -282,7 +282,7 @@ $readonly = !$canEdit;
   <aside class="builder-props" data-props>
     <div class="builder-props-empty" data-props-empty>
       <div class="eyebrow">Propriétés</div>
-      <p>Sélectionnez un bloc ou un groupe pour modifier son nom, sa couleur, ses montants ou ses liens.</p>
+      <p>Sélectionnez un bloc, ou glissez dans le vide pour en prendre plusieurs. Vous pourrez alors les déplacer, les supprimer, ou retirer leurs liaisons.</p>
     </div>
     <div data-props-form hidden></div>
   </aside>

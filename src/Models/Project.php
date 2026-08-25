@@ -40,10 +40,24 @@ class Project
         return self::activeCount((int) $user['id']) >= self::planLimit($user);
     }
 
-    public static function planChangePath(string $reason = 'circuits'): string
+    public static function remainingSlots(array $user): int
+    {
+        return max(0, self::planLimit($user) - self::activeCount((int) $user['id']));
+    }
+
+    public static function canFit(array $user, int $additional): bool
+    {
+        return self::activeCount((int) $user['id']) + max(0, $additional) <= self::planLimit($user);
+    }
+
+    public static function planChangePath(string $reason = 'circuits', int $needed = 0): string
     {
         $reason = in_array($reason, ['circuits', 'invitations'], true) ? $reason : 'circuits';
-        return '/app/forfait?raison=' . $reason;
+        $path = '/app/forfait?raison=' . $reason;
+        if ($reason === 'circuits' && $needed > 0) {
+            $path .= '&besoin=' . $needed;
+        }
+        return $path;
     }
 
     public static function planLimitMessage(array $user, string $wanted = ''): string
@@ -55,7 +69,23 @@ class Project
         $upgrade = $next !== null ? ', ou passez en ' . $next : '';
 
         return 'Votre forfait ' . $label . ' autorise ' . $limit . ' circuit' . ($limit > 1 ? 's' : '')
-            . $wantedBit . '. Archivez-en un' . $upgrade . ' pour libérer un emplacement.';
+            . $wantedBit . '. Archivez-en un, quittez un partage' . $upgrade . ' pour libérer un emplacement.';
+    }
+
+    public static function shareLimitMessage(array $user, int $needed): string
+    {
+        $limit = self::planLimit($user);
+        $used = self::activeCount((int) $user['id']);
+        $label = Plan::label($user);
+        $next = Plan::nextLabel($user);
+        $upgrade = $next !== null ? ', ou passez en ' . $next : '';
+        $needWord = $needed > 1 ? 's' : '';
+        $usedWord = $used > 1 ? 's' : '';
+
+        return 'Votre forfait ' . $label . ' autorise ' . $limit . ' circuit' . ($limit > 1 ? 's' : '')
+            . ' (' . $used . ' utilisé' . $usedWord . '). Cette invitation occupe '
+            . $needed . ' emplacement' . $needWord
+            . '. Archivez-en un, quittez un partage' . $upgrade . ' pour libérer de la place.';
     }
 
     public static function findById(int $id): ?array
@@ -93,8 +123,18 @@ class Project
     public static function activeCount(int $userId): int
     {
         $row = Database::fetch(
-            'SELECT COUNT(*) AS n FROM projects WHERE user_id = ? AND status != "archive"',
-            [$userId]
+            'SELECT COUNT(*) AS n FROM (
+                SELECT p.id
+                FROM projects p
+                WHERE p.user_id = ? AND p.status != "archive"
+                UNION
+                SELECT p.id
+                FROM projects p
+                INNER JOIN account_member_circuits amc ON amc.project_id = p.id
+                INNER JOIN account_members am ON am.id = amc.member_row_id
+                WHERE am.member_id = ? AND am.status = "active" AND p.status != "archive"
+             ) AS circuits',
+            [$userId, $userId]
         );
         return (int) ($row['n'] ?? 0);
     }

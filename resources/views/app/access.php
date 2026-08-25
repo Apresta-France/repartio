@@ -8,7 +8,7 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
   </div>
 </header>
 <section class="access-page">
-  <p class="lede access-intro">Invitez des personnes à agir sur vos circuits. Chaque personne n’accède qu’aux circuits cochés, avec le droit que vous lui donnez.</p>
+  <p class="lede access-intro">Invitez des personnes à agir sur vos circuits. Chaque personne n’accède qu’aux circuits cochés, avec le droit que vous lui donnez. Un circuit partagé occupe un emplacement sur le forfait de la personne invitée : elle ne pourra accepter que s’il lui reste de la place.</p>
 
   <div class="card access-card access-owner">
     <div class="access-person-head">

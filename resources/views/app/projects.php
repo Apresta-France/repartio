@@ -63,6 +63,8 @@ $statuses = [
             <?php endif; ?>
             <?php if ($isOwner): ?>
               <form class="is-danger" method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/supprimer')) ?>" data-confirm-delete data-confirm-name="<?= e($p['name']) ?>"><?= csrf_field() ?><button type="submit">Supprimer</button></form>
+            <?php else: ?>
+              <form class="is-danger" method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/quitter')) ?>" onsubmit="return confirm('Retirer ce circuit partagé de votre compte ? L’emplacement sera libéré.');"><?= csrf_field() ?><button type="submit">Quitter</button></form>
             <?php endif; ?>
           </div>
         </div>
