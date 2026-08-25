@@ -228,6 +228,44 @@ $readonly = !$canEdit;
         </div>
         <p>Cliquez le premier bloc pour choisir le montant à répartir.</p>
       </div>
+      <div class="link-coach" data-items-coach hidden role="status" aria-live="polite">
+        <div class="link-coach-head">
+          <strong>Regroupez les postes</strong>
+          <button type="button" class="link-coach-close" data-items-coach-dismiss aria-label="Fermer">×</button>
+        </div>
+        <div class="items-coach-scene" aria-hidden="true">
+          <div class="items-coach-node">
+            <span class="link-coach-bar" style="background:oklch(0.52 0.14 32)"></span>
+            <span class="link-coach-kind" style="color:oklch(0.52 0.14 32)">Dépense</span>
+            <span class="link-coach-title">Charges</span>
+            <span class="link-coach-port is-in"></span>
+          </div>
+          <div class="items-coach-card">
+            <div class="items-coach-card-head">
+              <span>Postes du mois</span>
+              <span class="items-coach-add">Ajouter</span>
+            </div>
+            <div class="items-coach-row">
+              <span>Loyer</span>
+              <span>850</span>
+            </div>
+            <div class="items-coach-row is-extra">
+              <span>EDF</span>
+              <span>90</span>
+            </div>
+            <div class="items-coach-total">
+              <span class="is-one">850 € / mois</span>
+              <span class="is-two">940 € / mois</span>
+            </div>
+          </div>
+          <span class="items-coach-cursor">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M5.2 2.8 19 13.6l-6.6.6-2.6 6.8Z" fill="var(--ink)" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <p>Ajoutez plusieurs dépenses dans le même bloc pour les regrouper.</p>
+      </div>
     </div>
   </main>
 

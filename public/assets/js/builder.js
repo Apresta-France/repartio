@@ -1876,7 +1876,8 @@
       addDepenseItem(n);
     }
     state.nodes.push(n);
-    offerLinkCoach();
+    if (n.kind === 'depense') offerItemsCoach();
+    else offerLinkCoach();
     return n;
   }
 
@@ -2112,12 +2113,16 @@
 
   const LINK_COACH_KEY = 'repartio.linkCoachSeen';
   const SPLIT_COACH_KEY = 'repartio.splitCoachSeen';
+  const ITEMS_COACH_KEY = 'repartio.itemsCoachSeen';
   const linkCoach = document.querySelector('[data-link-coach]');
   const splitCoach = document.querySelector('[data-split-coach]');
+  const itemsCoach = document.querySelector('[data-items-coach]');
   let linkCoachPending = false;
   let linkCoachTimer = 0;
   let splitCoachPending = false;
   let splitCoachTimer = 0;
+  let itemsCoachPending = false;
+  let itemsCoachTimer = 0;
 
   function graphNodeCount() {
     return state.nodes.filter((n) => !isAnnotation(n)).length;
@@ -2150,7 +2155,7 @@
     if (readonly || !linkCoach || linkCoachSeen()) return;
     if (graphNodeCount() !== 2) return;
     if (state.edges.length) return;
-    if (overlayBlockingCoach()) {
+    if (overlayBlockingCoach() || (itemsCoach && !itemsCoach.hidden)) {
       linkCoachPending = true;
       return;
     }
@@ -2161,7 +2166,7 @@
     linkCoachPending = false;
     window.clearTimeout(linkCoachTimer);
     linkCoachTimer = window.setTimeout(() => {
-      if (overlayBlockingCoach()) {
+      if (overlayBlockingCoach() || (itemsCoach && !itemsCoach.hidden)) {
         linkCoachPending = true;
         return;
       }
@@ -2245,8 +2250,71 @@
     if (splitCoachPending) offerSplitCoach();
   }
 
+  function itemsCoachSeen() {
+    try {
+      return window.localStorage.getItem(ITEMS_COACH_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markItemsCoachSeen() {
+    try {
+      window.localStorage.setItem(ITEMS_COACH_KEY, '1');
+    } catch (e) {}
+  }
+
+  function otherCoachOpen() {
+    return (linkCoach && !linkCoach.hidden) || (splitCoach && !splitCoach.hidden);
+  }
+
+  function offerItemsCoach() {
+    if (readonly || !itemsCoach || itemsCoachSeen()) return;
+    if (!state.nodes.some((n) => n.kind === 'depense')) return;
+    if (overlayBlockingCoach() || otherCoachOpen()) {
+      itemsCoachPending = true;
+      return;
+    }
+    scheduleItemsCoach();
+  }
+
+  function scheduleItemsCoach() {
+    itemsCoachPending = false;
+    window.clearTimeout(itemsCoachTimer);
+    itemsCoachTimer = window.setTimeout(() => {
+      if (overlayBlockingCoach() || otherCoachOpen()) {
+        itemsCoachPending = true;
+        return;
+      }
+      if (readonly || itemsCoachSeen()) return;
+      if (!state.nodes.some((n) => n.kind === 'depense')) return;
+      showItemsCoach();
+    }, 420);
+  }
+
+  function flushItemsCoach() {
+    if (itemsCoachPending) offerItemsCoach();
+  }
+
+  function showItemsCoach() {
+    if (!itemsCoach || !itemsCoach.hidden) return;
+    itemsCoach.hidden = false;
+    markItemsCoachSeen();
+  }
+
+  function dismissItemsCoach() {
+    window.clearTimeout(itemsCoachTimer);
+    itemsCoachPending = false;
+    markItemsCoachSeen();
+    const wasOpen = !!(itemsCoach && !itemsCoach.hidden);
+    if (itemsCoach && !itemsCoach.hidden) itemsCoach.hidden = true;
+    if (wasOpen) offerLinkCoach();
+    return wasOpen;
+  }
+
   function flushCoaches() {
-    flushLinkCoach();
+    flushItemsCoach();
+    if (!itemsCoachPending && (!itemsCoach || itemsCoach.hidden)) flushLinkCoach();
     flushSplitCoach();
   }
 
@@ -2278,6 +2346,12 @@
   });
   splitCoach?.addEventListener('mousedown', (e) => e.stopPropagation());
   splitCoach?.addEventListener('wheel', (e) => e.stopPropagation());
+  itemsCoach?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-items-coach-dismiss]')) dismissItemsCoach();
+    e.stopPropagation();
+  });
+  itemsCoach?.addEventListener('mousedown', (e) => e.stopPropagation());
+  itemsCoach?.addEventListener('wheel', (e) => e.stopPropagation());
   document.querySelectorAll('.builder-modal').forEach((el) => {
     new MutationObserver(() => {
       if (!overlayBlockingCoach()) flushCoaches();
@@ -2783,6 +2857,7 @@
       if (n && n.kind === 'depense') {
         const item = addDepenseItem(n);
         render();
+        if ((n.items || []).length >= 2) dismissItemsCoach();
         if (item) revealDepenseItem(item.id);
       }
       return;
@@ -3251,6 +3326,7 @@
       if (state.connectFrom) { cancelLink(); return; }
       if (dismissLinkCoach()) return;
       if (dismissSplitCoach()) return;
+      if (dismissItemsCoach()) return;
       if (state.selected) selectNode(null);
       return;
     }
