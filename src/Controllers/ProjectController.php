@@ -9,6 +9,7 @@ use App\Core\Auth;
 use App\Core\Session;
 use App\Core\View;
 use App\Models\Access;
+use App\Models\Plan;
 use App\Models\Project;
 use App\Models\Share;
 use App\Models\User;
@@ -25,7 +26,7 @@ class ProjectController
             'projects' => Access::allProjectsForUser((int) $user['id']),
             'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
-            'limit' => Project::PLAN_LIMITS[$user['plan']] ?? 3,
+            'limit' => Project::planLimit($user),
         ], 'layouts/app');
     }
 
@@ -89,7 +90,9 @@ class ProjectController
         $canEdit = Access::can((int) $user['id'], (int) $id, 'edition');
         $canManage = Access::can((int) $user['id'], (int) $id, 'gestion');
         $share = $canManage ? Share::findForProject((int) $project['id'], (int) $project['user_id']) : null;
-        $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
+        $owner = User::find((int) $project['user_id']) ?? $user;
+        $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload(Plan::defaultHorizon($owner));
+        $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
         View::render('app/builder', [
             'title' => $project['name'],
             'nav' => 'projets',
@@ -97,6 +100,9 @@ class ProjectController
             'user' => $user,
             'project' => $project,
             'payload' => $payload,
+            'horizonMax' => Plan::horizonMax($owner),
+            'horizonDefault' => Plan::defaultHorizon($owner),
+            'horizonPresets' => Plan::horizonPresets($owner),
             'setup' => $canEdit && (string) ($_GET['nouveau'] ?? '') === '1' && empty($payload['nodes']),
             'recents' => Access::recentsForUser((int) $user['id']),
             'activeCount' => Project::activeCount((int) $user['id']),
@@ -127,7 +133,8 @@ class ProjectController
         if ($raw === null || $raw === '') {
             $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload();
             if (isset($_POST['horizon'])) {
-                $payload['horizon'] = Project::clampHorizon($_POST['horizon']);
+                $owner = User::find((int) $project['user_id']) ?? $user;
+                $payload['horizon'] = Project::clampHorizonForUser($_POST['horizon'], $owner);
             }
         } else {
             $payload = is_array($raw) ? $raw : json_decode((string) $raw, true);

@@ -859,9 +859,14 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
   body.is-print-report .report-modal-card { box-shadow: none; border: 0; max-height: none; width: 100%; }
 }
 .scenario-modal-card { width: min(860px, 100%); max-height: min(90vh, 880px); }
-.scenario-chips { align-items: center; position: sticky; top: -4px; z-index: 1; background: var(--paper); padding: 4px 0 8px; }
+.scenario-toolbar { position: sticky; top: -4px; z-index: 1; background: var(--paper); padding: 4px 0 8px; display: flex; flex-direction: column; gap: 10px; }
+.scenario-search { margin: 0; }
+.scenario-search input { padding: 10px 12px; font-size: 14px; border-radius: 10px; border: 1px solid oklch(0.89 0.014 255); background: var(--paper); width: 100%; color: var(--navy); outline: none; }
+.scenario-search input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14); }
+.scenario-chips { align-items: center; }
 .scenario-count { margin-left: auto; font-size: 11.5px; color: var(--faint); }
 .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.scenario-empty { margin: 4px 0 0; font-size: 13.5px; color: var(--muted); }
 [data-filter-item][hidden] { display: none !important; }
 .scenario-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; text-align: left; padding: 14px 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); cursor: pointer; }
 .scenario-card:hover { border-color: var(--orange); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.12); }

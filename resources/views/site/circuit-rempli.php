@@ -204,7 +204,7 @@ $steps = [
   <div style="padding:64px 44px 64px 32px;display:flex;flex-direction:column;gap:20px;">
     <span class="eyebrow" style="color:oklch(0.75 0.12 192);">À vous</span>
     <h2 style="color:#fff;margin:0;font-size:clamp(26px,4vw,33px);letter-spacing:-.034em;line-height:1.1;">Remplacez leurs montants<br>par les vôtres.</h2>
-    <p class="lede">Le modèle s’ouvre tel quel dans le builder. Changez un salaire, un loyer, un versement : la projection se recalcule. Gratuit jusqu’à trois circuits, sans carte.</p>
+    <p class="lede">Le modèle s’ouvre tel quel dans le builder. Changez un salaire, un loyer, un versement : la projection se recalcule. Gratuit pour un circuit, sans carte.</p>
     <form method="post" action="<?= e(url('/app/circuits')) ?>" style="align-self:flex-start;">
       <?= csrf_field() ?>
       <input type="hidden" name="template" value="<?= e($key) ?>">
@@ -216,7 +216,7 @@ $steps = [
     <?php foreach ([
       ['Compte en deux minutes', 'Un e-mail, un mot de passe. Pas de banque à connecter, pas de carte à sortir.'],
       ['Le circuit déjà câblé', 'Vous partez de celui-ci, ou d’un des ' . count(\App\Content::templates()) . ' autres modèles.'],
-      ['Vos chiffres, votre horizon', '60 mois par défaut, plafonds réglementaires préremplis, export à tout moment.'],
+      ['Vos chiffres, votre horizon', '24 mois sur le plan gratuit, davantage selon l’offre. Plafonds réglementaires préremplis.'],
       ['Rien n’est connecté', 'repartio ne lit pas vos comptes. Vous saisissez ce que vous voulez répartir.'],
     ] as $t): ?>
       <div class="trust-row" style="border-bottom-color:oklch(0.28 0.06 265);">

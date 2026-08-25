@@ -3,7 +3,7 @@ $canEdit = !empty($canEdit);
 $canManage = !empty($canManage);
 $readonly = !$canEdit;
 ?>
-<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= (int) $project['id'] ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
   <div class="builder-workspace">
   <aside class="builder-side">
     <a href="<?= e(url('/app/circuits')) ?>" class="btn btn-navy builder-back">← Mes circuits</a>
@@ -92,7 +92,7 @@ $readonly = !$canEdit;
         <input name="name" data-name value="<?= e($project['name']) ?>" class="builder-name-input"<?= $readonly ? ' readonly' : '' ?>>
         <div class="builder-horizon">
           <span>Projection</span>
-          <input type="number" min="1" max="360" step="1" data-horizon value="<?= e((string) ($payload['horizon'] ?? 60)) ?>"<?= $readonly ? ' readonly' : '' ?>>
+          <input type="number" min="1" max="<?= (int) ($horizonMax ?? 24) ?>" step="1" data-horizon value="<?= e((string) ($payload['horizon'] ?? ($horizonDefault ?? 24))) ?>"<?= $readonly ? ' readonly' : '' ?>>
           <div class="builder-horizon-unit" data-horizon-unit>
             <button type="button" class="builder-horizon-unit-btn" data-horizon-unit-toggle aria-haspopup="listbox" aria-expanded="false">
               <span data-horizon-unit-label>mois</span>
@@ -313,18 +313,17 @@ $readonly = !$canEdit;
       </label>
       <div class="field">
         <div class="setup-horizon-head">
-          <span>Durée de la projection</span>
+          <span>Durée de la projection d'épargne</span>
           <div class="setup-horizon">
-            <input type="number" name="setup_horizon" data-setup-horizon min="1" max="360" step="1" value="<?= e((string) ($payload['horizon'] ?? 60)) ?>" aria-label="Durée en mois">
+            <input type="number" name="setup_horizon" data-setup-horizon min="1" max="<?= (int) ($horizonMax ?? 24) ?>" step="1" value="<?= e((string) ($payload['horizon'] ?? ($horizonDefault ?? 24))) ?>" aria-label="Durée en mois">
             <span>mois</span>
           </div>
         </div>
         <div class="chips setup-horizon-chips" role="group" aria-label="Durées fréquentes">
-          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 12 ? ' active' : '' ?>" data-setup-preset="12"><strong>1 an</strong><span>12 mois</span></button>
-          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 60 ? ' active' : '' ?>" data-setup-preset="60"><strong>5 ans</strong><span>60 mois</span></button>
-          <button type="button" class="chip<?= (int) ($payload['horizon'] ?? 60) === 120 ? ' active' : '' ?>" data-setup-preset="120"><strong>10 ans</strong><span>120 mois</span></button>
+          <?php foreach (($horizonPresets ?? []) as $preset): ?>
+            <button type="button" class="chip<?= (int) ($payload['horizon'] ?? ($horizonDefault ?? 24)) === (int) $preset['months'] ? ' active' : '' ?>" data-setup-preset="<?= (int) $preset['months'] ?>"><strong><?= e($preset['title']) ?></strong><span><?= e($preset['hint']) ?></span></button>
+          <?php endforeach; ?>
         </div>
-        <span class="field-hint">Le mois type se répète jusqu’à cet horizon : soldes, intérêts et saturation des livrets.</span>
       </div>
       <div class="setup-actions">
         <button class="btn btn-ghost" type="button" data-setup-dismiss>Plus tard</button>
@@ -359,15 +358,22 @@ foreach ($scenarios as $key => $t) {
       <button type="button" class="btn btn-ghost builder-modal-close" data-scenario-dismiss aria-label="Fermer">×</button>
     </div>
     <p class="builder-hint">Un circuit déjà câblé, à adapter. Filtrez par situation, puis chargez l’exemple : les chiffres se remplacent ensuite.</p>
-    <div class="chips scenario-chips">
-      <?php foreach (array_merge(['Tout'], $scenarioCategories) as $f): ?>
-        <button type="button" class="chip <?= $f === 'Tout' ? 'active' : '' ?>" data-filter="<?= e($f) ?>" data-group="scenarios"><?= e($f) ?></button>
-      <?php endforeach; ?>
-      <span class="mono scenario-count" data-filter-count="scenarios"><?= $scenarioCount ?> élément<?= $scenarioCount > 1 ? 's' : '' ?></span>
+    <div class="scenario-toolbar">
+      <label class="field scenario-search">
+        <span class="visually-hidden">Rechercher un scénario</span>
+        <input type="search" data-filter-search="scenarios" placeholder="Rechercher un scénario… naissance, LEP, crédit" autocomplete="off">
+      </label>
+      <div class="chips scenario-chips">
+        <?php foreach (array_merge(['Tout'], $scenarioCategories) as $f): ?>
+          <button type="button" class="chip <?= $f === 'Tout' ? 'active' : '' ?>" data-filter="<?= e($f) ?>" data-group="scenarios"><?= e($f) ?></button>
+        <?php endforeach; ?>
+        <span class="mono scenario-count" data-filter-count="scenarios"><?= $scenarioCount ?> élément<?= $scenarioCount > 1 ? 's' : '' ?></span>
+      </div>
     </div>
     <div class="scenario-grid">
       <?php foreach ($scenarios as $key => $t): ?>
-        <button type="button" class="scenario-card" data-scenario-load="<?= e((string) $key) ?>" data-filter-item="<?= e($t['category']) ?>" data-filter-group="scenarios">
+        <?php $searchText = trim($t['title'] . ' ' . $t['hint'] . ' ' . $t['category'] . ' ' . ($t['search'] ?? '')); ?>
+        <button type="button" class="scenario-card" data-scenario-load="<?= e((string) $key) ?>" data-filter-item="<?= e($t['category']) ?>" data-filter-group="scenarios" data-filter-text="<?= e($searchText) ?>">
           <div class="scenario-card-top">
             <span class="chip"><?= e($t['category']) ?></span>
             <span class="mono"><?= (int) $t['blocks'] ?> blocs</span>
@@ -377,6 +383,7 @@ foreach ($scenarios as $key => $t) {
         </button>
       <?php endforeach; ?>
     </div>
+    <p class="scenario-empty" data-filter-empty="scenarios" hidden>Aucun scénario ne correspond à cette recherche.</p>
   </div>
 </div>
 <script type="application/json" data-scenarios><?= json_encode($scenarioCatalog, JSON_UNESCAPED_UNICODE) ?></script>

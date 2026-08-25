@@ -124,6 +124,9 @@
   };
 
   const readonly = root.hasAttribute('data-readonly');
+  const HORIZON_MAX = Math.max(1, parseInt(root.getAttribute('data-horizon-max') || '600', 10) || 600);
+  const HORIZON_DEFAULT = Math.max(1, parseInt(root.getAttribute('data-horizon-default') || String(Math.min(60, HORIZON_MAX)), 10) || 24);
+  const HORIZON_YEAR_MAX = Math.max(1, Math.floor(HORIZON_MAX / 12));
   let payloadBroken = false;
   let initial = {};
   try {
@@ -182,7 +185,7 @@
     SCENARIOS = {};
   }
   let lastCompute = null;
-  let playMonth = Number(initial.horizon) || 60;
+  let playMonth = clampHorizon(initial.horizon);
   let playPinnedToEnd = true;
   let timeBound = false;
   let pendingDrop = null;
@@ -1751,10 +1754,10 @@
     if (!horizonInput) return;
     if (horizonUnit === 'ans') {
       horizonInput.min = '1';
-      horizonInput.max = '30';
+      horizonInput.max = String(HORIZON_YEAR_MAX);
     } else {
       horizonInput.min = '1';
-      horizonInput.max = '360';
+      horizonInput.max = String(HORIZON_MAX);
     }
     horizonInput.value = String(horizonDisplay());
   }
@@ -1762,10 +1765,10 @@
   function applyHorizonFromInput() {
     const raw = parseInt(horizonInput?.value, 10);
     if (horizonUnit === 'ans') {
-      const years = Number.isNaN(raw) ? 5 : Math.min(30, Math.max(1, raw));
-      state.horizon = Math.min(360, Math.max(12, years * 12));
+      const years = Number.isNaN(raw) ? Math.min(5, HORIZON_YEAR_MAX) : Math.min(HORIZON_YEAR_MAX, Math.max(1, raw));
+      state.horizon = clampHorizon(years * 12);
     } else {
-      state.horizon = Number.isNaN(raw) ? 60 : Math.min(360, Math.max(1, raw));
+      state.horizon = Number.isNaN(raw) ? HORIZON_DEFAULT : clampHorizon(raw);
     }
   }
 
@@ -1816,8 +1819,8 @@
   }
   function clampHorizon(value) {
     const n = Number(value);
-    if (!Number.isFinite(n) || n < 1) return 60;
-    return Math.min(360, Math.round(n));
+    if (!Number.isFinite(n) || n < 1) return HORIZON_DEFAULT;
+    return Math.min(HORIZON_MAX, Math.round(n));
   }
   function statRowsHtml(rows, clsPrefix) {
     const plain = clsPrefix === 'prop-stat';
@@ -2111,9 +2114,10 @@
     flushCoaches();
   }
 
-  const LINK_COACH_KEY = 'repartio.linkCoachSeen';
-  const SPLIT_COACH_KEY = 'repartio.splitCoachSeen';
-  const ITEMS_COACH_KEY = 'repartio.itemsCoachSeen';
+  const projectId = root.getAttribute('data-project-id') || '0';
+  const LINK_COACH_KEY = `repartio.linkCoachSeen.${projectId}`;
+  const SPLIT_COACH_KEY = `repartio.splitCoachSeen.${projectId}`;
+  const ITEMS_COACH_KEY = `repartio.itemsCoachSeen.${projectId}`;
   const linkCoach = document.querySelector('[data-link-coach]');
   const splitCoach = document.querySelector('[data-split-coach]');
   const itemsCoach = document.querySelector('[data-items-coach]');
@@ -2972,12 +2976,23 @@
     return Boolean(scenarioModal && !scenarioModal.hidden);
   }
 
+  function resetScenarioFilters() {
+    const search = scenarioModal?.querySelector('[data-filter-search="scenarios"]');
+    if (search) {
+      search.value = '';
+      search.dispatchEvent(new Event('input'));
+    }
+    scenarioModal?.querySelector('[data-group="scenarios"][data-filter="Tout"]')?.click();
+  }
+
   function openScenarioModal() {
     if (readonly || !scenarioModal) return;
     closePresetModal();
     if (setupModal && !setupModal.hidden) closeSetupModal();
+    resetScenarioFilters();
     scenarioModal.hidden = false;
     document.body.classList.add('is-locked');
+    requestAnimationFrame(() => scenarioModal.querySelector('[data-filter-search="scenarios"]')?.focus());
   }
 
   function closeScenarioModal() {
@@ -3212,7 +3227,7 @@
     if (state.nodes.length && !confirm('Remplacer le circuit actuel par « ' + pack.title + ' » ?')) return;
     state.nodes = (pack.payload.nodes || []).map(normalizeNode);
     state.edges = (pack.payload.edges || []).map(normalizeEdge);
-    state.horizon = Number(pack.payload.horizon) || state.horizon;
+    state.horizon = clampHorizon(pack.payload.horizon || state.horizon);
     state.selected = null;
     state.openEdge = null;
     cancelLink();
@@ -3232,7 +3247,7 @@
   function applySetup() {
     const name = (setupName?.value || '').trim() || 'Nouveau circuit';
     const raw = parseInt(setupHorizon?.value, 10);
-    const horizon = Number.isNaN(raw) ? 60 : Math.min(360, Math.max(1, raw));
+    const horizon = Number.isNaN(raw) ? HORIZON_DEFAULT : clampHorizon(raw);
     if (nameInput) nameInput.value = name;
     document.title = name + ' — repartio.fr';
     state.horizon = horizon;

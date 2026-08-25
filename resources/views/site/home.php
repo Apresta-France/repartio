@@ -193,7 +193,7 @@ $C = [
       ['F01', 'Répartiteurs en pourcentage', 'Un bloc qui découpe ce qu’il reçoit en parts, et qui vous prévient dès que la somme des parts ne fait pas 100 %.'],
       ['F02', 'Plafonds et taux réels', 'Livret A, LDDS, LEP, livrets jeunes : plafond et taux préremplis, capitalisation annuelle, date de saturation calculée.'],
       ['F03', 'Compteur de non-affecté', 'Le canvas affiche en permanence l’euro qui traîne. Un circuit valide est un circuit à zéro.'],
-      ['F04', 'Projection à l’horizon choisi', '12, 60, 120 mois : le mois type est déroulé et chaque bloc porte sa valeur de fin de période.'],
+      ['F04', 'Projection à l’horizon choisi', 'De 24 mois à 50 ans selon le plan : le mois type est déroulé et chaque bloc porte sa valeur de fin de période.'],
       ['F05', 'Scénarios comparés', 'Dupliquez un circuit, changez un versement, et lisez l’écart de patrimoine entre les deux variantes.'],
       ['F06', 'Canvas navigable', 'Glissé-déposé des blocs, panoramique au fond, zoom au clavier. Un circuit à trente blocs reste lisible.'],
     ] as $f): ?>
@@ -236,7 +236,7 @@ $C = [
       ['Comment sont gérés les plafonds réglementaires ?', 'Chaque livret porte son plafond et son taux. Quand il sature, repartio vous dit en combien de mois et redirige le surplus vers la destination que vous avez câblée.'],
       ['Peut-on modéliser un couple avec des comptes séparés ?', 'Oui — c’est même le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts par personne.'],
       ['Que se passe-t-il si un euro n’est pas affecté ?', 'Le compteur « non affecté » reste visible en permanence. Tant qu’il n’est pas à zéro, vous savez que le circuit est incomplet.'],
-      ['Que contient la version gratuite ?', 'Trois circuits, tous les types de blocs et la projection jusqu’à 60 mois. Le payant ajoute les scénarios comparés, l’export et l’historique des versions.'],
+      ['Que contient la version gratuite ?', 'Un circuit, tous les types de blocs, la projection jusqu’à 24 mois et le partage public. Le payant ajoute plus de circuits, un horizon plus long et des invitations.'],
     ] as $q): ?>
       <div class="faq-item">
         <button type="button" data-faq><span style="flex:1;"><?= e($q[0]) ?></span><span class="sign">+</span></button>

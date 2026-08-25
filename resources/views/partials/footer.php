@@ -1,7 +1,7 @@
 <section class="site-cta">
-  <span class="eyebrow" style="color: var(--orange-ink);">Gratuit jusqu’à 3 circuits · sans carte</span>
+  <span class="eyebrow" style="color: var(--orange-ink);">Gratuit · 1 circuit · sans carte</span>
   <h2>Votre premier circuit tient en dix minutes</h2>
-  <p class="lede">Posez vos revenus, branchez vos livrets, et voyez la première projection à 60 mois avant d’avoir fini votre café.</p>
+  <p class="lede">Posez vos revenus, branchez vos livrets, et voyez la première projection à 24 mois avant d’avoir fini votre café.</p>
   <div class="cta-row">
     <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Ouvrir le builder</a>
     <a class="btn btn-ghost" href="<?= e(url('/circuits-types')) ?>">Explorer les modèles</a>

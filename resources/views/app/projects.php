@@ -8,7 +8,7 @@ $statuses = [
 <header class="app-top">
   <div>
     <h1>Mes circuits</h1>
-    <span class="eyebrow"><?= (int) $activeCount ?> actifs · plan <?= e(ucfirst($user['plan'])) ?> <?= (int) $activeCount ?>/<?= (int) $limit ?></span>
+    <span class="eyebrow"><?= (int) $activeCount ?> actifs · plan <?= e(\App\Models\Plan::label($user)) ?> <?= (int) $activeCount ?>/<?= (int) $limit ?></span>
   </div>
   <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>" style="margin-left:auto;"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
 </header>
@@ -78,13 +78,20 @@ $statuses = [
     </button>
   </form>
 </section>
+<?php
+$nextPlan = \App\Models\Plan::nextLabel($user);
+if ($nextPlan):
+    $need = \App\Models\Plan::circuitLimit($user) + 1;
+    $needLabel = $need === 2 ? 'd’un deuxième circuit' : 'de plus de ' . \App\Models\Plan::circuitLimit($user) . ' circuits';
+?>
 <section class="card project-upsell">
   <div>
-    <strong>Besoin d’un quatrième circuit ?</strong>
-    <div>Le plan Complet lève la limite et débloque les scénarios comparés.</div>
+    <strong>Besoin <?= e($needLabel) ?> ?</strong>
+    <div>Le plan <?= e($nextPlan) ?> élargit le nombre de circuits, l’horizon et les invitations.</div>
   </div>
   <a class="btn btn-navy" href="<?= e(url('/app/forfait')) ?>">Voir les forfaits</a>
 </section>
+<?php endif; ?>
 <div class="builder-modal" data-confirm-modal hidden>
   <div class="builder-modal-backdrop" data-confirm-dismiss></div>
   <div class="builder-modal-card confirm-modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">

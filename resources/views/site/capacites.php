@@ -17,7 +17,7 @@
     ['Débordement câblé', 'Quand un livret sature, le surplus part où vous l’avez dit.'],
   ]],
   ['C03 · Projection', 'Voir la suite, pas seulement le mois', 'Le mois type est déroulé sur l’horizon choisi.', [
-    ['Horizons 12 / 60 / 120 mois', 'Changez l’horizon, toute la lecture se met à jour.'],
+    ['Horizons selon le plan', '24 mois, 60 mois ou 50 ans : changez l’horizon, toute la lecture se met à jour.'],
     ['Compteur de non-affecté', 'Un circuit valide est un circuit à zéro.'],
     ['Scénarios comparés', 'Dupliquez, changez un versement, lisez l’écart.'],
     ['Historique des versions', 'Chaque enregistrement est daté et restaurable.'],

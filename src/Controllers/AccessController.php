@@ -9,6 +9,7 @@ use App\Core\Mailer;
 use App\Core\Session;
 use App\Core\View;
 use App\Models\Access;
+use App\Models\Plan;
 use App\Models\Project;
 use App\Models\User;
 use Throwable;
@@ -28,7 +29,7 @@ class AccessController
             'members' => Access::membersForOwner((int) $user['id']),
             'circuits' => $circuits,
             'memberCount' => Access::countForOwner((int) $user['id']),
-            'memberLimit' => Access::MAX_MEMBERS,
+            'memberLimit' => Access::memberLimitFor($user),
         ]), 'layouts/app');
     }
 
@@ -55,8 +56,15 @@ class AccessController
             Session::flashSet('error', 'Cette personne a déjà un accès. Modifiez ses droits ci-dessous.');
             redirect('/app/acces');
         }
-        if (Access::countForOwner($ownerId) >= Access::MAX_MEMBERS) {
-            Session::flashSet('error', 'Limite atteinte (' . Access::MAX_MEMBERS . ' personnes). Retirez un accès pour en ajouter un autre.');
+        $memberLimit = Access::memberLimitFor($user);
+        if ($memberLimit <= 0) {
+            Session::flashSet('error', 'Le plan Libre ne permet pas d’inviter. Passez en Complet pour inviter une personne.');
+            redirect('/app/acces');
+        }
+        if (Access::countForOwner($ownerId) >= $memberLimit) {
+            $next = Plan::nextLabel($user);
+            Session::flashSet('error', 'Limite atteinte (' . $memberLimit . ' personne' . ($memberLimit > 1 ? 's' : '') . ').'
+                . ($next ? ' Passez en ' . $next . ' pour en inviter davantage, ou retirez un accès.' : ' Retirez un accès pour en ajouter un autre.'));
             redirect('/app/acces');
         }
 

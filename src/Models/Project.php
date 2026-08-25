@@ -8,33 +8,31 @@ use App\Core\Database;
 
 class Project
 {
-    public const PLAN_LIMITS = [
-        'libre' => 3,
-        'complet' => 999,
-        'foyer' => 999,
-    ];
-
-    public const PLAN_LABELS = [
-        'libre' => 'Libre',
-        'complet' => 'Complet',
-        'foyer' => 'Foyer',
-    ];
-
     public const HORIZON_MIN = 1;
-    public const HORIZON_MAX = 360;
+    public const HORIZON_MAX = 600;
 
-    public static function clampHorizon(mixed $horizon, int $fallback = 60): int
+    public static function clampHorizon(mixed $horizon, int $fallback = 60, int $max = self::HORIZON_MAX): int
     {
         $value = (int) $horizon;
+        $cap = max(self::HORIZON_MIN, min(self::HORIZON_MAX, $max));
         if ($value < self::HORIZON_MIN) {
-            return $fallback;
+            return min($fallback, $cap);
         }
-        return min(self::HORIZON_MAX, $value);
+        return min($cap, $value);
+    }
+
+    public static function clampHorizonForUser(mixed $horizon, ?array $user): int
+    {
+        return self::clampHorizon(
+            $horizon,
+            Plan::defaultHorizon($user),
+            Plan::horizonMax($user)
+        );
     }
 
     public static function planLimit(array $user): int
     {
-        return self::PLAN_LIMITS[$user['plan'] ?? ''] ?? 3;
+        return Plan::circuitLimit($user);
     }
 
     public static function atPlanLimit(array $user): bool
@@ -45,11 +43,13 @@ class Project
     public static function planLimitMessage(array $user, string $wanted = ''): string
     {
         $limit = self::planLimit($user);
-        $label = self::PLAN_LABELS[$user['plan'] ?? ''] ?? 'Libre';
+        $label = Plan::label($user);
         $wantedBit = $wanted !== '' ? ' pour « ' . $wanted . ' »' : '';
+        $next = Plan::nextLabel($user);
+        $upgrade = $next !== null ? ', ou passez en ' . $next : '';
 
-        return 'Votre forfait ' . $label . ' est plein (' . $limit . ' circuits déjà utilisés)'
-            . $wantedBit . '. Archivez-en un, ou changez de forfait, pour libérer un emplacement.';
+        return 'Votre forfait ' . $label . ' autorise ' . $limit . ' circuit' . ($limit > 1 ? 's' : '')
+            . $wantedBit . '. Archivez-en un' . $upgrade . ' pour libérer un emplacement.';
     }
 
     public static function findById(int $id): ?array
@@ -96,7 +96,8 @@ class Project
     public static function create(int $userId, string $name, array $payload, string $status = 'actif'): array
     {
         $name = mb_substr($name, 0, 180);
-        $payload['horizon'] = self::clampHorizon($payload['horizon'] ?? 60);
+        $owner = User::find($userId);
+        $payload['horizon'] = self::clampHorizonForUser($payload['horizon'] ?? null, $owner);
         $totals = self::summarize($payload);
         Database::query(
             'INSERT INTO projects (user_id, name, slug, status, horizon, payload, monthly_in, monthly_out, monthly_saved, unassigned, projection, created_at, updated_at)
@@ -129,7 +130,9 @@ class Project
     public static function updateById(int $id, string $name, array $payload): void
     {
         $name = mb_substr($name, 0, 180);
-        $payload['horizon'] = self::clampHorizon($payload['horizon'] ?? 60);
+        $project = self::findById($id);
+        $owner = $project ? User::find((int) $project['user_id']) : null;
+        $payload['horizon'] = self::clampHorizonForUser($payload['horizon'] ?? null, $owner);
         $totals = self::summarize($payload);
         Database::query(
             'UPDATE projects SET name = ?, horizon = ?, payload = ?, monthly_in = ?, monthly_out = ?, monthly_saved = ?, unassigned = ?, projection = ?, updated_at = NOW()
@@ -187,10 +190,10 @@ class Project
         );
     }
 
-    public static function emptyPayload(): array
+    public static function emptyPayload(?int $horizon = null): array
     {
         return [
-            'horizon' => 60,
+            'horizon' => $horizon ?? 24,
             'nodes' => [],
             'edges' => [],
         ];

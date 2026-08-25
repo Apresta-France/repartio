@@ -1,8 +1,12 @@
 <?php
 $nav = $nav ?? '';
-$limit = \App\Models\Project::PLAN_LIMITS[$user['plan']] ?? 3;
+$limit = \App\Models\Project::planLimit($user);
 $used = $activeCount ?? 0;
 $pct = $limit > 0 ? min(100, (int) round($used / $limit * 100)) : 0;
+$nextPlan = \App\Models\Plan::nextLabel($user);
+$limitHint = $used >= $limit
+    ? ($nextPlan ? 'Limite atteinte. Passez en ' . $nextPlan . '.' : 'Limite de circuits atteinte.')
+    : 'Circuits actifs sur votre plan.';
 $main = [
     ['dashboard', 'Tableau de bord', '/app', 'var(--teal)'],
     ['projets', 'Mes circuits', '/app/circuits', 'var(--blue)'],
@@ -43,11 +47,11 @@ $bottom = [
   </nav>
   <a href="<?= e(url('/app/forfait')) ?>" style="display:flex;flex-direction:column;gap:7px;padding:13px;border-radius:11px;background:oklch(0.975 0.005 250);border:1px solid var(--line);color:var(--ink);">
     <div style="display:flex;align-items:baseline;gap:8px;">
-      <span class="eyebrow">Plan <?= e(ucfirst($user['plan'])) ?></span>
+      <span class="eyebrow">Plan <?= e(\App\Models\Plan::label($user)) ?></span>
       <span class="mono" style="margin-left:auto;font-size:11px;"><?= (int) $used ?> / <?= (int) $limit ?></span>
     </div>
     <div class="progress"><i style="width:<?= (int) $pct ?>%"></i></div>
-    <span style="font-size:12px;color:var(--muted);"><?= $used >= $limit ? 'Limite atteinte. Passez en Complet.' : 'Circuits actifs sur votre plan.' ?></span>
+    <span style="font-size:12px;color:var(--muted);"><?= e($limitHint) ?></span>
   </a>
   <a href="<?= e(url('/app/profil')) ?>" style="display:flex;align-items:center;gap:10px;padding:8px 6px 0;color:var(--ink);">
     <span style="width:30px;height:30px;border-radius:9px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;"><?= e(initials($user['first_name'])) ?></span>

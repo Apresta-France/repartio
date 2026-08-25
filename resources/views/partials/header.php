@@ -25,7 +25,7 @@ $user = \App\Core\Auth::user();
     </div>
   </nav>
   <div class="header-actions">
-    <span class="hint">Gratuit jusqu’à 3 circuits</span>
+    <span class="hint">Gratuit · 1 circuit</span>
     <?php if ($user): ?>
       <a class="btn-link" href="<?= e(url('/app')) ?>">Tableau de bord</a>
       <a class="btn btn-orange" href="<?= e(url('/app/circuits')) ?>">Mes circuits</a>

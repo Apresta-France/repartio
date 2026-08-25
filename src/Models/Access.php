@@ -8,7 +8,10 @@ use App\Core\Database;
 
 class Access
 {
-    public const MAX_MEMBERS = 8;
+    public static function memberLimitFor(array $user): int
+    {
+        return Plan::memberLimit($user);
+    }
 
     public const PERMISSIONS = [
         'lecture' => 'Lecture',

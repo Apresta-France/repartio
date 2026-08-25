@@ -35,10 +35,10 @@ class Content
             ['Situations', 'Et les livrets des enfants ?', 'Un bloc livret par enfant, avec son solde de départ, son taux et son plafond.', '', ''],
             ['Situations', 'Peut-on suivre un objectif chiffré, comme un apport ?', 'Oui : vous posez la cible sur le bloc de destination, et repartio affiche le mois d’atteinte.', '', ''],
             ['Situations', 'Comment gérer un crédit immobilier ?', 'Comme une dépense mensuelle fixe. La modélisation du capital restant dû n’est pas encore dans le moteur.', '', ''],
-            ['Compte & plans', 'Que contient la version gratuite ?', 'Trois circuits, les cinq types de blocs, les plafonds réglementaires, la projection jusqu’à 60 mois et les exports.', 'Comparer les plans', '/tarifs'],
+            ['Compte & plans', 'Que contient la version gratuite ?', 'Un circuit, les cinq types de blocs, la projection jusqu’à 24 mois et le partage public.', 'Comparer les plans', '/tarifs'],
             ['Compte & plans', 'Faut-il une carte pour créer un compte ?', 'Non. Aucun moyen de paiement n’est demandé sur le plan Libre.', '', ''],
-            ['Compte & plans', 'Que devient mon circuit si j’arrête de payer ?', 'Il reste consultable et exportable. Vous repassez sous la limite de trois circuits modifiables.', '', ''],
-            ['Compte & plans', 'Le plan Foyer, c’est deux abonnements ?', 'Non, un seul : deux accès nominatifs sur les mêmes circuits.', '', ''],
+            ['Compte & plans', 'Que devient mon circuit si j’arrête de payer ?', 'Il reste consultable, partageable et exportable. Vous repassez sous la limite d’un circuit modifiable et d’une projection à 24 mois.', '', ''],
+            ['Compte & plans', 'Le plan Foyer, c’est plusieurs abonnements ?', 'Non, un seul : jusqu’à dix personnes invitées à gérer les mêmes circuits.', '', ''],
             ['Compte & plans', 'Puis-je changer de plan en cours de route ?', 'À tout moment, dans les deux sens.', '', ''],
             ['Données & sécurité', 'Où sont hébergées mes données ?', 'Dans un centre de données situé en France, au sein de l’Union européenne.', 'Confidentialité', '/confidentialite'],
             ['Données & sécurité', 'Vendez-vous les données ?', 'Jamais. Pas de revente, pas de courtier, pas de ciblage publicitaire.', '', ''],
@@ -520,7 +520,7 @@ class Content
                         'La création d’un compte requiert une adresse e-mail valide et un mot de passe de douze caractères minimum. L’utilisateur est responsable de la confidentialité de ses identifiants et de toute activité réalisée depuis son compte.',
                     ],
                     'list' => [
-                        'Un compte est strictement personnel ; le plan Foyer autorise deux accès nominatifs distincts.',
+                        'Un compte est strictement personnel ; le plan Complet autorise une invitation, le plan Foyer jusqu’à dix personnes invitées à gérer les circuits.',
                         'Tout usage frauduleux constaté doit être signalé sans délai à bonjour@repartio.fr.',
                         'L’éditeur peut suspendre un compte en cas d’atteinte à la sécurité ou à l’intégrité du service.',
                     ],
@@ -577,7 +577,7 @@ class Content
             'eyebrow' => 'CGV · Conditions générales de vente',
             'title' => 'Conditions générales de vente',
             'lede' => 'Les règles applicables aux abonnements payants repartio : prix, paiement, durée, renouvellement, droit de rétractation et remboursement. Elles complètent les conditions générales d’utilisation.',
-            'meta' => ['Version 2.0', 'En vigueur au 24 août 2026', 'Prix TTC — clients particuliers'],
+            'meta' => ['Version 2.1', 'En vigueur au 25 août 2026', 'Prix HT — TVA en sus'],
             'sections' => [
                 [
                     'h' => 'Champ d’application',
@@ -594,12 +594,12 @@ class Content
                 [
                     'h' => 'Offres et prix',
                     'ps' => [
-                        'Les prix sont indiqués en euros, toutes taxes comprises pour les particuliers résidant en France. Le prix applicable est celui affiché au moment de la souscription ; une évolution tarifaire ne s’applique qu’au renouvellement suivant, après information par e-mail trente jours à l’avance.',
+                        'Les prix sont indiqués en euros hors taxes. La TVA en vigueur s’applique selon le statut de l’utilisateur. Le prix applicable est celui affiché au moment de la souscription ; une évolution tarifaire ne s’applique qu’au renouvellement suivant, après information par e-mail trente jours à l’avance.',
                     ],
                     'rows' => [
-                        ['k' => 'Plan Libre', 'v' => '0 € — 3 circuits, projection jusqu’à 60 mois'],
-                        ['k' => 'Plan Complet', 'v' => '4,90 € par mois ou 49 € par an'],
-                        ['k' => 'Plan Foyer', 'v' => '7,90 € par mois ou 79 € par an, 2 accès nominatifs'],
+                        ['k' => 'Plan Libre', 'v' => '0 € — 1 circuit, projection jusqu’à 24 mois, partage public'],
+                        ['k' => 'Plan Complet', 'v' => '3,90 € HT par mois ou 39 € HT par an — 3 circuits, 60 mois, 1 invitation'],
+                        ['k' => 'Plan Foyer', 'v' => '8,90 € HT par mois ou 89 € HT par an — 50 circuits, 50 ans, 10 invitations'],
                         ['k' => 'Engagement', 'v' => 'Aucun — résiliable à tout moment'],
                     ],
                 ],
@@ -633,7 +633,7 @@ class Content
                         'La résiliation est effective à la fin de la période en cours ; aucun prélèvement supplémentaire n’intervient. Les fonctionnalités payantes sont désactivées à cette date.',
                     ],
                     'list' => [
-                        'Les circuits au-delà de la limite du plan gratuit deviennent consultables et exportables, mais non modifiables.',
+                        'Les circuits au-delà de la limite du plan gratuit deviennent consultables, partageables et exportables, mais non modifiables.',
                         'L’historique des versions reste accessible pendant trente jours après la fin de l’abonnement.',
                         'Aucune donnée n’est supprimée du fait de la seule résiliation.',
                     ],

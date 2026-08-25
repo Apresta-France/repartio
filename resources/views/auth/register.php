@@ -8,7 +8,7 @@
         <?php if (!empty($pendingCircuit)): ?>
           <p class="lede">Le circuit « <?= e((string) $pendingCircuit) ?> » sera créé sur votre compte dès que vous serez connecté.</p>
         <?php else: ?>
-          <p class="lede">Trois circuits, tous les types de blocs, projection à 60 mois. Aucun moyen de paiement demandé.</p>
+          <p class="lede">Un circuit, tous les types de blocs, projection à 24 mois, partage public. Aucun moyen de paiement demandé.</p>
         <?php endif; ?>
       </div>
       <form method="post" action="<?= e(url('/creer-un-compte')) ?>" style="display:flex;flex-direction:column;gap:14px;">

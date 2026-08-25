@@ -171,23 +171,45 @@ document.addEventListener('click', (event) => {
   if (sign) sign.textContent = item.classList.contains('open') ? '−' : '+';
 });
 
+const foldText = (value) => String(value || '')
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '');
+
+const applyFilters = (group) => {
+  const active = document.querySelector(`[data-group="${group}"].active`);
+  const value = active?.getAttribute('data-filter') || 'Tout';
+  const query = foldText(document.querySelector(`[data-filter-search="${group}"]`)?.value || '').trim();
+  const items = [...document.querySelectorAll(`[data-filter-item][data-filter-group="${group}"]`)];
+  items.forEach((el) => {
+    const tags = (el.getAttribute('data-filter-item') || '').split(',');
+    const catOk = value === 'Tout' || tags.includes(value);
+    const hay = foldText(el.getAttribute('data-filter-text') || el.textContent || '');
+    el.hidden = !catOk || (query !== '' && !hay.includes(query));
+  });
+  const visible = items.filter((el) => !el.hidden).length;
+  const count = document.querySelector(`[data-filter-count="${group}"]`);
+  if (count) {
+    const one = count.getAttribute('data-filter-one') || 'élément';
+    const many = count.getAttribute('data-filter-many') || 'éléments';
+    count.textContent = visible + ' ' + (visible > 1 ? many : one);
+  }
+  const empty = document.querySelector(`[data-filter-empty="${group}"]`);
+  if (empty) empty.hidden = visible > 0;
+};
+
 document.querySelectorAll('[data-filter]').forEach((btn) => {
   btn.addEventListener('click', () => {
-    const value = btn.getAttribute('data-filter');
     const group = btn.getAttribute('data-group') || 'default';
     document.querySelectorAll(`[data-group="${group}"]`).forEach((el) => el.classList.toggle('active', el === btn));
-    document.querySelectorAll(`[data-filter-item][data-filter-group="${group}"]`).forEach((el) => {
-      const tags = (el.getAttribute('data-filter-item') || '').split(',');
-      el.hidden = value !== 'Tout' && !tags.includes(value);
-    });
-    const count = document.querySelector(`[data-filter-count="${group}"]`);
-    if (count) {
-      const n = [...document.querySelectorAll(`[data-filter-item][data-filter-group="${group}"]`)].filter((el) => !el.hidden).length;
-      const one = count.getAttribute('data-filter-one') || 'élément';
-      const many = count.getAttribute('data-filter-many') || 'éléments';
-      count.textContent = n + ' ' + (n > 1 ? many : one);
-    }
+    applyFilters(group);
   });
+});
+
+document.querySelectorAll('[data-filter-search]').forEach((input) => {
+  const group = input.getAttribute('data-filter-search');
+  if (!group) return;
+  input.addEventListener('input', () => applyFilters(group));
 });
 
 const pwd = document.querySelector('[data-password]');
@@ -1056,9 +1078,9 @@ document.querySelectorAll('[data-cycle]').forEach((btn) => {
   btn.addEventListener('click', () => {
     const annual = btn.getAttribute('data-cycle') === 'Annuel';
     document.querySelectorAll('[data-cycle]').forEach((el) => el.classList.toggle('active', el === btn));
-    document.querySelectorAll('[data-price="complet"]').forEach((el) => { el.textContent = annual ? '49 €' : '4,90 €'; });
+    document.querySelectorAll('[data-price="complet"]').forEach((el) => { el.textContent = annual ? '39 € HT' : '3,90 € HT'; });
     document.querySelectorAll('[data-unit="complet"]').forEach((el) => { el.textContent = annual ? 'par an — 2 mois offerts' : 'par mois'; });
-    document.querySelectorAll('[data-price="foyer"]').forEach((el) => { el.textContent = annual ? '79 €' : '7,90 €'; });
+    document.querySelectorAll('[data-price="foyer"]').forEach((el) => { el.textContent = annual ? '89 € HT' : '8,90 € HT'; });
     document.querySelectorAll('[data-unit="foyer"]').forEach((el) => { el.textContent = annual ? 'par an — 2 mois offerts' : 'par mois'; });
   });
 });
