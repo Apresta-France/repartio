@@ -38,7 +38,7 @@ class AdminController
             ],
             'plans' => $plans,
             'planCounts' => $counts,
-            'activity' => Project::recentActivity(12),
+            'activity' => Project::recentActivity(5),
         ], 'layouts/admin');
     }
 

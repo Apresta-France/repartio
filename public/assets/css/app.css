@@ -206,7 +206,7 @@ h1.page-title { font-size: clamp(30px, 7vw, 48px) !important; letter-spacing: -.
 .page-split > :first-child { border-right: 1px solid var(--line); }
 .feature-grid { display: grid; grid-template-columns: 1fr 1fr; }
 .fields-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; min-width: 0; }
-.fields-3 { display: grid; grid-template-columns: minmax(110px, .75fr) minmax(160px, 1.4fr) minmax(72px, .55fr); gap: 14px; width: 100%; min-width: 0; }
+.fields-3 { display: grid; grid-template-columns: 8.5rem minmax(12rem, 1fr) 5.75rem; gap: 14px; width: 100%; min-width: 0; }
 .fields-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 100%; min-width: 0; }
 .band-2 { display: grid; grid-template-columns: 1fr 1fr; }
 .card { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--paper); }
@@ -793,6 +793,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder.is-readonly .edge-pill { cursor: default; }
 
 .app-page { padding: 24px 28px 48px; display: flex; flex-direction: column; gap: 20px; }
+.app-page h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
 .app-page-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
 .app-page-grid > .card { min-width: 0; }
 .share-page { padding: 24px 28px 48px; }
