@@ -142,11 +142,14 @@ $readonly = !$canEdit;
         <button type="button" class="btn btn-orange" data-scenario-open>Charger un scénario</button>
         <?php endif; ?>
       </div>
-      <div class="canvas-zoom">
-        <button type="button" class="btn btn-ghost" data-zoom-out>−</button>
-        <span class="mono" data-zoom>85%</span>
-        <button type="button" class="btn btn-ghost" data-zoom-in>+</button>
-        <button type="button" class="btn btn-ghost" data-fit>Ajuster</button>
+      <div class="canvas-dock">
+        <?php require BASE_PATH . '/resources/views/partials/builder-time.php'; ?>
+        <div class="canvas-zoom">
+          <button type="button" class="btn btn-ghost" data-zoom-out>−</button>
+          <span class="mono" data-zoom>85%</span>
+          <button type="button" class="btn btn-ghost" data-zoom-in>+</button>
+          <button type="button" class="btn btn-ghost" data-fit>Ajuster</button>
+        </div>
       </div>
       <div class="link-coach" data-link-coach hidden role="status" aria-live="polite">
         <div class="link-coach-head">
@@ -180,7 +183,6 @@ $readonly = !$canEdit;
         <p>Restez cliqué sur un point, puis glissez jusqu’au point opposé.</p>
       </div>
     </div>
-    <?php require BASE_PATH . '/resources/views/partials/builder-time.php'; ?>
   </main>
 
   <aside class="builder-props" data-props>

@@ -159,14 +159,16 @@ $steps = [
               <svg data-edges width="6000" height="4200" class="builder-edges"></svg>
               <div data-labels class="builder-labels"></div>
             </div>
-            <div class="canvas-zoom">
-              <button type="button" class="btn btn-ghost" data-zoom-out>−</button>
-              <span class="mono" data-zoom>85%</span>
-              <button type="button" class="btn btn-ghost" data-zoom-in>+</button>
-              <button type="button" class="btn btn-ghost" data-fit>Ajuster</button>
+            <div class="canvas-dock">
+              <?php require BASE_PATH . '/resources/views/partials/builder-time.php'; ?>
+              <div class="canvas-zoom">
+                <button type="button" class="btn btn-ghost" data-zoom-out>−</button>
+                <span class="mono" data-zoom>85%</span>
+                <button type="button" class="btn btn-ghost" data-zoom-in>+</button>
+                <button type="button" class="btn btn-ghost" data-fit>Ajuster</button>
+              </div>
             </div>
           </div>
-          <?php require BASE_PATH . '/resources/views/partials/builder-time.php'; ?>
         </main>
       </div>
     </div>

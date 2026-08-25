@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-site-verification" content="tkoUj9yLmWAby31MzJERDUewFeRFRLVDdpSAT93VOs4">
   <title><?= e($title ?? 'repartio') ?> — repartio.fr</title>
   <link rel="icon" href="<?= e(asset('img/logo.png')) ?>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
