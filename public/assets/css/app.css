@@ -669,25 +669,25 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .setup-horizon-chips { margin-top: 2px; }
 .setup-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .report-modal-card { width: min(560px, 100%); }
+.report-modal-card [data-report-body] { display: flex; flex-direction: column; gap: 18px; }
 .report-lead { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
-.report-chips { margin: 2px 0 4px; }
+.report-chips { margin: 0; }
 .report-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .report-kpis > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line-soft); }
 .report-kpis span { font-size: 11px; font-weight: 600; color: var(--muted); }
 .report-kpis b { font-size: 15px; font-weight: 650; color: var(--ink); }
 .report-kpis b.is-proj { color: var(--teal-ink); }
-.report-insights { display: flex; flex-direction: column; gap: 8px; }
+.report-insights { display: flex; flex-direction: column; gap: 10px; }
 .report-insight { margin: 0; padding: 10px 12px; border-radius: 10px; background: oklch(0.96 0.012 152); border: 1px solid oklch(0.9 0.02 152); font-size: 13px; line-height: 1.5; color: oklch(0.32 0.06 195); }
 .report-insight strong { font-weight: 750; color: var(--teal-ink); }
-.report-section { display: flex; flex-direction: column; gap: 4px; }
+.report-section { display: flex; flex-direction: column; gap: 8px; }
 .report-lines { display: flex; flex-direction: column; }
 .report-line { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; color: var(--muted); }
 .report-line:first-child { border-top: 0; }
 .report-line b { font-family: var(--mono); font-weight: 550; color: var(--ink); }
 .report-line .is-month { font-size: 12px; color: var(--faint); }
 .report-empty { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
-.report-actions { display: flex; justify-content: flex-end; padding-top: 4px; }
-.report-actions .btn { min-height: 36px; padding: 8px 14px; font-size: 13px; }
+.report-actions { display: flex; justify-content: flex-end; }
 @media print {
   body.is-print-report * { visibility: hidden; }
   body.is-print-report [data-report-modal],
