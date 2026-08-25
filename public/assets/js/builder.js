@@ -200,7 +200,8 @@
   let playPinnedToEnd = true;
   let timeBound = false;
   let pendingDrop = null;
-  const flow = { paths: {}, pills: {}, pellets: [] };
+  const flow = { paths: {}, hits: {}, pills: {}, pellets: [] };
+  let hoverEdgeId = null;
   const phase = {};
   let lastTick = 0;
   let flowPaused = false;
@@ -1294,7 +1295,9 @@
       const a = nodeById(e.from);
       const b = nodeById(e.to);
       if (!path || !a || !b) return;
-      path.setAttribute('d', curve(portPoint(a, 'out'), portPoint(b, 'in')));
+      const d = curve(portPoint(a, 'out'), portPoint(b, 'in'));
+      path.setAttribute('d', d);
+      flow.hits[e.id]?.setAttribute('d', d);
       const len = path.getTotalLength();
       flow.pellets.forEach((p) => {
         if (p.eid === e.id) p.len = len;
@@ -1392,8 +1395,10 @@
     svg.innerHTML = '';
     if (labels) labels.innerHTML = '';
     flow.paths = {};
+    flow.hits = {};
     flow.pills = {};
     flow.pellets = [];
+    hoverEdgeId = null;
 
     const ordered = [
       ...state.nodes.filter((n) => n.kind === 'groupe'),
@@ -1493,21 +1498,43 @@
       svg.appendChild(path);
       flow.paths[e.id] = path;
 
+      if (!readonly) {
+        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        hit.setAttribute('d', path.getAttribute('d'));
+        hit.setAttribute('class', 'builder-wire-hit');
+        hit.setAttribute('data-edge-hit', e.id);
+        svg.appendChild(hit);
+        flow.hits[e.id] = hit;
+      }
+
       if (labels) {
         const sibs = C.outs[e.from] || [];
         const idx = Math.max(0, sibs.indexOf(e));
         const mid = labelPoint(path, a, b, idx);
+        const wrap = document.createElement('div');
+        const tag = e.mode === 'pct' ? e.value + ' %' : (e.mode === 'fixe' ? 'fixe' : 'reste');
+        wrap.className = 'edge-label' + (hot ? '' : ' is-zero') + (state.openEdge === e.id ? ' is-open' : '');
+        wrap.dataset.edge = e.id;
+        wrap.style.left = mid.x + 'px';
+        wrap.style.top = mid.y + 'px';
         const pill = document.createElement('button');
         pill.type = 'button';
-        const tag = e.mode === 'pct' ? e.value + ' %' : (e.mode === 'fixe' ? 'fixe' : 'reste');
         pill.className = 'edge-pill' + (hot ? '' : ' is-zero') + (state.openEdge === e.id ? ' is-open' : '');
         if (readonly) pill.disabled = true;
-        pill.dataset.edge = e.id;
-        pill.style.left = mid.x + 'px';
-        pill.style.top = mid.y + 'px';
         pill.innerHTML = `${euro(e._amt)}<i>${tag}</i>`;
-        labels.appendChild(pill);
-        flow.pills[e.id] = pill;
+        wrap.appendChild(pill);
+        if (!readonly) {
+          const kill = document.createElement('button');
+          kill.type = 'button';
+          kill.className = 'edge-kill';
+          kill.dataset.edgeDel = e.id;
+          kill.title = 'Retirer le lien';
+          kill.setAttribute('aria-label', 'Retirer le lien');
+          kill.textContent = '×';
+          wrap.appendChild(kill);
+        }
+        labels.appendChild(wrap);
+        flow.pills[e.id] = wrap;
       }
 
       spawnPellets(e, path, color);
@@ -1933,6 +1960,46 @@
     state.edges = state.edges.filter((e) => e.from !== id && e.to !== id);
     if (state.selected === id) state.selected = null;
     if (state.connectFrom === id) cancelLink();
+  }
+
+  function removeEdge(id) {
+    state.edges = state.edges.filter((e) => e.id !== id);
+    if (state.openEdge === id) state.openEdge = null;
+    if (hoverEdgeId === id) hoverEdgeId = null;
+  }
+
+  function edgeTargetId(el) {
+    if (!el || !el.closest) return null;
+    const hit = el.closest('[data-edge-hit]');
+    if (hit) return hit.getAttribute('data-edge-hit');
+    const label = el.closest('[data-edge]');
+    return label ? label.getAttribute('data-edge') : null;
+  }
+
+  function applyHoverEdge(id) {
+    if (readonly || state.connectFrom) id = null;
+    if (hoverEdgeId === id) return;
+    if (hoverEdgeId) {
+      flow.paths[hoverEdgeId]?.classList.remove('is-hover');
+      flow.hits[hoverEdgeId]?.classList.remove('is-hover');
+      flow.pills[hoverEdgeId]?.classList.remove('is-hover');
+    }
+    hoverEdgeId = id;
+    if (id) {
+      flow.paths[id]?.classList.add('is-hover');
+      flow.hits[id]?.classList.add('is-hover');
+      flow.pills[id]?.classList.add('is-hover');
+    }
+  }
+
+  let hoverEdgeClear = 0;
+  function setHoverEdge(id) {
+    clearTimeout(hoverEdgeClear);
+    if (id) {
+      applyHoverEdge(id);
+      return;
+    }
+    hoverEdgeClear = setTimeout(() => applyHoverEdge(null), 160);
   }
 
   function syncDepenseAmount(n) {
@@ -2435,6 +2502,7 @@
 
   function startLink(id, side) {
     dismissLinkCoach();
+    applyHoverEdge(null);
     state.connectFrom = id;
     state.connectSide = side;
     canvas.classList.add('is-linking');
@@ -2670,7 +2738,7 @@
   });
 
   canvas.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.node, .edge-pill, .link-coach, button, input, select')) return;
+    if (e.target.closest('.node, .edge-label, .edge-pill, .builder-wire-hit, .link-coach, button, input, select')) return;
     pan = { sx: e.clientX, sy: e.clientY, ox: state.tx, oy: state.ty };
     canvas.classList.add('is-grabbing');
   });
@@ -2773,11 +2841,8 @@
     }
   });
 
-  labels?.addEventListener('click', (e) => {
-    if (readonly) return;
-    const pill = e.target.closest('[data-edge]');
-    if (!pill) return;
-    const edge = state.edges.find((x) => x.id === pill.getAttribute('data-edge'));
+  function openEdgeProps(edgeId) {
+    const edge = state.edges.find((x) => x.id === edgeId);
     if (!edge) return;
     state.selected = edge.from;
     state.openEdge = edge.id;
@@ -2785,11 +2850,46 @@
     dismissSplitCoach();
     render();
     propsForm?.querySelector(`[data-edge-edit="${edge.id}"]`)?.scrollIntoView({ block: 'nearest' });
+  }
+
+  labels?.addEventListener('click', (e) => {
+    if (readonly) return;
+    const del = e.target.closest('[data-edge-del]');
+    if (del) {
+      e.preventDefault();
+      e.stopPropagation();
+      removeEdge(del.getAttribute('data-edge-del'));
+      render();
+      return;
+    }
+    const pill = e.target.closest('[data-edge]');
+    if (!pill) return;
+    openEdgeProps(pill.getAttribute('data-edge'));
+  });
+
+  svg?.addEventListener('click', (e) => {
+    if (readonly || state.connectFrom) return;
+    const hit = e.target.closest('[data-edge-hit]');
+    if (!hit) return;
+    openEdgeProps(hit.getAttribute('data-edge-hit'));
+  });
+
+  layer.addEventListener('pointerover', (e) => {
+    if (readonly || state.connectFrom) return;
+    const id = edgeTargetId(e.target);
+    if (id) setHoverEdge(id);
+  });
+
+  layer.addEventListener('pointerout', (e) => {
+    const from = edgeTargetId(e.target);
+    if (!from) return;
+    const next = edgeTargetId(e.relatedTarget);
+    if (next !== from) setHoverEdge(null);
   });
 
   canvas.addEventListener('click', (e) => {
     if (linkJustEnded || ignoreClick) return;
-    if (e.target.closest('.node, .edge-pill, .port, .link-coach, button')) return;
+    if (e.target.closest('.node, .edge-label, .edge-pill, .builder-wire-hit, .port, .link-coach, button')) return;
     if (state.connectFrom) { cancelLink(); return; }
     if (state.selected) selectNode(null);
   });
@@ -2930,7 +3030,7 @@
     }
     const delEdge = e.target.closest('[data-edge-del]');
     if (delEdge) {
-      state.edges = state.edges.filter((ed) => ed.id !== delEdge.getAttribute('data-edge-del'));
+      removeEdge(delEdge.getAttribute('data-edge-del'));
       render();
       return;
     }

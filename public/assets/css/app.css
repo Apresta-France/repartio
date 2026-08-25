@@ -949,6 +949,8 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder-edges { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; z-index: 1; }
 .builder-wire { fill: none; stroke-linecap: round; }
 .builder-wire.is-hot { opacity: .55; }
+.builder-wire.is-hover { opacity: .95; stroke-width: 3.2; }
+.builder-wire-hit { fill: none; stroke: transparent; stroke-width: 18; stroke-linecap: round; pointer-events: stroke; cursor: pointer; }
 .pellet { pointer-events: none; }
 .builder-labels { position: absolute; top: 0; left: 0; z-index: 4; }
 .canvas-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; text-align: center; color: var(--muted); pointer-events: none; }
@@ -1254,10 +1256,14 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .port-out { right: -6px; }
 .port:hover, .port.is-armed { box-shadow: 0 0 0 4px oklch(0.62 0.12 192 / 0.22); }
 .port.is-target { box-shadow: 0 0 0 5px oklch(0.62 0.12 192 / 0.38); transform: scale(1.2); }
-.edge-pill { position: absolute; transform: translate(-50%, -50%); z-index: 4; display: flex; align-items: baseline; gap: 5px; padding: 2px 8px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); font-family: var(--mono); font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px oklch(0.26 0.07 265 / 0.06); }
-.edge-pill:hover, .edge-pill.is-open { border-color: var(--teal); }
+.edge-label { position: absolute; transform: translate(-50%, -50%); z-index: 4; display: flex; align-items: center; }
+.edge-pill { position: relative; z-index: 4; display: flex; align-items: baseline; gap: 5px; padding: 2px 8px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); font-family: var(--mono); font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; box-shadow: 0 2px 8px oklch(0.26 0.07 265 / 0.06); }
+.edge-label:hover .edge-pill, .edge-label.is-hover .edge-pill, .edge-label.is-open .edge-pill, .edge-pill:hover, .edge-pill.is-open { border-color: var(--teal); }
 .edge-pill i { font-style: normal; font-family: var(--sans); font-size: 9.5px; font-weight: 600; color: var(--muted); }
 .edge-pill.is-zero { color: var(--muted); font-weight: 500; }
+.edge-kill { position: absolute; left: calc(100% + 4px); top: 50%; transform: translateY(-50%); width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); color: var(--faint); font-size: 16px; line-height: 1; cursor: pointer; opacity: 0; pointer-events: none; box-shadow: 0 2px 8px oklch(0.26 0.07 265 / 0.06); }
+.edge-label:hover .edge-kill, .edge-label.is-hover .edge-kill { opacity: 1; pointer-events: auto; }
+.edge-kill:hover { background: var(--chip); color: var(--red); border-color: oklch(0.82 0.06 25); }
 .builder-props-empty p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
 .prop-block { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .prop-head { display: flex; align-items: center; gap: 10px; }
@@ -1344,6 +1350,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder.is-readonly .node-head,
 .builder.is-readonly .node.is-group { cursor: default; }
 .builder.is-readonly .edge-pill { cursor: default; }
+.builder.is-readonly .edge-kill { display: none; }
 
 .app-page { padding: 24px 28px 48px; display: flex; flex-direction: column; gap: 20px; }
 .app-page h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.03em; line-height: 1.15; }
@@ -1901,7 +1908,7 @@ form.dash-card .card-action-hit { padding: 0; }
 .node.is-tour-on { border-color: var(--orange); box-shadow: 0 0 0 2px oklch(0.68 0.18 38 / 0.28); z-index: 5; }
 .builder-wire.is-tour-dim { opacity: .12; }
 .builder-wire.is-tour-on { opacity: .9; }
-.edge-pill.is-tour-dim { opacity: .2; }
+.edge-pill.is-tour-dim, .edge-label.is-tour-dim { opacity: .2; }
 
 .showcase-lessons { background: var(--paper); }
 .showcase-claim .lede { max-width: 46ch; }
