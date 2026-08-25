@@ -28,7 +28,7 @@ $user = \App\Core\Auth::user();
       <a class="btn btn-orange" href="<?= e(url('/app')) ?>">Mon compte</a>
     <?php else: ?>
       <a class="btn-link" href="<?= e(url('/connexion')) ?>">Se connecter</a>
-      <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Ouvrir le builder</a>
+      <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Créer mon compte gratuit</a>
     <?php endif; ?>
   </div>
   <button type="button" class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="site-nav">
