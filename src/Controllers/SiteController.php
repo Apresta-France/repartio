@@ -50,14 +50,6 @@ class SiteController
         ], 'layouts/site');
     }
 
-    public function capacites(): void
-    {
-        View::render('site/capacites', [
-            'title' => 'Capacités',
-            'nav' => 'capacites',
-        ], 'layouts/site');
-    }
-
     public function tarifs(): void
     {
         View::render('site/tarifs', [

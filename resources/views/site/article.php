@@ -18,7 +18,7 @@ $headingId = static function (array $block): string {
     <div class="article-crumb">
       <a href="<?= e(url('/ressources')) ?>">Ressources</a>
       <span aria-hidden="true">/</span>
-      <span><?= e($post['tag']) ?></span>
+      <span><?= e($post['topic'] ?? $post['tag']) ?></span>
     </div>
     <h1 class="page-title"><?= e($post['t']) ?></h1>
     <p class="lede"><?= e($post['d']) ?></p>
@@ -94,7 +94,7 @@ $headingId = static function (array $block): string {
           <?php else: ?>
             <a class="btn btn-orange" href="<?= e(url('/creer-un-compte')) ?>">Ouvrir le builder</a>
           <?php endif; ?>
-          <a class="btn btn-ghost" href="<?= e(url('/ressources')) ?>">← Toutes les notes</a>
+          <a class="btn btn-ghost" href="<?= e(url('/ressources')) ?>">← Tous les guides</a>
         </div>
       </div>
     </div>
@@ -118,7 +118,7 @@ $headingId = static function (array $block): string {
         <div class="article-next">
           <?php foreach ($post['related'] as $next): ?>
             <a href="<?= e(url('/ressources/' . $next['slug'])) ?>">
-              <span class="eyebrow" style="color:var(--teal-ink);"><?= e($next['tag']) ?></span>
+              <span class="eyebrow" style="color:var(--teal-ink);"><?= e(\App\Articles::topicOf($next)) ?></span>
               <strong><?= e($next['t']) ?></strong>
             </a>
           <?php endforeach; ?>

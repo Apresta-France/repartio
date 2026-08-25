@@ -4,9 +4,9 @@
     <h1>Aucune connexion bancaire. Aucun agrégateur.</h1>
     <p class="lede">repartio ne lit pas vos comptes. Vous saisissez les montants que vous voulez répartir&nbsp;: un salaire, un loyer, un versement mensuel. C’est une contrainte assumée — elle permet de modéliser des situations qui n’existent pas encore, et elle nous évite de détenir votre historique de transactions.</p>
     <div class="chips donnees-hero-meta">
-      <span class="chip">À jour au 24 août 2026</span>
+      <span class="chip">À jour au 25 août 2026</span>
       <span class="chip">RGPD</span>
-      <span class="chip">Union européenne</span>
+      <span class="chip">Suisse</span>
     </div>
     <div class="cta-row">
       <a class="btn btn-orange" href="<?= e(url('/confidentialite')) ?>">Politique de confidentialité</a>
@@ -16,7 +16,7 @@
   <div class="donnees-hero-facts">
     <?php foreach ([
       ['Saisie manuelle', 'Aucun accès à vos comptes, aucun mandat DSP2, aucun agrégateur tiers.'],
-      ['Hébergement', 'Serveurs en France, Union européenne, chiffrés au repos et en transit.'],
+      ['Hébergement', 'Serveurs en Suisse, chez Infomaniak, chiffrés au repos et en transit.'],
       ['Aucune revente', 'Vos circuits ne sont ni vendus, ni partagés, ni utilisés pour du ciblage.'],
       ['Export', 'JSON et CSV disponibles à tout moment, sans demande ni délai.'],
       ['Suppression', 'Un clic supprime le compte et les circuits, sans période de rétention.'],
@@ -49,7 +49,7 @@
       'Aucun mandat DSP2, aucun agrégateur de comptes.',
       'Aucun cookie publicitaire, aucun pixel de régie.',
       'Aucune revente, aucun courtier, aucun enrichissement externe.',
-      'Aucun transfert des données hors de l’Union européenne.',
+      'Hébergement en Suisse, en Europe, chez Infomaniak.',
     ] as $item): ?>
       <div><span aria-hidden="true">—</span><span><?= e($item) ?></span></div>
     <?php endforeach; ?>
@@ -116,10 +116,10 @@
     <span class="eyebrow">Sous-traitants</span>
     <h2>Hébergement et prestataires</h2>
   </div>
-  <p class="lede donnees-lede">Les données restent dans l’Union européenne. Les sous-traitants sont limités au strict nécessaire, encadrés par l’article 28 du RGPD.</p>
+  <p class="lede donnees-lede">Les données sont hébergées en Suisse, en Europe, chez Infomaniak. Les sous-traitants sont limités au strict nécessaire, encadrés par l’article 28 du RGPD.</p>
   <div class="donnees-vendors">
     <?php foreach ([
-      ['Hébergement', 'Infrastructure européenne', 'Base de données et application hébergées dans un centre de données situé en France.', 'Paris, FR'],
+      ['Hébergement', 'Infomaniak Network SA', 'Base de données et application hébergées dans un centre de données situé en Suisse.', 'Genève, CH'],
       ['Paiement', 'Prestataire PCI-DSS', 'Aucune donnée de carte ne transite par nos serveurs : nous ne voyons qu’un identifiant d’abonnement.', 'Union européenne'],
       ['E-mails', 'Envoi transactionnel', 'Liens de connexion et factures uniquement. Pas de liste marketing par défaut.', 'Union européenne'],
       ['Audience', 'ReInvent Analytics', 'Mesure d’usage sans cookie ni identifiant publicitaire, opérée par ReInvent.', 'Union européenne'],
@@ -142,7 +142,7 @@
   <div class="card">
     <?php foreach ([
       ['Faut-il connecter ma banque ?', 'Non, et ce n’est pas prévu. repartio fonctionne uniquement avec les montants que vous saisissez : un salaire, un loyer, un versement mensuel.'],
-      ['Où sont hébergées mes données ?', 'Dans un centre de données situé en France, au sein de l’Union européenne. Aucun transfert hors UE.'],
+      ['Où sont hébergées mes données ?', 'Chez Infomaniak, dans un centre de données situé en Suisse, en Europe.'],
       ['Vendez-vous les données ?', 'Jamais. Pas de revente, pas de courtier, pas de ciblage publicitaire, pas de croisement entre utilisateurs.'],
       ['Comment supprimer définitivement mon compte ?', 'Depuis les réglages, en un clic. La suppression est immédiate et sans période de rétention. Exportez vos circuits avant.'],
       ['Y a-t-il une bannière de cookies ?', 'Non. Un cookie de session suffit à vous maintenir connecté, et la mesure d’audience ReInvent n’utilise ni cookie ni identifiant publicitaire.'],

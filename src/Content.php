@@ -33,6 +33,7 @@ class Content
             ['Situations', 'Peut-on modéliser un couple avec des comptes séparés ?', 'C’est le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts.', 'Voir un circuit rempli', '/circuit-rempli'],
             ['Situations', 'Comment provisionner l’URSSAF en auto-entreprise ?', 'Avec un bloc dépense dédié, alimenté depuis le compte professionnel.', '', ''],
             ['Situations', 'Et les livrets des enfants ?', 'Un bloc livret par enfant, avec son solde de départ, son taux et son plafond.', '', ''],
+            ['Situations', 'Peut-on câbler le premier argent d’un ado ?', 'Oui. Le scénario « Seize ans » part d’un argent de poche et d’un job, verse une part à l’épargne avant les sorties, et vise un Livret Jeune plus une enveloppe (permis, voyage).', 'Circuits types', '/circuits-types'],
             ['Situations', 'Peut-on suivre un objectif chiffré, comme un apport ?', 'Oui : vous posez la cible sur le bloc de destination, et repartio affiche le mois d’atteinte.', '', ''],
             ['Situations', 'Comment gérer un crédit immobilier ?', 'Comme une dépense mensuelle fixe. La modélisation du capital restant dû n’est pas encore dans le moteur.', '', ''],
             ['Compte & plans', 'Que contient la version gratuite ?', 'Un circuit, les cinq types de blocs, la projection jusqu’à 24 mois et le partage public.', 'Comparer les plans', '/tarifs'],
@@ -40,7 +41,7 @@ class Content
             ['Compte & plans', 'Que devient mon circuit si j’arrête de payer ?', 'Il reste consultable, partageable et exportable. Vous repassez sous la limite d’un circuit modifiable et d’une projection à 24 mois.', '', ''],
             ['Compte & plans', 'Le plan Foyer, c’est plusieurs abonnements ?', 'Non, un seul : jusqu’à dix personnes invitées à gérer les mêmes circuits.', '', ''],
             ['Compte & plans', 'Puis-je changer de plan en cours de route ?', 'À tout moment, dans les deux sens.', '', ''],
-            ['Données & sécurité', 'Où sont hébergées mes données ?', 'Dans un centre de données situé en France, au sein de l’Union européenne.', 'Confidentialité', '/confidentialite'],
+            ['Données & sécurité', 'Où sont hébergées mes données ?', 'Chez Infomaniak, dans un centre de données situé en Suisse, en Europe.', 'Confidentialité', '/confidentialite'],
             ['Données & sécurité', 'Vendez-vous les données ?', 'Jamais. Pas de revente, pas de courtier, pas de ciblage publicitaire.', '', ''],
             ['Données & sécurité', 'Comment supprimer définitivement mon compte ?', 'Depuis les réglages, en un clic. La suppression est immédiate et sans période de rétention.', '', ''],
             ['Données & sécurité', 'repartio est-il un conseil en investissement ?', 'Non. C’est un outil de simulation : il calcule ce que vous décrivez.', '', ''],
@@ -388,7 +389,7 @@ class Content
             'eyebrow' => 'Mentions légales',
             'title' => 'Mentions légales',
             'lede' => 'Informations légales relatives à l’éditeur du site repartio.fr et du service de répartition de revenus qui y est accessible, conformément à la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l’économie numérique.',
-            'meta' => ['Version 2.0', 'À jour au 24 août 2026', 'Droit français'],
+            'meta' => ['Version 2.0', 'À jour au 25 août 2026', 'Droit français'],
             'sections' => [
                 [
                     'h' => 'Éditeur du site',
@@ -425,11 +426,13 @@ class Content
                 [
                     'h' => 'Hébergement et exploitation technique',
                     'ps' => [
-                        'Le site et les données du service sont exploités par REINVENT et hébergés au sein de l’Union européenne. L’hébergeur n’intervient ni dans la production ni dans la modération des contenus publiés.',
+                        'Le site et les données du service sont exploités par REINVENT et hébergés en Suisse, en Europe, par Infomaniak Network SA. L’hébergeur n’intervient ni dans la production ni dans la modération des contenus publiés.',
                     ],
                     'rows' => [
                         ['k' => 'Exploitant technique', 'v' => 'REINVENT — [reinvent.fr](https://reinvent.fr)'],
-                        ['k' => 'Localisation', 'v' => 'Centres de données situés dans l’Union européenne'],
+                        ['k' => 'Hébergeur', 'v' => 'Infomaniak Network SA'],
+                        ['k' => 'Adresse de l’hébergeur', 'v' => 'Rue Eugène-Marziano 25, 1227 Les Acacias (GE), Suisse'],
+                        ['k' => 'Localisation', 'v' => 'Centres de données situés en Suisse'],
                     ],
                 ],
                 [
@@ -675,7 +678,7 @@ class Content
             'eyebrow' => 'Politique de confidentialité',
             'title' => 'Politique de confidentialité',
             'lede' => 'Comment repartio, édité et propulsé par ReInvent, traite les données personnelles de ses utilisateurs, pour quelles finalités, pendant combien de temps, et comment exercer vos droits. Rédigée en application du règlement (UE) 2016/679 (RGPD).',
-            'meta' => ['Version 2.0', 'À jour au 24 août 2026', 'Responsable : REINVENT'],
+            'meta' => ['Version 2.0', 'À jour au 25 août 2026', 'Responsable : REINVENT'],
             'sections' => [
                 [
                     'h' => 'Responsable du traitement',
@@ -756,15 +759,15 @@ class Content
                 [
                     'h' => 'Sous-traitants et localisation',
                     'ps' => [
-                        'Les données sont hébergées au sein de l’Union européenne. Les sous-traitants intervenant dans la fourniture du service sont limités au strict nécessaire et encadrés par des clauses conformes à l’article 28 du RGPD.',
+                        'Les données sont hébergées en Suisse, en Europe, chez Infomaniak. Les sous-traitants intervenant dans la fourniture du service sont limités au strict nécessaire et encadrés par des clauses conformes à l’article 28 du RGPD.',
                     ],
                     'rows' => [
                         ['k' => 'Édition et infogérance', 'v' => 'REINVENT — [reinvent.fr](https://reinvent.fr)'],
-                        ['k' => 'Hébergement', 'v' => 'Infrastructure européenne'],
+                        ['k' => 'Hébergement', 'v' => 'Infomaniak Network SA, centres de données en Suisse'],
                         ['k' => 'Mesure d’audience', 'v' => 'ReInvent Analytics (stat.reinvent.fr), Union européenne'],
                         ['k' => 'Paiement', 'v' => 'Prestataire certifié PCI-DSS, Union européenne'],
                         ['k' => 'E-mails transactionnels', 'v' => 'Prestataire d’envoi, Union européenne'],
-                        ['k' => 'Transferts hors UE', 'v' => 'Aucun transfert hors Union européenne'],
+                        ['k' => 'Transferts hors UE', 'v' => 'Hébergement en Suisse, pays bénéficiant d’une décision d’adéquation de la Commission européenne'],
                     ],
                 ],
                 [

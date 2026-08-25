@@ -215,7 +215,7 @@ $C = [
   <div style="padding:48px 32px 48px 44px;background:var(--navy-soft);">
     <?php foreach ([
       ['Saisie manuelle', 'Aucun accès à vos comptes, aucun mandat DSP2, aucun agrégateur tiers.'],
-      ['Hébergement', 'Données chiffrées au repos, serveurs en Union européenne.'],
+      ['Hébergement', 'Données chiffrées au repos, serveurs en Suisse chez Infomaniak.'],
       ['Export', 'Vos circuits s’exportent en JSON et CSV à tout moment, sans demande.'],
       ['Suppression', 'Un clic supprime le compte et les circuits associés, sans période de rétention.'],
     ] as $t): ?>
@@ -248,15 +248,15 @@ $C = [
 
 <section class="section" id="ressources">
   <div class="section-head">
-    <span class="eyebrow">06 · Ressources</span>
-    <h2>Notes de terrain</h2>
-    <a href="<?= e(url('/ressources')) ?>" style="margin-left:auto;font-weight:600;font-size:13.5px;">Tous les articles →</a>
+    <span class="eyebrow">06 · Guides</span>
+    <h2>Comment gérer son argent</h2>
+    <a href="<?= e(url('/ressources')) ?>" style="margin-left:auto;font-weight:600;font-size:13.5px;">Tous les guides →</a>
   </div>
   <div class="split cols-3">
     <?php foreach ([
-      ['Méthode', '6 min', 'Pourquoi votre budget ne tient pas dans un tableur', 'Un tableur décrit des totaux ; un circuit décrit des chemins. Ajoutez des comptes, voyez ce qui casse.', 'budget-tableur'],
-      ['Réglementaire', '4 min', 'Ordre de remplissage des livrets réglementés', 'LEP, LDDS, Livret A : réglez l’épargne mensuelle, lisez les dates de saturation.', 'ordre-livrets'],
-      ['Étude de cas', '12 min', 'Un couple, 6 280 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
+      ['Budget', '6 min', 'Pourquoi votre budget ne tient pas dans un tableur', 'Un tableur décrit des totaux ; un circuit décrit des chemins. Ajoutez des comptes, voyez ce qui casse.', 'budget-tableur'],
+      ['Épargne', '4 min', 'Ordre de remplissage des livrets réglementés', 'LEP, LDDS, Livret A : réglez l’épargne mensuelle, lisez les dates de saturation.', 'ordre-livrets'],
+      ['Foyer', '12 min', 'Un couple, 6 280 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
     ] as $p): ?>
       <a href="<?= e(url('/ressources/' . $p[4])) ?>" style="padding:24px 26px;color:inherit;display:flex;flex-direction:column;gap:10px;">
         <div class="eyebrow" style="display:flex;"><span style="color:var(--teal-live);"><?= e($p[0]) ?></span><span style="margin-left:auto;color:var(--faint);"><?= e($p[1]) ?></span></div>

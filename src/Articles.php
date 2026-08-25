@@ -179,6 +179,26 @@ class Articles
         return $out;
     }
 
+    /** @return list<string> */
+    public static function topics(): array
+    {
+        return ['Budget', 'Épargne', 'Foyer', 'Produit'];
+    }
+
+    public static function topicOf(array $post): string
+    {
+        if (!empty($post['topic']) && is_string($post['topic'])) {
+            return $post['topic'];
+        }
+
+        return match ($post['tag'] ?? '') {
+            'Méthode' => 'Budget',
+            'Réglementaire' => 'Épargne',
+            'Étude de cas' => 'Foyer',
+            default => 'Produit',
+        };
+    }
+
     /** @return list<array{q: string, a: string, slug: string}> */
     public static function doors(): array
     {
@@ -238,6 +258,7 @@ class Articles
             if ($post['slug'] !== $slug) {
                 continue;
             }
+            $post['topic'] = self::topicOf($post);
             $post['blocks'] = self::blocks($slug);
             $post['toc'] = self::toc($post['blocks']);
             $post['related'] = self::related($slug);
@@ -264,7 +285,7 @@ class Articles
             if ($post['slug'] === $slug) {
                 continue;
             }
-            if ($current && $post['tag'] === $current['tag']) {
+            if ($current && self::topicOf($post) === self::topicOf($current)) {
                 $picked[] = $post;
             }
         }

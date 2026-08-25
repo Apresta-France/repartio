@@ -324,9 +324,16 @@ $readonly = !$canEdit;
             <button type="button" class="chip<?= (int) ($payload['horizon'] ?? ($horizonDefault ?? 24)) === (int) $preset['months'] ? ' active' : '' ?>" data-setup-preset="<?= (int) $preset['months'] ?>"><strong><?= e($preset['title']) ?></strong><span><?= e($preset['hint']) ?></span></button>
           <?php endforeach; ?>
         </div>
+        <?php
+        $setupPlan = \App\Models\Plan::of($user ?? null);
+        $setupIsFree = (float) ($setupPlan['price_monthly_ht'] ?? 0) <= 0 && (float) ($setupPlan['price_yearly_ht'] ?? 0) <= 0;
+        if ($setupIsFree && \App\Models\Plan::nextSlug($setupPlan)):
+        ?>
+          <p class="field-hint setup-horizon-note">* Pour une projection plus longue, <a href="<?= e(url('/app/forfait')) ?>">passez sur une formule supérieure</a>.</p>
+        <?php endif; ?>
       </div>
       <div class="setup-actions">
-        <button class="btn btn-ghost" type="button" data-setup-dismiss>Plus tard</button>
+        <button class="btn btn-ghost setup-later" type="button" data-setup-dismiss>Plus tard</button>
         <button class="btn btn-ghost" type="button" data-scenario-open>Charger un scénario</button>
         <button class="btn btn-orange" type="submit">Commencer</button>
       </div>

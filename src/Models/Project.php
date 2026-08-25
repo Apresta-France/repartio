@@ -468,7 +468,7 @@ class Project
                 $saved += $firstDeposit;
                 $leftover += max(0.0, $add - $firstDeposit);
                 $projection += $balance;
-            } else {
+            } elseif ($kind === 'repartiteur') {
                 $leftover += $kept[$id] ?? 0;
             }
         }

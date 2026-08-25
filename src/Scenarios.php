@@ -180,6 +180,43 @@ class Scenarios
                     ],
                 ],
             ],
+            'seize-ans' => [
+                'title' => 'Seize ans',
+                'category' => 'Solo',
+                'search' => 'ado lycéen 16 ans argent de poche baby-sitting livret jeune permis apprentissage flux',
+                'hint' => 'Encore au foyer : argent de poche et job, une part versée avant les sorties, Livret Jeune et enveloppe permis.',
+                'thumb' => $thumbs['two-in'],
+                'payload' => [
+                    'horizon' => 24,
+                    'nodes' => [
+                        $node('r1', 'revenu', 'Argent de poche', 40, 40, 50),
+                        $node('r2', 'revenu', 'Job week-end', 40, 200, 190),
+                        $node('c1', 'compte', 'Compte ado', 360, 120),
+                        $depense('dabo', 'Abonnements', 720, 40, [
+                            $line('Téléphone', 15),
+                            $line('Transports', 25),
+                        ]),
+                        $depense('dcour', 'Sorties', 720, 200, [
+                            $line('Sorties', 50),
+                            $line('Cafés / restos', 30),
+                            $line('Jeux / streaming', 18),
+                            $line('Achats', 30),
+                        ]),
+                        $node('p1', 'repartiteur', 'Épargne', 720, 360),
+                        $node('permis', 'livret', 'Enveloppe permis', 1040, 280, 0, ['rate' => 0, 'cap' => 0, 'start' => 280, 'preset' => 'custom', 'note' => 'Permis, voyage, premier ordi : changez le titre. Horizon 24 mois, de 16 à 18 ans.']),
+                        $node('lj', 'livret', 'Livret Jeune', 1040, 440, 0, ['rate' => 1.7, 'cap' => 1600, 'start' => 220, 'preset' => 'jeune']),
+                    ],
+                    'edges' => [
+                        ['from' => 'r1', 'to' => 'c1', 'mode' => 'reste', 'value' => 0],
+                        ['from' => 'r2', 'to' => 'c1', 'mode' => 'reste', 'value' => 0],
+                        ['from' => 'c1', 'to' => 'dabo', 'mode' => 'fixe', 'value' => 40],
+                        ['from' => 'c1', 'to' => 'p1', 'mode' => 'pct', 'value' => 30],
+                        ['from' => 'c1', 'to' => 'dcour', 'mode' => 'reste', 'value' => 0],
+                        ['from' => 'p1', 'to' => 'permis', 'mode' => 'fixe', 'value' => 55],
+                        ['from' => 'p1', 'to' => 'lj', 'mode' => 'reste', 'value' => 0],
+                    ],
+                ],
+            ],
             'colocation' => [
                 'title' => 'Colocation',
                 'category' => 'Solo',

@@ -3,7 +3,6 @@ $nav = $nav ?? '';
 $links = [
     ['fonctionnement', 'Fonctionnement', '/fonctionnement'],
     ['circuits', 'Circuits types', '/circuits-types'],
-    ['capacites', 'Capacités', '/capacites'],
     ['tarifs', 'Tarifs', '/tarifs'],
     ['donnees', 'Vos données', '/vos-donnees'],
     ['ressources', 'Ressources', '/ressources'],

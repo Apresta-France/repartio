@@ -582,7 +582,7 @@
         saved += deposit;
         leftover += Math.max(0, add - deposit);
       }
-      else leftover += kept[n.id] || 0;
+      else if (n.kind === 'repartiteur') leftover += kept[n.id] || 0;
     });
 
     return { byId, outs, inflow, kept, over, cycle, inn, out, saved, leftover, proj, fin, full, sat, series: { livrets, total, delta } };
@@ -1321,7 +1321,7 @@
     const out = (C.outs[n.id] || []).reduce((s, e) => s + e._amt, 0);
     const rows = [];
     if (n.kind === 'revenu') {
-      rows.push(['Par mois', euro(n.amount), n.amount > 0 ? 'is-gain' : '']);
+      rows.push(['Par mois', euro(n.amount), n.amount > 0 ? 'is-gain' : (needsAmount(n) ? 'is-missing' : '')]);
       rows.push(['Sort', euro(out)]);
     } else if (n.kind === 'depense') {
       (n.items || []).forEach((item) => {
@@ -1329,7 +1329,7 @@
         rows.push([String(item.title || '').trim() || 'Poste', euro(item.amount), 'is-line']);
       });
       const monthlyLoss = (Number(n.amount) || 0) > 0;
-      rows.push(['Par mois', euro(n.amount), monthlyLoss ? 'is-loss' : '']);
+      rows.push(['Par mois', euro(n.amount), monthlyLoss ? 'is-loss' : (needsAmount(n) ? 'is-missing' : '')]);
       if (Math.abs(inflow - (Number(n.amount) || 0)) > 0.5) {
         rows.push(['Reçoit', euro(inflow), !monthlyLoss && inflow > 0 ? 'is-loss' : '']);
       }
@@ -1577,6 +1577,7 @@
     }
     const stats = nodeStats(n, C);
     const outs = (C.outs[n.id] || []);
+    const amountTip = n.kind === 'revenu' && graphNodeCount() === 1;
     if (propsEmpty) propsEmpty.hidden = true;
     if (!propsForm) return;
     propsForm.hidden = false;
@@ -1598,8 +1599,11 @@
         </div>
         ${n.kind === 'revenu' ? `
           <label class="prop-field">
-            <span>Montant par mois</span>
-            <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}">
+            <span class="prop-field-top">
+              <span>Montant par mois</span>
+              ${amountTip ? `<em class="prop-field-tip" id="prop-amount-tip" data-amount-tip${needsAmount(n) ? '' : ' hidden'}>Renseignez une valeur ici</em>` : ''}
+            </span>
+            <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}"${amountTip && needsAmount(n) ? ' aria-describedby="prop-amount-tip"' : ''}>
           </label>` : ''}
         ${n.kind === 'depense' ? `
           <div data-items-block>
@@ -1826,13 +1830,17 @@
     const plain = clsPrefix === 'prop-stat';
     return (rows || []).map(([k, v, cls, key]) => {
       const classes = String(cls || '').trim().split(/\s+/).filter(Boolean);
-      const rowExtra = classes.filter((c) => c === 'is-line').join(' ');
+      const missing = !plain && classes.includes('is-missing');
+      const rowExtra = classes.filter((c) => c === 'is-line' || c === 'is-missing').join(' ');
       const valExtra = classes.filter((c) => {
-        if (c === 'is-line') return false;
+        if (c === 'is-line' || c === 'is-missing') return false;
         if (plain && (c === 'is-gain' || c === 'is-loss')) return false;
         return true;
       }).join(' ');
-      return `<div class="${clsPrefix}${rowExtra ? ' ' + rowExtra : ''}"${key ? ` data-play="${escapeAttr(key)}"` : ''}><span>${escapeHtml(k)}</span><b${valExtra ? ` class="${escapeAttr(valExtra)}"` : ''}>${escapeHtml(v)}</b></div>`;
+      const label = missing
+        ? `<span class="node-stat-warn" title="À saisir" aria-label="À saisir">!</span>`
+        : `<span>${escapeHtml(k)}</span>`;
+      return `<div class="${clsPrefix}${rowExtra ? ' ' + rowExtra : ''}"${key ? ` data-play="${escapeAttr(key)}"` : ''}>${label}<b${valExtra ? ` class="${escapeAttr(valExtra)}"` : ''}>${escapeHtml(v)}</b></div>`;
     }).join('');
   }
 
@@ -2773,6 +2781,13 @@
     if (prop === 'amount') {
       n.amount = Number(e.target.value) || 0;
       if (n.kind === 'depense') syncDepenseItems(n);
+      const tip = propsForm.querySelector('[data-amount-tip]');
+      if (tip) {
+        const show = needsAmount(n) && graphNodeCount() === 1;
+        tip.hidden = !show;
+        if (show) e.target.setAttribute('aria-describedby', 'prop-amount-tip');
+        else e.target.removeAttribute('aria-describedby');
+      }
     }
     const itemTitle = e.target.getAttribute('data-item-title');
     const itemAmount = e.target.getAttribute('data-item-amount');
