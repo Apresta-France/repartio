@@ -57,6 +57,10 @@ class Config
             'mail.from' => env('MAIL_FROM', 'bonjour@repartio.fr'),
             'mail.from_name' => env('MAIL_FROM_NAME', 'repartio'),
             'mail.admin' => env('MAIL_ADMIN', 'bonjour@repartio.fr'),
+            'reinvent.api_url' => rtrim((string) env('REINVENT_API_URL', 'https://secure.reinvent.fr'), '/'),
+            'reinvent.api_key' => env('REINVENT_API_KEY', ''),
+            'reinvent.platform' => env('REINVENT_PLATFORM', 'repartio'),
+            'reinvent.webhook_secret' => env('REINVENT_WEBHOOK_SECRET', ''),
         ];
     }
 

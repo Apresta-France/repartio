@@ -8,6 +8,7 @@ use App\Controllers\AccessController;
 use App\Controllers\AdminController;
 use App\Controllers\AppController;
 use App\Controllers\AuthController;
+use App\Controllers\BillingController;
 use App\Controllers\ContactController;
 use App\Controllers\InstallController;
 use App\Controllers\ProjectController;
@@ -36,7 +37,7 @@ class App
             }
         }
 
-        if ($method === 'POST' && !Csrf::check($_POST['_token'] ?? null)) {
+        if ($method === 'POST' && $path !== '/webhooks/reinvent' && !Csrf::check($_POST['_token'] ?? null)) {
             http_response_code(419);
             Session::flashSet('error', 'Session expirée. Merci de renvoyer le formulaire.');
             if (wants_json()) {
@@ -108,8 +109,13 @@ class App
         $router->post('/app/circuits/{id}/archiver', [ProjectController::class, 'archive']);
         $router->post('/app/circuits/{id}/supprimer', [ProjectController::class, 'destroy']);
         $router->get('/p/{slug}', [ShareController::class, 'preview']);
-        $router->get('/app/forfait', [AppController::class, 'billing']);
-        $router->post('/app/forfait', [AppController::class, 'changePlan']);
+        $router->get('/app/forfait', [BillingController::class, 'show']);
+        $router->post('/app/forfait', [BillingController::class, 'changePlan']);
+        $router->post('/app/forfait/facturation', [BillingController::class, 'saveProfile']);
+        $router->get('/app/forfait/succes', [BillingController::class, 'success']);
+        $router->post('/app/forfait/portail', [BillingController::class, 'portal']);
+        $router->post('/app/forfait/resilier', [BillingController::class, 'cancel']);
+        $router->post('/webhooks/reinvent', [BillingController::class, 'webhook']);
         $router->get('/app/acces', [AccessController::class, 'index']);
         $router->post('/app/acces', [AccessController::class, 'invite']);
         $router->post('/app/acces/{id}', [AccessController::class, 'update']);

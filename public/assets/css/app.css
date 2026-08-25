@@ -994,6 +994,14 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .billing-plan-note { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 .billing-plan .btn, .billing-plan form { width: 100%; margin-top: auto; }
 .billing-plan .btn:disabled { opacity: .55; cursor: default; }
+.billing-sub-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.billing-profile { display: flex; flex-direction: column; gap: 14px; }
+.billing-profile h2, .billing-invoices h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
+.billing-cycle { margin: 0; }
+.billing-invoices { display: flex; flex-direction: column; gap: 12px; }
+.billing-invoice-list { display: flex; flex-direction: column; gap: 8px; }
+.billing-invoice-list > div { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; font-size: 14px; }
+.billing-invoice-list span { color: var(--muted); }
 
 .project-upsell { margin: 0 28px 40px; padding: 20px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .project-upsell > div { display: flex; flex-direction: column; gap: 4px; }

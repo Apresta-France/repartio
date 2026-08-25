@@ -96,6 +96,10 @@ class InstallController
             'MAIL_FROM' => trim((string) ($_POST['mail_from'] ?? 'bonjour@repartio.fr')),
             'MAIL_FROM_NAME' => 'repartio',
             'MAIL_ADMIN' => $email,
+            'REINVENT_API_URL' => 'https://secure.reinvent.fr',
+            'REINVENT_API_KEY' => '',
+            'REINVENT_PLATFORM' => 'repartio',
+            'REINVENT_WEBHOOK_SECRET' => '',
         ]);
 
         Config::load(BASE_PATH . '/.env');

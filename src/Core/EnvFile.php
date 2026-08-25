@@ -9,13 +9,14 @@ use PDOException;
 
 class EnvFile
 {
-    public const SECRETS = ['APP_KEY', 'DB_PASS', 'MAIL_PASS'];
+    public const SECRETS = ['APP_KEY', 'DB_PASS', 'MAIL_PASS', 'REINVENT_API_KEY', 'REINVENT_WEBHOOK_SECRET'];
 
     public const ORDER = [
         'APP_NAME', 'APP_ENV', 'APP_DEBUG', 'APP_URL', 'APP_KEY',
         'DB_DRIVER', 'DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASS',
         'MAIL_DRIVER', 'MAIL_HOST', 'MAIL_PORT', 'MAIL_USER', 'MAIL_PASS',
         'MAIL_ENCRYPTION', 'MAIL_FROM', 'MAIL_FROM_NAME', 'MAIL_ADMIN',
+        'REINVENT_API_URL', 'REINVENT_API_KEY', 'REINVENT_PLATFORM', 'REINVENT_WEBHOOK_SECRET',
     ];
 
     /** @return array<string, array<string, array{label:string,type:string,options?:array<string,string>,hint?:string}>> */
@@ -66,6 +67,28 @@ class EnvFile
                 'MAIL_FROM' => ['label' => 'Expéditeur', 'type' => 'email'],
                 'MAIL_FROM_NAME' => ['label' => 'Nom de l’expéditeur', 'type' => 'text'],
                 'MAIL_ADMIN' => ['label' => 'E-mail d’administration', 'type' => 'email'],
+            ],
+            'Paiement ReInvent' => [
+                'REINVENT_API_URL' => [
+                    'label' => 'URL du pont',
+                    'type' => 'url',
+                    'hint' => 'https://secure.reinvent.fr',
+                ],
+                'REINVENT_PLATFORM' => [
+                    'label' => 'Slug plateforme',
+                    'type' => 'text',
+                    'hint' => 'Doit correspondre à la plateforme créée dans l’admin ReInvent.',
+                ],
+                'REINVENT_API_KEY' => [
+                    'label' => 'Clé API',
+                    'type' => 'password',
+                    'hint' => 'rip_test_… en local, rip_live_… en production. Laissez vide pour conserver.',
+                ],
+                'REINVENT_WEBHOOK_SECRET' => [
+                    'label' => 'Secret webhook',
+                    'type' => 'password',
+                    'hint' => 'HMAC partagé avec le pont. Laissez vide pour conserver.',
+                ],
             ],
         ];
     }

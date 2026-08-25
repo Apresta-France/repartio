@@ -54,7 +54,7 @@ class Plan
             'sort_order' => 3,
             'featured' => false,
             'cta_label' => 'Choisir Foyer',
-            'cta_url' => '/contact',
+            'cta_url' => '/creer-un-compte',
         ],
     ];
 

@@ -1084,5 +1084,8 @@ document.querySelectorAll('[data-cycle]').forEach((btn) => {
     document.querySelectorAll('[data-unit-monthly][data-unit-yearly]').forEach((el) => {
       el.textContent = annual ? el.getAttribute('data-unit-yearly') : el.getAttribute('data-unit-monthly');
     });
+    document.querySelectorAll('[data-billing-cycle]').forEach((input) => {
+      input.value = annual ? 'yearly' : 'monthly';
+    });
   });
 });

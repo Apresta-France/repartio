@@ -407,6 +407,10 @@ class AdminController
             'MAIL_FROM' => trim((string) ($_POST['MAIL_FROM'] ?? '')),
             'MAIL_FROM_NAME' => trim((string) ($_POST['MAIL_FROM_NAME'] ?? 'repartio')),
             'MAIL_ADMIN' => trim((string) ($_POST['MAIL_ADMIN'] ?? '')),
+            'REINVENT_API_URL' => rtrim(trim((string) ($_POST['REINVENT_API_URL'] ?? 'https://secure.reinvent.fr')), '/'),
+            'REINVENT_PLATFORM' => trim((string) ($_POST['REINVENT_PLATFORM'] ?? 'repartio')) ?: 'repartio',
+            'REINVENT_API_KEY' => (string) ($_POST['REINVENT_API_KEY'] ?? ''),
+            'REINVENT_WEBHOOK_SECRET' => (string) ($_POST['REINVENT_WEBHOOK_SECRET'] ?? ''),
         ];
 
         $merged = $current;
@@ -419,7 +423,7 @@ class AdminController
 
         try {
             EnvFile::testDatabase($merged);
-            EnvFile::write($updates, ['DB_PASS', 'MAIL_PASS', 'APP_KEY']);
+            EnvFile::write($updates, ['DB_PASS', 'MAIL_PASS', 'APP_KEY', 'REINVENT_API_KEY', 'REINVENT_WEBHOOK_SECRET']);
             EnvFile::reload();
         } catch (Throwable $e) {
             Session::flashSet('error', $e->getMessage());
