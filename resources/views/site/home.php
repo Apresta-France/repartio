@@ -122,10 +122,24 @@ $C = [
 
 <section class="chip-bar">
   <span class="eyebrow">Sait répartir</span>
-  <div class="chips">
-    <?php foreach (['Salaires','Auto-entreprise','Loyers perçus','URSSAF','Comptes joints','Livret A','LDDS','LEP','Livrets enfants','Prélèvements','Dépenses libres','Parts en %'] as $c): ?>
-      <span class="chip"><?= e($c) ?></span>
-    <?php endforeach; ?>
+  <div class="chips-marquee">
+    <div class="chips-track">
+      <?php
+      $chips = [
+        'Salaires', 'Auto-entreprise', 'Loyers perçus', 'Dividendes',
+        'URSSAF', 'Impôts', 'Comptes joints', 'Compte courant',
+        'Livret A', 'LDDS', 'LEP', 'PEL', 'Livrets enfants',
+        'Assurance-vie', 'Prélèvements', 'Crédit immobilier',
+        'Dépenses libres', 'Aides CAF', 'Parts en %', 'Plafonds',
+      ];
+      foreach ([false, true] as $dup): ?>
+        <div class="chips"<?= $dup ? ' aria-hidden="true"' : '' ?>>
+          <?php foreach ($chips as $c): ?>
+            <span class="chip"><?= e($c) ?></span>
+          <?php endforeach; ?>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </div>
 </section>
 

@@ -209,6 +209,38 @@ if (pwd) {
   });
 }
 
+const noteSearch = document.querySelector('[data-note-search]');
+if (noteSearch) {
+  let noteTimer = 0;
+  let lastNote = '';
+  const catalogItems = () => [...document.querySelectorAll('[data-note-group] [data-note-q]')];
+  const visibleNotes = () => catalogItems().filter((el) => !el.hidden).length;
+  noteSearch.addEventListener('input', () => {
+    const q = noteSearch.value.trim().toLowerCase();
+    catalogItems().forEach((item) => {
+      const text = item.getAttribute('data-note-q') || '';
+      item.hidden = q !== '' && !text.includes(q);
+    });
+    document.querySelectorAll('[data-note-group]').forEach((group) => {
+      const any = [...group.querySelectorAll('[data-note-q]')].some((el) => !el.hidden);
+      group.hidden = !any;
+    });
+    const doors = document.querySelector('[data-note-doors]');
+    const jump = document.querySelector('[data-note-jump]');
+    if (doors) doors.hidden = q !== '';
+    if (jump) jump.hidden = q !== '';
+    const empty = document.querySelector('[data-note-empty]');
+    if (empty) empty.hidden = visibleNotes() > 0;
+    window.clearTimeout(noteTimer);
+    if (q.length < 2) return;
+    noteTimer = window.setTimeout(() => {
+      if (q === lastNote || typeof window.rv !== 'function') return;
+      lastNote = q;
+      window.rv('search', { term: noteSearch.value.trim(), zero: visibleNotes() === 0 });
+    }, 700);
+  });
+}
+
 const faqSearch = document.querySelector('[data-faq-search]');
 if (faqSearch) {
   let searchTimer = 0;

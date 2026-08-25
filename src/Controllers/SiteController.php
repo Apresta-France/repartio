@@ -79,7 +79,6 @@ class SiteController
         View::render('site/ressources', [
             'title' => 'Ressources',
             'nav' => 'ressources',
-            'ressources' => true,
             'posts' => Content::posts(),
         ], 'layouts/site');
     }

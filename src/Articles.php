@@ -179,6 +179,59 @@ class Articles
         return $out;
     }
 
+    /** @return list<array{q: string, a: string, slug: string}> */
+    public static function doors(): array
+    {
+        return [
+            ['q' => 'J’ai un tableur', 'a' => 'Le migrer en vingt minutes', 'slug' => 'tableur-vers-circuit'],
+            ['q' => 'Je veux les barèmes', 'a' => 'Taux et plafonds 2026', 'slug' => 'taux-plafonds-2026'],
+            ['q' => 'Je veux un foyer réel', 'a' => '6 280 €, zéro euro non affecté', 'slug' => 'couple-12338'],
+            ['q' => 'Je découvre le moteur', 'a' => 'Anatomie d’un répartiteur', 'slug' => 'anatomie-repartiteur'],
+        ];
+    }
+
+    /** @return list<array{id: string, kicker: string, title: string, lead: string, slugs: list<string>}> */
+    public static function sections(): array
+    {
+        return [
+            [
+                'id' => 'commencer',
+                'kicker' => '01 · Commencer',
+                'title' => 'Quitter le tableur',
+                'lead' => 'Traduire une feuille en chemins, puis comprendre ce qu’un répartiteur force à écrire.',
+                'slugs' => ['tableur-vers-circuit', 'budget-tableur', 'anatomie-repartiteur'],
+            ],
+            [
+                'id' => 'baremes',
+                'kicker' => '02 · Barèmes',
+                'title' => 'Les chiffres du moteur',
+                'lead' => 'Taux, plafonds, ordre de remplissage : ce que le circuit porte, sans conseil de placement.',
+                'slugs' => ['taux-plafonds-2026', 'ordre-livrets', 'plafond-atteint'],
+            ],
+            [
+                'id' => 'cas',
+                'kicker' => '03 · Cas réels',
+                'title' => 'Des circuits commentés',
+                'lead' => 'Lire un foyer déjà câblé, puis baisser un revenu pour voir ce qui s’arrête.',
+                'slugs' => ['couple-12338', 'famille-de-quatre', 'urssaf-auto-entrepreneur'],
+            ],
+            [
+                'id' => 'mecanique',
+                'kicker' => '04 · Mécanique',
+                'title' => 'Les gestes qui tiennent',
+                'lead' => 'Joints, fixes, pourcentages, débordement : les décisions qui suppriment l’arbitrage du 30.',
+                'slugs' => ['compte-joint-factures', 'pourcentages-ou-fixes', 'fil-tout-le-reste', 'scenarios-compares'],
+            ],
+            [
+                'id' => 'produit',
+                'kicker' => '05 · Produit',
+                'title' => 'Ce qui a changé',
+                'lead' => 'Le journal du moteur, du canvas et des projections.',
+                'slugs' => ['journal-versions'],
+            ],
+        ];
+    }
+
     public static function find(string $slug): ?array
     {
         foreach (self::index() as $post) {
