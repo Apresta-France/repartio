@@ -23,7 +23,7 @@ class BillingController
         $user = Auth::requireUser();
         $reason = (string) ($_GET['raison'] ?? '');
         if (!in_array($reason, ['circuits', 'invitations'], true)) {
-            $reason = Project::atPlanLimit($user) ? 'circuits' : '';
+            $reason = '';
         }
         if (!empty($_GET['annule'])) {
             redirect('/app/forfait/echec');
@@ -62,7 +62,10 @@ class BillingController
     public function saveProfile(): void
     {
         $user = Auth::requireUser();
-        $email = trim((string) ($_POST['billing_email'] ?? $user['email']));
+        $email = trim((string) ($_POST['billing_email'] ?? ''));
+        if ($email === '') {
+            $email = (string) $user['email'];
+        }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Session::flashSet('error', 'Indiquez une adresse e-mail de facturation valide.');
             redirect('/app/forfait#facturation');
@@ -119,11 +122,6 @@ class BillingController
         if (!ReInvent::enabled()) {
             Session::flashSet('error', 'Le paiement n’est pas encore configuré.');
             redirect('/app/forfait');
-        }
-
-        if (!Billing::profileReady((int) $user['id'], $user)) {
-            Session::flashSet('error', 'Renseignez votre adresse de facturation avant de payer.');
-            redirect('/app/forfait#facturation');
         }
 
         $targetPrice = ReInvent::priceCode($slug, $cycle);

@@ -7,7 +7,6 @@ $invited = (int) ($memberCount ?? 0);
 $reason = (string) ($reason ?? '');
 $atCircuitLimit = $used >= $limit;
 $atInviteLimit = $membersLimit <= 0 || $invited >= $membersLimit;
-$blocked = $reason === 'invitations' ? $atInviteLimit : $atCircuitLimit;
 $neededCircuits = $reason === 'circuits' ? $used + 1 : 0;
 $neededMembers = $reason === 'invitations' ? $invited + 1 : 0;
 $profile = $profile ?? [];
@@ -29,7 +28,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
 </header>
 
 <section class="billing-page">
-  <?php if ($blocked && $reason === 'circuits'): ?>
+  <?php if ($reason === 'circuits' && $atCircuitLimit): ?>
     <div class="card billing-limit" role="status">
       <div class="billing-banner-copy">
         <span class="eyebrow">Limite atteinte</span>
@@ -37,7 +36,7 @@ $profileType = (string) ($profile['type'] ?? 'individual');
         <p class="lede">Le forfait <?= e($plan['label']) ?> autorise <?= (int) $limit ?> circuit<?= $limit > 1 ? 's' : '' ?>. Vous en avez <?= (int) $used ?> actif<?= $used > 1 ? 's' : '' ?>. Pour en créer un autre, il faut un forfait avec plus d’emplacements.</p>
       </div>
     </div>
-  <?php elseif ($blocked && $reason === 'invitations'): ?>
+  <?php elseif ($reason === 'invitations' && $atInviteLimit): ?>
     <div class="card billing-limit" role="status">
       <div class="billing-banner-copy">
         <span class="eyebrow">Limite atteinte</span>
@@ -47,34 +46,34 @@ $profileType = (string) ($profile['type'] ?? 'individual');
             : 'Le forfait ' . e($plan['label']) . ' autorise ' . (int) $membersLimit . ' personne' . ($membersLimit > 1 ? 's' : '') . '. Choisissez un forfait avec plus d’invitations.' ?></p>
       </div>
     </div>
-  <?php else: ?>
-    <div class="card billing-current">
-      <div class="billing-banner-copy">
-        <span class="eyebrow">Forfait actuel</span>
-        <h2><?= e($plan['label']) ?></h2>
-        <p class="lede"><?= e(\App\Models\Plan::blurb($user)) ?></p>
-        <?php if ($subActive && $periodEnd): ?>
-          <p class="lede"><?= $cancelAtEnd
-              ? 'Résilié : accès conservé jusqu’au ' . date('d/m/Y', $periodEnd) . '.'
-              : 'Période en cours jusqu’au ' . date('d/m/Y', $periodEnd) . ($currentCycle === 'yearly' ? ' · annuel' : ' · mensuel') . '.' ?></p>
-        <?php endif; ?>
-      </div>
-      <?php if ($subActive): ?>
-        <div class="billing-sub-actions">
-          <form method="post" action="<?= e(url('/app/forfait/portail')) ?>">
-            <?= csrf_field() ?>
-            <button class="btn btn-ghost" type="submit">Carte, adresse et factures Stripe</button>
-          </form>
-          <?php if (!$cancelAtEnd): ?>
-            <form method="post" action="<?= e(url('/app/forfait/resilier')) ?>" onsubmit="return confirm('Résilier à la fin de la période déjà réglée ?');">
-              <?= csrf_field() ?>
-              <button class="btn btn-ghost" type="submit">Résilier à l’échéance</button>
-            </form>
-          <?php endif; ?>
-        </div>
+  <?php endif; ?>
+
+  <div class="card billing-current">
+    <div class="billing-banner-copy">
+      <span class="eyebrow">Forfait actuel</span>
+      <h2><?= e($plan['label']) ?></h2>
+      <p class="lede"><?= e(\App\Models\Plan::blurb($user)) ?></p>
+      <?php if ($subActive && $periodEnd): ?>
+        <p class="lede"><?= $cancelAtEnd
+            ? 'Résilié : accès conservé jusqu’au ' . date('d/m/Y', $periodEnd) . '.'
+            : 'Période en cours jusqu’au ' . date('d/m/Y', $periodEnd) . ($currentCycle === 'yearly' ? ' · annuel' : ' · mensuel') . '.' ?></p>
       <?php endif; ?>
     </div>
-  <?php endif; ?>
+    <?php if ($subActive): ?>
+      <div class="billing-sub-actions">
+        <form method="post" action="<?= e(url('/app/forfait/portail')) ?>">
+          <?= csrf_field() ?>
+          <button class="btn btn-ghost" type="submit">Carte, adresse et factures Stripe</button>
+        </form>
+        <?php if (!$cancelAtEnd): ?>
+          <form method="post" action="<?= e(url('/app/forfait/resilier')) ?>" onsubmit="return confirm('Résilier à la fin de la période déjà réglée ?');">
+            <?= csrf_field() ?>
+            <button class="btn btn-ghost" type="submit">Résilier à l’échéance</button>
+          </form>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
+  </div>
 
   <div class="billing-usage">
     <div>
@@ -90,69 +89,6 @@ $profileType = (string) ($profile['type'] ?? 'individual');
       <strong class="mono<?= $reason === 'invitations' && $atInviteLimit ? ' is-over' : '' ?>"><?= (int) $invited ?> / <?= (int) $membersLimit ?></strong>
     </div>
   </div>
-
-  <form id="facturation" class="card card-pad billing-profile" method="post" action="<?= e(url('/app/forfait/facturation')) ?>">
-    <?= csrf_field() ?>
-    <div class="billing-profile-head">
-      <div>
-        <span class="eyebrow">Facturation</span>
-        <h2>Coordonnées pour la facture</h2>
-      </div>
-      <p class="lede">Stripe Tax calcule la TVA selon le pays (et le n° TVA intra-communautaire s’il est renseigné). La facture Stripe reprend HT, TVA et TTC.</p>
-    </div>
-    <div class="fields-2">
-      <label class="field">
-        <span>Type</span>
-        <select name="billing_type">
-          <option value="individual" <?= $profileType !== 'company' ? 'selected' : '' ?>>Particulier</option>
-          <option value="company" <?= $profileType === 'company' ? 'selected' : '' ?>>Entreprise</option>
-        </select>
-      </label>
-      <label class="field">
-        <span>E-mail de facturation</span>
-        <input type="email" name="billing_email" value="<?= e((string) ($profile['email'] ?: $user['email'])) ?>" required>
-      </label>
-    </div>
-    <div class="fields-2">
-      <label class="field">
-        <span>Nom</span>
-        <input name="billing_name" value="<?= e((string) ($profile['name'] ?: $user['first_name'])) ?>" required>
-      </label>
-      <label class="field">
-        <span>Raison sociale</span>
-        <input name="billing_company" value="<?= e((string) ($profile['company_name'] ?? '')) ?>">
-      </label>
-    </div>
-    <label class="field">
-      <span>Adresse</span>
-      <input name="billing_line1" value="<?= e((string) ($profile['line1'] ?? '')) ?>" required>
-    </label>
-    <div class="fields-3">
-      <label class="field">
-        <span>Code postal</span>
-        <input name="billing_postal_code" value="<?= e((string) ($profile['postal_code'] ?? '')) ?>" required>
-      </label>
-      <label class="field">
-        <span>Ville</span>
-        <input name="billing_city" value="<?= e((string) ($profile['city'] ?? '')) ?>" required>
-      </label>
-      <label class="field">
-        <span>Pays</span>
-        <input name="billing_country" maxlength="2" value="<?= e((string) ($profile['country'] ?? 'FR')) ?>" required>
-      </label>
-    </div>
-    <div class="fields-2">
-      <label class="field">
-        <span>N° TVA (optionnel)</span>
-        <input name="billing_vat" value="<?= e((string) ($profile['vat_number'] ?? '')) ?>">
-      </label>
-      <label class="field">
-        <span>SIRET (optionnel)</span>
-        <input name="billing_siret" value="<?= e((string) ($profile['siret'] ?? '')) ?>">
-      </label>
-    </div>
-    <button class="btn btn-navy" type="submit">Enregistrer les coordonnées</button>
-  </form>
 
   <?php if ($paymentReady): ?>
     <div class="chips billing-cycle" style="background:oklch(0.94 0.01 255);padding:4px;border-radius:11px;align-self:start;">
@@ -220,6 +156,69 @@ $profileType = (string) ($profile['type'] ?? 'individual');
       </article>
     <?php endforeach; ?>
   </div>
+
+  <form id="facturation" class="card card-pad billing-profile" method="post" action="<?= e(url('/app/forfait/facturation')) ?>">
+    <?= csrf_field() ?>
+    <div class="billing-profile-head">
+      <div>
+        <span class="eyebrow">Optionnel</span>
+        <h2>Facture entreprise</h2>
+      </div>
+      <p class="lede">Stripe demande l’adresse au paiement et calcule la TVA. Ce bloc sert seulement à préremplir le checkout, ou à ajouter raison sociale, n° TVA et SIRET.</p>
+    </div>
+    <div class="fields-2">
+      <label class="field">
+        <span>Type</span>
+        <select name="billing_type">
+          <option value="individual" <?= $profileType !== 'company' ? 'selected' : '' ?>>Particulier</option>
+          <option value="company" <?= $profileType === 'company' ? 'selected' : '' ?>>Entreprise</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>E-mail de facturation</span>
+        <input type="email" name="billing_email" value="<?= e((string) ($profile['email'] ?: $user['email'])) ?>">
+      </label>
+    </div>
+    <div class="fields-2">
+      <label class="field">
+        <span>Nom</span>
+        <input name="billing_name" value="<?= e((string) ($profile['name'] ?: $user['first_name'])) ?>">
+      </label>
+      <label class="field">
+        <span>Raison sociale</span>
+        <input name="billing_company" value="<?= e((string) ($profile['company_name'] ?? '')) ?>">
+      </label>
+    </div>
+    <label class="field">
+      <span>Adresse</span>
+      <input name="billing_line1" value="<?= e((string) ($profile['line1'] ?? '')) ?>">
+    </label>
+    <div class="fields-3">
+      <label class="field">
+        <span>Code postal</span>
+        <input name="billing_postal_code" value="<?= e((string) ($profile['postal_code'] ?? '')) ?>">
+      </label>
+      <label class="field">
+        <span>Ville</span>
+        <input name="billing_city" value="<?= e((string) ($profile['city'] ?? '')) ?>">
+      </label>
+      <label class="field">
+        <span>Pays</span>
+        <input name="billing_country" maxlength="2" value="<?= e((string) ($profile['country'] ?? 'FR')) ?>">
+      </label>
+    </div>
+    <div class="fields-2">
+      <label class="field">
+        <span>N° TVA</span>
+        <input name="billing_vat" value="<?= e((string) ($profile['vat_number'] ?? '')) ?>">
+      </label>
+      <label class="field">
+        <span>SIRET</span>
+        <input name="billing_siret" value="<?= e((string) ($profile['siret'] ?? '')) ?>">
+      </label>
+    </div>
+    <button class="btn btn-navy" type="submit">Enregistrer</button>
+  </form>
 
   <div class="card card-pad billing-invoices">
     <div class="billing-section-head">

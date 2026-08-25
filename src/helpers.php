@@ -47,7 +47,14 @@ function url(string $path = ''): string
 
 function asset(string $path): string
 {
-    return '/public/assets/' . ltrim($path, '/');
+    $rel = 'public/assets/' . ltrim($path, '/');
+    $url = '/' . $rel;
+    $full = BASE_PATH . '/' . $rel;
+    if (is_file($full)) {
+        $url .= '?v=' . filemtime($full);
+    }
+
+    return $url;
 }
 
 function env(string $key, mixed $default = null): mixed

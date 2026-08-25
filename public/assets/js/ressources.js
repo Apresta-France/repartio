@@ -24,7 +24,7 @@
       if (el) el.innerHTML = value;
     };
     const onChange = (fn) => {
-      root.querySelectorAll('input, button[data-step], button[data-rate], button[data-livret], button[data-log]').forEach((el) => {
+      root.querySelectorAll('input, select, button.chip, button[data-step], button[data-rate], button[data-livret], button[data-log]').forEach((el) => {
         el.addEventListener('input', fn);
         el.addEventListener('change', fn);
         if (el.tagName === 'BUTTON') el.addEventListener('click', fn);
@@ -39,7 +39,19 @@
     ldds: { name: 'LDDS', rate: 1.7, cap: 12000 },
     lep: { name: 'LEP', rate: 2.5, cap: 10000 },
     jeune: { name: 'Livret jeune', rate: 1.7, cap: 1600 },
+    cel: { name: 'CEL', rate: 1.25, cap: 15300 },
+    pel: { name: 'PEL 2026', rate: 2.0, cap: 61200 },
   };
+
+  const REGIMES = {
+    vente: { label: 'Vente', social: 12.3, cfp: 0.1, vl: 1.0, abatt: 71, tva: 85000, tvaMaj: 93500, micro: 203100 },
+    bic: { label: 'Services BIC', social: 21.2, cfp: 0.2, vl: 1.7, abatt: 50, tva: 37500, tvaMaj: 41250, micro: 83600 },
+    bnc: { label: 'BNC', social: 25.6, cfp: 0.2, vl: 2.2, abatt: 34, tva: 37500, tvaMaj: 41250, micro: 83600 },
+    cipav: { label: 'CIPAV', social: 23.2, cfp: 0.2, vl: 2.2, abatt: 34, tva: 37500, tvaMaj: 41250, micro: 83600 },
+  };
+
+  const pct = (n) => `${n.toFixed(1).replace('.', ',')} %`;
+  const pct2 = (n) => `${n.toFixed(2).replace('.', ',')} %`;
 
   const fillMonths = (start, cap, monthly) => {
     const room = cap - start;
@@ -220,24 +232,57 @@
   };
 
   const urssaf = (root) => {
-    const { inn, set, out, onChange } = api(root);
-    let rate = 21.2;
-    root.querySelectorAll('[data-rate]').forEach((btn) => {
+    const { inn, set, out, html, onChange } = api(root);
+    let regime = 'bic';
+    let acre = 0;
+    root.querySelectorAll('[data-regime]').forEach((btn) => {
       btn.addEventListener('click', () => {
-        rate = Number(btn.dataset.rate);
-        root.querySelectorAll('[data-rate]').forEach((el) => el.classList.toggle('active', el === btn));
+        regime = btn.dataset.regime;
+        root.querySelectorAll('[data-regime]').forEach((el) => el.classList.toggle('active', el === btn));
+      });
+    });
+    root.querySelectorAll('[data-acre]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        acre = Number(btn.dataset.acre);
+        root.querySelectorAll('[data-acre]').forEach((el) => el.classList.toggle('active', el === btn));
       });
     });
     onChange(() => {
+      const spec = REGIMES[regime];
       const ca = num(inn('ca'));
+      const social = spec.social * (acre ? (1 - acre / 100) : 1);
+      const useCfp = inn('cfp')?.checked;
+      const artisan = inn('artisan')?.checked;
+      const cfp = useCfp ? (artisan ? 0.3 : spec.cfp) : 0;
+      const vl = inn('vl')?.checked ? spec.vl : 0;
+      const rate = social + cfp + vl;
       const tax = ca * (rate / 100);
       const net = ca - tax;
+      const annual = ca * 12;
       set('ca', euro(ca));
+      set('rate', pct2(rate));
       set('month', euro(tax));
-      set('quarter', euro(tax * 3));
       set('net', euro(net));
       const bar = out('tax-bar');
-      if (bar) bar.style.width = `${rate}%`;
+      if (bar) bar.style.width = `${clamp(rate, 0, 100)}%`;
+      html('break', `
+        <div class="lab-col-title">Décomposition</div>
+        <div><span>Cotisations sociales</span><b class="mono">${pct2(social)}</b></div>
+        <div><span>CFP</span><b class="mono">${useCfp ? pct2(cfp) : 'off'}</b></div>
+        <div><span>Versement libératoire</span><b class="mono">${vl ? pct(vl) : 'off'}</b></div>
+        <div><span>Facture / trimestre</span><b class="mono">${euro(tax * 3)}</b></div>
+      `);
+      const tvaLeft = spec.tva - annual;
+      const microLeft = spec.micro - annual;
+      html('year', `
+        <div class="lab-col-title">Sur 12 mois</div>
+        <div><span>CA annuel</span><b class="mono">${euro(annual)}</b></div>
+        <div><span>Franchise TVA ${euro(spec.tva)}</span><b class="mono${tvaLeft < 0 ? ' is-bad' : ''}">${tvaLeft >= 0 ? euro(tvaLeft) + ' restants' : 'dépassée'}</b></div>
+        <div><span>Plafond micro ${euro(spec.micro)}</span><b class="mono${microLeft < 0 ? ' is-bad' : ''}">${microLeft >= 0 ? euro(microLeft) + ' restants' : 'dépassé'}</b></div>
+      `);
+      set('note', acre
+        ? `ACRE ${acre} % : le taux social passe à ${pct2(social)}. La CFP et le libératoire ne sont pas réduits. Servez ce total depuis le compte pro, puis « tout le reste » vers le perso.`
+        : 'Hors ACRE. Servez ce total depuis le compte pro, puis un fil « tout le reste » vers le perso — jamais un pourcentage du CA brut.');
     });
   };
 
@@ -499,9 +544,198 @@
     paint();
   };
 
+  const chipGroup = (root, attr, initial, onPick) => {
+    let value = initial;
+    root.querySelectorAll(`[${attr}]`).forEach((btn) => {
+      btn.addEventListener('click', () => {
+        value = btn.getAttribute(attr);
+        root.querySelectorAll(`[${attr}]`).forEach((el) => el.classList.toggle('active', el === btn));
+        onPick(value);
+      });
+    });
+    return () => value;
+  };
+
+  const plafonds = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    let act = 'services';
+    const current = chipGroup(root, 'data-act', 'services', (v) => { act = v; });
+    onChange(() => {
+      act = current();
+      const spec = act === 'vente' ? REGIMES.vente : REGIMES.bic;
+      const month = num(inn('month'));
+      const year = month * 12;
+      set('month', euro(month));
+      set('year', euro(year));
+      const tvaOk = year <= spec.tva;
+      const tvaMaj = year <= spec.tvaMaj;
+      const microOk = year <= spec.micro;
+      set('tva', tvaOk ? 'franchise' : (tvaMaj ? 'seuil majoré' : 'redevable'), !tvaOk);
+      set('micro', microOk ? 'sous le plafond' : 'dépassé', !microOk);
+      const bars = [
+        ['Franchise TVA', year, spec.tva, 'var(--orange)'],
+        ['Seuil TVA majoré', year, spec.tvaMaj, 'var(--red)'],
+        ['Plafond micro', year, spec.micro, 'var(--teal)'],
+      ];
+      html('stack', bars.map(([name, val, cap, color]) => {
+        const pctBar = clamp((val / cap) * 100, 0, 100);
+        return `<div class="lab-stack-row"><span>${name}<b>${euro(val)} / ${euro(cap)}</b></span><i><em style="width:${pctBar}%;background:${color}"></em></i></div>`;
+      }).join(''));
+      if (!microOk) set('note', `À ${euro(month)} / mois, le plafond micro est dépassé. Deux années de suite, le régime réel s’applique au 1er janvier suivant.`);
+      else if (!tvaOk) set('note', `Encore en micro (${euro(spec.micro - year)} de marge), mais au-dessus de la franchise TVA. Les factures devront porter la TVA — le net câblable n’est plus le brut encaissé.`);
+      else set('note', `Sous les deux seuils. Il reste ${euro(spec.tva - year)} avant la franchise TVA, ${euro(spec.micro - year)} avant le plafond micro.`);
+    });
+  };
+
+  const liberatoire = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    let regime = 'bic';
+    let tmi = 11;
+    chipGroup(root, 'data-regime', 'bic', (v) => { regime = v; });
+    chipGroup(root, 'data-tmi', '11', (v) => { tmi = Number(v); });
+    onChange(() => {
+      const spec = REGIMES[regime];
+      const ca = num(inn('ca'));
+      set('ca', euro(ca));
+      const social = spec.social + spec.cfp;
+      const withVl = ca * ((social + spec.vl) / 100);
+      const withoutSocial = ca * (social / 100);
+      const taxable = ca * (1 - spec.abatt / 100);
+      const ir = taxable * (tmi / 100);
+      const withoutTotal = withoutSocial + ir;
+      const cheaper = withVl <= withoutTotal;
+      html('with', `
+        <div class="lab-col-title">Avec libératoire</div>
+        <div><span>Urssaf + CFP</span><b class="mono">${euro(ca * social / 100)}</b></div>
+        <div><span>IR libératoire ${pct(spec.vl)}</span><b class="mono">${euro(ca * spec.vl / 100)}</b></div>
+        <div><span>Prélevé / mois</span><b class="mono">${euro(withVl)}</b></div>
+        <div><span>Net câblable</span><b class="mono">${euro(ca - withVl)}</b></div>
+      `);
+      html('without', `
+        <div class="lab-col-title">Sans · IR à part</div>
+        <div><span>Urssaf + CFP</span><b class="mono">${euro(withoutSocial)}</b></div>
+        <div><span>IR estimé (TMI ${tmi} %)</span><b class="mono">${euro(ir)}</b></div>
+        <div><span>Total / mois</span><b class="mono">${euro(withoutTotal)}</b></div>
+        <div><span>Net après IR</span><b class="mono">${euro(ca - withoutTotal)}</b></div>
+      `);
+      if (tmi === 0) set('note', 'À TMI 0 %, le libératoire fait payer un impôt que le foyer ne doit pas. Gardez le taux social seul, et ne posez pas de provision IR.');
+      else set('note', cheaper
+        ? `À TMI ${tmi} %, le libératoire coûte ${euro(withoutTotal - withVl)} de moins par mois. Un seul bloc suffit : social + CFP + ${pct(spec.vl)}.`
+        : `À TMI ${tmi} %, le barème classique coûte ${euro(withVl - withoutTotal)} de moins. Deux blocs : Urssaf, puis une provision IR de ${euro(ir)}.`);
+    });
+  };
+
+  const irregulier = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    let pattern = 'flat';
+    chipGroup(root, 'data-pattern', 'flat', (v) => { pattern = v; });
+    onChange(() => {
+      const peak = num(inn('peak'));
+      set('peak', euro(peak));
+      const months = [];
+      for (let i = 0; i < 12; i += 1) {
+        if (pattern === 'flat') months.push(peak);
+        else if (pattern === 'season') months.push(i >= 3 && i <= 8 ? peak : 0);
+        else months.push(i % 2 === 0 ? peak : Math.round(peak * 0.25));
+      }
+      const total = months.reduce((s, n) => s + n, 0);
+      const avg = total / 12;
+      const prov = avg * 0.212;
+      set('total', euro(total));
+      set('avg', euro(avg));
+      set('prov', euro(prov));
+      const max = Math.max(...months, 1);
+      html('year', months.map((v, i) => {
+        const labels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+        const h = clamp((v / max) * 100, v > 0 ? 8 : 2, 100);
+        return `<i style="height:${h}%" title="${labels[i]} : ${euro(v)}"></i>`;
+      }).join(''));
+      if (pattern === 'flat') set('note', `Douze mois à ${euro(peak)}. La provision à 21,2 % (BIC) est ${euro(prov)} chaque mois — le trimestre fait ${euro(prov * 3)}.`);
+      else set('note', `CA annuel ${euro(total)}, moyenne ${euro(avg)}. Si vous provisionnez seulement les mois chargés, il faudra sortir ${euro(prov * 3)} d’un coup au trimestre. Le compte pro doit déjà porter ce matelas.`);
+    });
+  };
+
+  const lep = (root) => {
+    const { inn, set, onChange } = api(root);
+    let parts = 1;
+    chipGroup(root, 'data-parts', '1', (v) => { parts = Number(v); });
+    onChange(() => {
+      const rfr = num(inn('rfr'));
+      set('rfr', euro(rfr));
+      const cap = Math.round(23028 + (parts - 1) * 12298);
+      set('cap', euro(cap));
+      const ok = rfr <= cap;
+      set('ok', ok ? 'Éligible' : 'Hors plafond', !ok);
+      const room = cap - rfr;
+      set('note', ok
+        ? `Marge de ${euro(room)}. Saturez d’abord le LEP (2,50 % · 10 000 €), puis le LDDS, puis le Livret A.`
+        : `Dépassement de ${euro(-room)}. Un seul avis au-dessus : le LEP déjà ouvert peut rester un an. Deux années de suite : clôture.`);
+    });
+  };
+
+  const matelas = (root) => {
+    const { inn, set, out, onChange } = api(root);
+    onChange(() => {
+      const bills = num(inn('bills'));
+      const horizon = num(inn('horizon'));
+      const have = num(inn('have'));
+      const pay = num(inn('pay'));
+      const target = bills * horizon;
+      const gap = Math.max(0, target - have);
+      set('bills', euro(bills));
+      set('horizon', `${horizon} mois`);
+      set('have', euro(have));
+      set('pay', euro(pay));
+      set('target', euro(target));
+      set('gap', euro(gap), gap > 0);
+      set('when', gap === 0 ? 'déjà' : monthsLabel(gap / pay));
+      const fill = out('fill');
+      if (fill) fill.style.width = `${clamp((have / Math.max(target, 1)) * 100, 0, 100)}%`;
+      set('note', gap === 0
+        ? 'La cible est atteinte. Le fil fixe vers ce livret peut basculer vers l’objectif suivant — apport, projet, ou « tout le reste ».'
+        : `À ${euro(pay)} / mois, la cible de ${horizon} mois de charges est tenue dans ${monthsLabel(gap / pay)}. Tant que ce livret n’est pas là, l’épargne-projet attend.`);
+    });
+  };
+
+  const mixte = (root) => {
+    const { inn, set, html, onChange } = api(root);
+    onChange(() => {
+      const salary = num(inn('salary'));
+      const ae = num(inn('ae'));
+      const bills = num(inn('bills'));
+      const urssafTax = ae * 0.212;
+      const netAe = ae - urssafTax;
+      const total = salary + netAe;
+      const save = total - bills;
+      const withoutAe = salary - bills;
+      set('salary', euro(salary));
+      set('ae', euro(ae));
+      set('bills', euro(bills));
+      set('net', euro(Math.max(0, netAe)));
+      set('save', euro(Math.max(0, save)), save < 0);
+      set('cut', withoutAe >= 0 ? 'Factures tenues' : `Il manque ${euro(-withoutAe)}`, withoutAe < 0);
+      const billPct = clamp((bills / Math.max(total, 1)) * 100, 0, 100);
+      const savePct = clamp(100 - billPct, 0, 100);
+      html('flow', [
+        ['Factures', billPct, euro(Math.min(bills, Math.max(0, total)))],
+        ['Épargne / reste', savePct, euro(Math.max(0, save))],
+      ].map(([label, p, val]) => `
+        <div class="lab-flow-row">
+          <span>${label}</span>
+          <i><em style="width:${p}%"></em></i>
+          <b class="mono">${val}</b>
+        </div>
+      `).join(''));
+      set('note', withoutAe >= 0
+        ? 'Le salaire couvre les factures. L’AE peut tout verser à l’épargne après l’Urssaf — y compris tomber à zéro un mois, sans faire sauter le loyer.'
+        : `Le salaire ne tient pas les factures. L’AE doit verser au moins ${euro(-withoutAe)} chaque mois, et le compte pro a besoin d’un matelas pour les mois à 0 €.`);
+    });
+  };
+
   const changelog = (root) => {
     const { html } = api(root);
     const entries = [
+      { date: '25 août 2026', tag: 'Barème', t: 'Barèmes 2026 revus, guides activité', d: 'BNC régime général à 25,6 % (plus 24,6 %). CFP, ACRE et versement libératoire dans le simulateur URSSAF. Nouveaux guides : plafonds micro / TVA, libératoire, CA irrégulier, éligibilité LEP, matelas, salaire + AE. Livrets au 1er août : A et LDDS 1,70 %, LEP 2,50 %.' },
       { date: '22 août 2026', tag: 'Canvas', t: 'Notes de terrain interactives', d: 'Les fiches ressources portent désormais un simulateur : ordre des livrets, provision URSSAF, choc de revenu, comparaison de scénarios.' },
       { date: '18 août 2026', tag: 'Canvas', t: 'Circuit commenté du couple', d: 'Le modèle à 23 blocs est lisible en démo guidée, avec les dates de saturation et les débordements à câbler.' },
       { date: '24 juin 2026', tag: 'Moteur', t: 'Fil « tout le reste »', d: 'Un mode de fil qui emporte le solde d’un bloc après les fixes. Le compteur non affecté survit aux augmentations.' },
@@ -529,7 +763,7 @@
     paint();
   };
 
-  const labs = { couple, tableur, ordre, joints, urssaf, plafond, mix, reste, famille, scenarios, taux, repart, migrate, changelog };
+  const labs = { couple, tableur, ordre, joints, urssaf, plafond, mix, reste, famille, scenarios, taux, repart, migrate, changelog, plafonds, liberatoire, irregulier, lep, matelas, mixte };
   document.querySelectorAll('[data-lab]').forEach((root) => {
     const fn = labs[root.getAttribute('data-lab')];
     if (fn) fn(root);

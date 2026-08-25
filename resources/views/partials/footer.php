@@ -25,6 +25,7 @@
     <a href="<?= e(url('/ressources')) ?>">Guides</a>
     <a href="<?= e(url('/faq')) ?>">FAQ</a>
     <a href="<?= e(url('/ressources/taux-plafonds-2026')) ?>">Guide des livrets</a>
+    <a href="<?= e(url('/ressources/urssaf-auto-entrepreneur')) ?>">URSSAF 2026</a>
     <a href="<?= e(url('/ressources/journal-versions')) ?>">Journal des versions</a>
   </div>
   <div class="footer-col">

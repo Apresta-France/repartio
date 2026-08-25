@@ -61,15 +61,18 @@ $headingId = static function (array $block): string {
             <?php endforeach; ?>
           </div>
         <?php elseif ($type === 'table'): ?>
-          <div class="article-table">
+          <?php $hasMid = !empty($block['headMid']); ?>
+          <div class="article-table<?= $hasMid ? ' is-3' : '' ?>">
             <div class="article-table-head">
               <span><?= e($block['head'] ?? 'Libellé') ?></span>
-              <span>Montant</span>
+              <?php if ($hasMid): ?><span><?= e($block['headMid']) ?></span><?php endif; ?>
+              <span><?= e($block['headRight'] ?? 'Montant') ?></span>
             </div>
             <?php foreach ($block['rows'] as $row): ?>
               <div>
                 <i style="background:<?= e($tone($row['c'] ?? '')) ?>"></i>
                 <span><?= e($row['k']) ?></span>
+                <?php if ($hasMid): ?><em class="mono"><?= e($row['mid'] ?? '') ?></em><?php endif; ?>
                 <strong class="mono"><?= e($row['v']) ?></strong>
               </div>
             <?php endforeach; ?>
@@ -78,6 +81,13 @@ $headingId = static function (array $block): string {
           <aside class="article-callout">
             <strong><?= e($block['title']) ?></strong>
             <p><?= e($block['text']) ?></p>
+          </aside>
+        <?php elseif ($type === 'links'): ?>
+          <aside class="article-links">
+            <strong><?= e($block['title'] ?? 'Sources') ?></strong>
+            <?php foreach ($block['items'] as $link): ?>
+              <a href="<?= e($link['href']) ?>" target="_blank" rel="noopener noreferrer"><?= e($link['label']) ?></a>
+            <?php endforeach; ?>
           </aside>
         <?php elseif ($type === 'widget'): ?>
           <?php $widget = $block['id']; require BASE_PATH . '/resources/views/partials/article-widgets.php'; ?>

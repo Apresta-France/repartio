@@ -15,10 +15,90 @@ class Articles
     {
         return [
             [
+                'slug' => 'urssaf-auto-entrepreneur',
+                'tag' => 'Activité',
+                'read' => '14 min',
+                'date' => '25 août 2026',
+                't' => 'Auto-entrepreneur : provisionner l’URSSAF comme une dépense',
+                'd' => 'Barème micro-social 2026, CFP, ACRE, versement libératoire : poser le vrai net chaque mois, pas la facture de mars.',
+                'interactive' => true,
+                'guide' => true,
+                'guideMeta' => 'Taux 2026 · CFP · ACRE · libératoire',
+                'topics' => ['Activité', 'Budget'],
+                'cta' => ['href' => '/circuits-types', 'label' => 'Ouvrir un modèle auto-entrepreneur'],
+                'figures' => [
+                    ['k' => 'BNC régime général', 'v' => '25,6 %', 'tone' => 'ink'],
+                    ['k' => 'Services BIC', 'v' => '21,2 %', 'tone' => 'ink'],
+                    ['k' => 'Vente', 'v' => '12,3 %', 'tone' => 'ink'],
+                    ['k' => 'CIPAV', 'v' => '23,2 %', 'tone' => 'ink'],
+                    ['k' => 'Plafond services', 'v' => '83 600 €', 'tone' => 'teal'],
+                ],
+            ],
+            [
+                'slug' => 'plafonds-micro-tva-2026',
+                'tag' => 'Activité',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'Deux plafonds, deux bascules : micro et TVA',
+                'd' => '83 600 € et 37 500 € ne sont pas la même limite. Le circuit doit voir la TVA arriver avant la sortie du régime.',
+                'interactive' => true,
+                'guide' => true,
+                'guideMeta' => 'Micro 2026–2028 · franchise TVA',
+            ],
+            [
+                'slug' => 'versement-liberatoire',
+                'tag' => 'Activité',
+                'read' => '8 min',
+                'date' => '25 août 2026',
+                't' => 'Versement libératoire : payer l’impôt chaque mois, ou plus tard ?',
+                'd' => 'Un pourcentage de plus sur le CA, ou un impôt annuel sur le revenu abattu. Le simulateur compare les deux câblages.',
+                'interactive' => true,
+                'guide' => true,
+                'guideMeta' => '1 % · 1,7 % · 2,2 % · RFR 29 315 €',
+            ],
+            [
+                'slug' => 'ca-irregulier',
+                'tag' => 'Activité',
+                'read' => '7 min',
+                'date' => '25 août 2026',
+                't' => 'CA en dents de scie : lisser pour ne pas vivre le trimestre',
+                'd' => 'Six mois à zéro, trois mois chargés : la provision doit suivre la moyenne, pas la dernière facture.',
+                'interactive' => true,
+            ],
+            [
+                'slug' => 'eligibilite-lep',
+                'tag' => 'Réglementaire',
+                'read' => '6 min',
+                'date' => '25 août 2026',
+                't' => 'Êtes-vous encore dans les clous du LEP ?',
+                'd' => '23 028 € de RFR pour une part, 35 326 € pour deux. Le taux à 2,50 % ne sert que si le livret peut rester ouvert.',
+                'interactive' => true,
+                'guide' => true,
+                'guideMeta' => 'Plafonds RFR 2026 · métropole',
+            ],
+            [
+                'slug' => 'matelas-trois-mois',
+                'tag' => 'Méthode',
+                'read' => '6 min',
+                'date' => '25 août 2026',
+                't' => 'Le matelas de trois mois, en euros et en mois',
+                'd' => 'Trois mois de charges, pas trois mois de revenus. Le circuit pose la cible, puis un fil jusqu’à saturation.',
+                'interactive' => true,
+            ],
+            [
+                'slug' => 'salaire-et-autoentreprise',
+                'tag' => 'Étude de cas',
+                'read' => '9 min',
+                'date' => '25 août 2026',
+                't' => 'Un salaire et une auto-entreprise : qui encaisse le choc ?',
+                'd' => 'Le fixe tient les factures. Le variable nourrit l’épargne — jusqu’au mois où il ne le fait plus.',
+                'interactive' => true,
+            ],
+            [
                 'slug' => 'journal-versions',
                 'tag' => 'Produit',
                 'read' => '4 min',
-                'date' => '22 août 2026',
+                'date' => '25 août 2026',
                 't' => 'Journal des versions',
                 'd' => 'Ce qui a changé dans le moteur, le canvas et les projections — mois par mois, sans rummage.',
                 'interactive' => true,
@@ -29,9 +109,9 @@ class Articles
                 'slug' => 'taux-plafonds-2026',
                 'tag' => 'Réglementaire',
                 'read' => '5 min',
-                'date' => '20 août 2026',
+                'date' => '25 août 2026',
                 't' => 'Taux et plafonds 2026',
-                'd' => 'Livret A, LDDS, LEP, livrets jeunes : les barèmes utilisés par le moteur, et ce qu’ils changent quand on épargne chaque mois.',
+                'd' => 'Livret A, LDDS, LEP, CEL, PEL : les barèmes au 1er août 2026, et en combien de mois un versement les sature.',
                 'interactive' => true,
                 'guide' => true,
                 'guideMeta' => 'Livret A · LDDS · LEP · livrets jeunes',
@@ -110,15 +190,6 @@ class Articles
                 'interactive' => true,
             ],
             [
-                'slug' => 'urssaf-auto-entrepreneur',
-                'tag' => 'Étude de cas',
-                'read' => '9 min',
-                'date' => '19 juillet 2026',
-                't' => 'Auto-entrepreneur : provisionner l’URSSAF comme une dépense',
-                'd' => 'Un bloc dépense dédié évite la mauvaise surprise trimestrielle, et rend le revenu net lisible.',
-                'interactive' => true,
-            ],
-            [
                 'slug' => 'plafond-atteint',
                 'tag' => 'Réglementaire',
                 'read' => '5 min',
@@ -182,7 +253,7 @@ class Articles
     /** @return list<string> */
     public static function topics(): array
     {
-        return ['Budget', 'Épargne', 'Foyer', 'Produit'];
+        return ['Budget', 'Épargne', 'Foyer', 'Activité', 'Produit'];
     }
 
     public static function topicOf(array $post): string
@@ -195,6 +266,7 @@ class Articles
             'Méthode' => 'Budget',
             'Réglementaire' => 'Épargne',
             'Étude de cas' => 'Foyer',
+            'Activité' => 'Activité',
             default => 'Produit',
         };
     }
@@ -205,8 +277,8 @@ class Articles
         return [
             ['q' => 'J’ai un tableur', 'a' => 'Le migrer en vingt minutes', 'slug' => 'tableur-vers-circuit'],
             ['q' => 'Je veux les barèmes', 'a' => 'Taux et plafonds 2026', 'slug' => 'taux-plafonds-2026'],
+            ['q' => 'Je suis auto-entrepreneur', 'a' => 'Provisionner l’URSSAF 2026', 'slug' => 'urssaf-auto-entrepreneur'],
             ['q' => 'Je veux un foyer réel', 'a' => '6 280 €, zéro euro non affecté', 'slug' => 'couple-12338'],
-            ['q' => 'Je découvre le moteur', 'a' => 'Anatomie d’un répartiteur', 'slug' => 'anatomie-repartiteur'],
         ];
     }
 
@@ -226,28 +298,35 @@ class Articles
                 'kicker' => '02 · Barèmes',
                 'title' => 'Les chiffres du moteur',
                 'lead' => 'Taux, plafonds, ordre de remplissage : ce que le circuit porte, sans conseil de placement.',
-                'slugs' => ['taux-plafonds-2026', 'ordre-livrets', 'plafond-atteint'],
+                'slugs' => ['taux-plafonds-2026', 'ordre-livrets', 'plafond-atteint', 'eligibilite-lep'],
+            ],
+            [
+                'id' => 'activite',
+                'kicker' => '03 · Activité',
+                'title' => 'Auto-entreprise, sans surprise',
+                'lead' => 'Provisionner les cotisations, lire les plafonds, choisir le libératoire, lisser un CA irrégulier.',
+                'slugs' => ['urssaf-auto-entrepreneur', 'plafonds-micro-tva-2026', 'versement-liberatoire', 'ca-irregulier'],
             ],
             [
                 'id' => 'cas',
-                'kicker' => '03 · Cas réels',
+                'kicker' => '04 · Cas réels',
                 'title' => 'Des circuits commentés',
                 'lead' => 'Lire un foyer déjà câblé, puis baisser un revenu pour voir ce qui s’arrête.',
-                'slugs' => ['couple-12338', 'famille-de-quatre', 'urssaf-auto-entrepreneur'],
+                'slugs' => ['couple-12338', 'famille-de-quatre', 'salaire-et-autoentreprise'],
             ],
             [
                 'id' => 'mecanique',
-                'kicker' => '04 · Mécanique',
+                'kicker' => '05 · Mécanique',
                 'title' => 'Les gestes qui tiennent',
                 'lead' => 'Joints, fixes, pourcentages, débordement : les décisions qui suppriment l’arbitrage du 30.',
-                'slugs' => ['compte-joint-factures', 'pourcentages-ou-fixes', 'fil-tout-le-reste', 'scenarios-compares'],
+                'slugs' => ['compte-joint-factures', 'pourcentages-ou-fixes', 'fil-tout-le-reste', 'matelas-trois-mois'],
             ],
             [
                 'id' => 'produit',
-                'kicker' => '05 · Produit',
+                'kicker' => '06 · Produit',
                 'title' => 'Ce qui a changé',
                 'lead' => 'Le journal du moteur, du canvas et des projections.',
-                'slugs' => ['journal-versions'],
+                'slugs' => ['journal-versions', 'scenarios-compares'],
             ],
         ];
     }
@@ -262,7 +341,7 @@ class Articles
             $post['blocks'] = self::blocks($slug);
             $post['toc'] = self::toc($post['blocks']);
             $post['related'] = self::related($slug);
-            $post['disclaimer'] = 'Les chiffres de cette note sont des exemples de simulation. Ils ne constituent pas un conseil en investissement. Les taux et plafonds repris sont ceux du moteur repartio.';
+            $post['disclaimer'] = 'Les chiffres de cette note sont des exemples de simulation. Ils ne constituent pas un conseil fiscal, social ou en investissement. Les barèmes repris sont ceux publiés au 25 août 2026 (Urssaf, ministère de l’Économie, Service-Public). Vérifiez votre dernier avis avant de figer un fil.';
 
             return $post;
         }
@@ -337,6 +416,12 @@ class Articles
             'ordre-livrets' => self::ordre(),
             'compte-joint-factures' => self::joints(),
             'urssaf-auto-entrepreneur' => self::urssaf(),
+            'plafonds-micro-tva-2026' => self::plafondsMicro(),
+            'versement-liberatoire' => self::liberatoire(),
+            'ca-irregulier' => self::irregulier(),
+            'eligibilite-lep' => self::lepElig(),
+            'matelas-trois-mois' => self::matelas(),
+            'salaire-et-autoentreprise' => self::mixte(),
             'plafond-atteint' => self::plafond(),
             'pourcentages-ou-fixes' => self::mix(),
             'fil-tout-le-reste' => self::reste(),
@@ -427,7 +512,7 @@ class Articles
                 ['k' => 'LEP — si éligible', 'v' => '2,50 % · 10 000 €', 'c' => 'teal'],
                 ['k' => 'LDDS', 'v' => '1,70 % · 12 000 €', 'c' => 'blue'],
                 ['k' => 'Livret A', 'v' => '1,70 % · 22 950 €', 'c' => 'blue'],
-                ['k' => 'Livret jeune', 'v' => '1,70 % · 1 600 €', 'c' => 'navy'],
+                ['k' => 'Livret jeune', 'v' => '≥ 1,70 % · 1 600 €', 'c' => 'navy'],
             ]],
             ['type' => 'widget', 'id' => 'ordre'],
             ['type' => 'h', 'text' => 'Pourquoi le LDDS avant le Livret A'],
@@ -461,17 +546,49 @@ class Articles
     {
         return [
             ['type' => 'h', 'text' => 'Une charge trimestrielle n’existe pas dans un mois type'],
-            ['type' => 'p', 'text' => 'L’auto-entrepreneur encaisse un chiffre d’affaires, puis reçoit une facture URSSAF tous les trois mois. Dans un tableur mensuel, cette facture apparaît comme un accident. Dans un circuit, elle doit être une dépense mensuelle — sinon le revenu « disponible » est une illusion deux mois sur trois.'],
-            ['type' => 'p', 'text' => 'Le geste est simple : un bloc dépense « Cotisations », alimenté chaque mois depuis le compte professionnel, au taux du régime. Ce qui sort ensuite vers le compte personnel est le net réel, pas le brut encaissé.'],
-            ['type' => 'widget', 'id' => 'urssaf'],
-            ['type' => 'h', 'text' => 'Ce que ça change à la lecture'],
-            ['type' => 'p', 'text' => 'Sur 5 000 € de CA services, une provision à 21,2 % retire 1 060 €. Le foyer ne « gagne » plus 5 000 € : il en gagne 3 940 avant impôt sur le revenu. C’est moins flatteur, et c’est le seul chiffre qu’on peut câbler vers un joint ou un livret sans se mentir.'],
-            ['type' => 'list', 'items' => [
-                'Le fil vers l’URSSAF est un fixe, recalculé si le CA moyen change.',
-                'Le reste du compte pro part vers le compte personnel — « tout le reste », jamais un pourcentage du CA brut.',
-                'Les mois bas : la provision baisse avec le CA si vous l’exprimez en pourcentage du bloc revenu. En fixe, elle peut trop prélever.',
+            ['type' => 'p', 'text' => 'L’auto-entrepreneur encaisse un chiffre d’affaires, puis paie l’Urssaf chaque mois ou chaque trimestre. Dans un tableur, la ligne n’apparaît que le jour du prélèvement. Deux mois sur trois, le « disponible » est donc une illusion : l’argent est déjà dû, il n’est juste pas encore parti.'],
+            ['type' => 'p', 'text' => 'Le geste du circuit est simple. Un bloc dépense « Cotisations », alimenté chaque mois depuis le compte professionnel, au taux de votre régime. Ce qui sort ensuite vers le compte personnel est le net réellement câblable — pas le brut encaissé.'],
+            ['type' => 'h', 'text' => 'Le barème micro-social au 1er janvier 2026'],
+            ['type' => 'p', 'text' => 'Les taux s’appliquent au chiffre d’affaires hors taxes encaissé, sans déduire aucune charge. Seul le BNC du régime général a bougé cette année : il passe de 24,6 % à 25,6 %. Les autres familles restent stables. C’est ce point, souvent oublié dans les simulateurs restés à 2025, qui fausse le net d’un consultant ou d’un développeur.'],
+            ['type' => 'table', 'head' => 'Famille d’activité', 'headMid' => '2025', 'headRight' => '2026', 'rows' => [
+                ['k' => 'Vente de marchandises (BIC)', 'mid' => '12,3 %', 'v' => '12,3 %', 'c' => 'blue'],
+                ['k' => 'Services commerciaux et artisanaux (BIC)', 'mid' => '21,2 %', 'v' => '21,2 %', 'c' => 'teal'],
+                ['k' => 'Autres prestations (BNC, régime général)', 'mid' => '24,6 %', 'v' => '25,6 %', 'c' => 'orange'],
+                ['k' => 'Libéraux réglementés (CIPAV)', 'mid' => '23,2 %', 'v' => '23,2 %', 'c' => 'navy'],
+                ['k' => 'Meublé de tourisme classé', 'mid' => '6,0 %', 'v' => '6,0 %', 'c' => 'blue'],
             ]],
-            ['type' => 'callout', 'title' => 'Barème indicatif', 'text' => 'Les taux proposés ici sont des ordres de grandeur du régime micro-social (hors CFP, hors versement libératoire). Vérifiez le vôtre sur votre dernier avis URSSAF avant de figer un fil.'],
+            ['type' => 'p', 'text' => 'Ces taux couvrent maladie, retraite, invalidité-décès, allocations familiales et CSG-CRDS. Ils ne couvrent pas la contribution à la formation professionnelle, ni le versement libératoire de l’impôt sur le revenu si vous l’avez choisi.'],
+            ['type' => 'widget', 'id' => 'urssaf'],
+            ['type' => 'h', 'text' => 'CFP : trois décimales qui s’ajoutent'],
+            ['type' => 'p', 'text' => 'La contribution à la formation professionnelle est due quel que soit le secteur. Elle s’ajoute au taux social, et l’Urssaf la prélève en même temps. Oublier la CFP, c’est sous-provisionner de 0,1 à 0,3 point — peu sur un mois, visible sur un trimestre.'],
+            ['type' => 'table', 'head' => 'Secteur', 'headRight' => 'CFP 2026', 'rows' => [
+                ['k' => 'Commerce / vente', 'v' => '0,10 %', 'c' => 'blue'],
+                ['k' => 'Prestation de services et professions libérales', 'v' => '0,20 %', 'c' => 'teal'],
+                ['k' => 'Artisanat', 'v' => '0,30 %', 'c' => 'orange'],
+            ]],
+            ['type' => 'h', 'text' => 'ACRE : 50 % jusqu’au 30 juin, 25 % ensuite'],
+            ['type' => 'p', 'text' => 'L’exonération de début d’activité réduit le seul taux social, pas la CFP ni le libératoire. Pour une création avant le 1er juillet 2026, l’Urssaf applique encore 50 % de réduction. À partir du 1er juillet, la réduction passe à 25 % — soit un taux social égal à 75 % du barème normal. L’exonération court jusqu’à la fin du troisième trimestre civil qui suit celui de la création.'],
+            ['type' => 'table', 'head' => 'Régime', 'headMid' => 'ACRE 50 %', 'headRight' => 'ACRE 25 %', 'rows' => [
+                ['k' => 'Vente · 12,3 %', 'mid' => '6,2 %', 'v' => '9,2 %', 'c' => 'blue'],
+                ['k' => 'Services BIC · 21,2 %', 'mid' => '10,6 %', 'v' => '15,9 %', 'c' => 'teal'],
+                ['k' => 'BNC régime général · 25,6 %', 'mid' => '12,8 %', 'v' => '19,2 %', 'c' => 'orange'],
+                ['k' => 'CIPAV · 23,2 %', 'mid' => '11,6 %', 'v' => '17,4 %', 'c' => 'navy'],
+            ]],
+            ['type' => 'h', 'text' => 'Pourcentage du CA, pas un fixe figé'],
+            ['type' => 'p', 'text' => 'Dans le circuit du couple à 6 280 €, la provision URSSAF est un fixe de 380 € — soit 21,2 % de 1 800 € de CA services. Ça tient tant que le CA moyen reste à 1 800 €. Si le mois tombe à 900 € et que le fixe reste, le compte pro se vide trop. Si le CA monte à 3 000 €, on sous-provisionne.'],
+            ['type' => 'list', 'items' => [
+                'Le plus honnête : un pourcentage du bloc revenu AE, recalculé chaque fois que la moyenne bouge.',
+                'Un fixe n’est acceptable que si vous lissez le CA sur douze mois et que vous le revoyez à chaque trimestre.',
+                'Après la provision, un seul fil « tout le reste » vers le compte personnel. Jamais un pourcentage du brut.',
+            ]],
+            ['type' => 'quote', 'text' => 'On croyait disposer de tout le chiffre d’affaires. On en garde le net, et c’est très bien — au moins c’est vrai.', 'by' => 'Lecture d’un circuit, après provision URSSAF'],
+            ['type' => 'h', 'text' => 'Ce que 5 000 € de CA veulent vraiment dire'],
+            ['type' => 'p', 'text' => 'Services BIC à 21,2 %, hors CFP et hors libératoire : 1 060 € partent, 3 940 € restent. En BNC régime général à 25,6 %, la même facture retire 1 280 €. L’écart est de 220 € par mois, 2 640 € par an — uniquement parce que le simulateur était resté à 24,6 %.'],
+            ['type' => 'callout', 'title' => 'Deux autres plafonds à surveiller', 'text' => 'Rester en micro jusqu’à 83 600 € de CA services (203 100 € en vente) n’empêche pas de basculer à la TVA dès 37 500 € (85 000 € en vente). Ces deux limites ne bougent pas ensemble. Le guide dédié les superpose sur le même curseur.'],
+            ['type' => 'links', 'title' => 'Sources officielles', 'items' => [
+                ['label' => 'Urssaf — L’essentiel du statut auto-entrepreneur', 'href' => 'https://www.autoentrepreneur.urssaf.fr/portail/accueil/sinformer-sur-le-statut/lessentiel-du-statut.html'],
+                ['label' => 'economie.gouv.fr — Montant des cotisations sociales des micro-entreprises', 'href' => 'https://www.economie.gouv.fr/entreprises/gerer-sa-micro-entreprise/micro-entreprises-quel-est-le-montant-de-vos-cotisations-sociales'],
+            ]],
         ];
     }
 
@@ -563,18 +680,25 @@ class Articles
     private static function taux(): array
     {
         return [
-            ['type' => 'h', 'text' => 'Les barèmes que porte le moteur'],
-            ['type' => 'p', 'text' => 'repartio n’invente pas de taux. Chaque livret réglementé arrive avec son plafond et son taux, identiques à ceux que vous posez à la main si vous partez d’un livret vierge. Cette fiche sert à les lire ensemble, et à voir en combien de mois un versement les sature.'],
-            ['type' => 'table', 'head' => 'Produit', 'rows' => [
+            ['type' => 'h', 'text' => 'Les barèmes au 1er août 2026'],
+            ['type' => 'p', 'text' => 'repartio n’invente pas de taux. Chaque livret réglementé arrive avec son plafond et son taux, identiques à ceux que vous posez à la main si vous partez d’un livret vierge. Les taux ci-dessous courent jusqu’au 31 janvier 2027. Le Livret A et le LDDS sont passés de 1,50 % (1er février – 31 juillet) à 1,70 % le 1er août. Le LEP est resté à 2,50 % — la formule aurait dû le ramener à 2,20 %, un « coup de pouce » l’a maintenu.'],
+            ['type' => 'table', 'head' => 'Produit', 'headRight' => 'Taux · plafond', 'rows' => [
                 ['k' => 'Livret A', 'v' => '1,70 % · 22 950 €', 'c' => 'blue'],
                 ['k' => 'LDDS', 'v' => '1,70 % · 12 000 €', 'c' => 'blue'],
-                ['k' => 'LEP', 'v' => '2,50 % · 10 000 €', 'c' => 'teal'],
-                ['k' => 'Livret jeune', 'v' => '1,70 % · 1 600 €', 'c' => 'navy'],
+                ['k' => 'LEP (si éligible)', 'v' => '2,50 % · 10 000 €', 'c' => 'teal'],
+                ['k' => 'Livret jeune', 'v' => '≥ 1,70 % · 1 600 €', 'c' => 'navy'],
+                ['k' => 'CEL', 'v' => '1,25 % · 15 300 €', 'c' => 'blue'],
+                ['k' => 'PEL ouvert depuis le 1er janv. 2026', 'v' => '2,00 % · 61 200 €', 'c' => 'orange'],
             ]],
             ['type' => 'widget', 'id' => 'taux'],
             ['type' => 'h', 'text' => 'Ce que le plafond ne dit pas'],
-            ['type' => 'p', 'text' => 'Le plafond est un stock maximal, pas un flux. Un livret plein continue de capitaliser. Un livret jeune saturé en 18 mois n’est pas « fini » : ses intérêts restent dans la projection, et le versement mensuel doit basculer ailleurs — sinon il redevient non affecté.'],
-            ['type' => 'callout', 'title' => 'Mise à jour', 'text' => 'Si un barème officiel change, le moteur est mis à jour et cette fiche suit. Les circuits déjà créés gardent les taux saisis, sauf si vous rechargez le préréglage du livret.'],
+            ['type' => 'p', 'text' => 'Le plafond est un stock maximal de versements, pas un flux. Un livret plein continue de capitaliser : les intérêts peuvent porter le solde au-delà. Un livret jeune saturé en 18 mois n’est pas « fini » : ses intérêts restent dans la projection, et le versement mensuel doit basculer ailleurs — sinon il redevient non affecté.'],
+            ['type' => 'p', 'text' => 'Le livret jeune n’a pas un taux unique : chaque banque le fixe, sans pouvoir descendre sous le Livret A. Le moteur utilise 1,70 % comme plancher. Si votre banque sert davantage, saisissez le taux réel sur le bloc.'],
+            ['type' => 'callout', 'title' => 'Mise à jour', 'text' => 'Les préréglages du canvas suivent ce barème. Les circuits déjà créés gardent les taux saisis ; recharger un préréglage applique le barème neuf. Prochaine révision réglementaire : 1er février 2027.'],
+            ['type' => 'links', 'title' => 'Sources officielles', 'items' => [
+                ['label' => 'Service-Public — Taux Livret A et LEP au 1er août 2026', 'href' => 'https://www.service-public.gouv.fr/particuliers/actualites/A18000'],
+                ['label' => 'Service-Public — Plafonds de revenus du LEP 2026', 'href' => 'https://www.service-public.gouv.fr/particuliers/actualites/A18261'],
+            ]],
         ];
     }
 
@@ -615,6 +739,136 @@ class Articles
             ['type' => 'widget', 'id' => 'changelog'],
             ['type' => 'h', 'text' => 'Ce qui ne change pas'],
             ['type' => 'p', 'text' => 'Pas de connexion bancaire, pas de conseil en placement, pas de revente de données. Quand un barème réglementaire bouge, vos circuits gardent les taux saisis ; le préréglage neuf, lui, suit le barème.'],
+        ];
+    }
+
+    private static function plafondsMicro(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Deux compteurs, deux conséquences'],
+            ['type' => 'p', 'text' => 'Le régime micro et la franchise en base de TVA ne partagent pas les mêmes seuils. On peut rester micro-entrepreneur et déjà facturer de la TVA. On peut aussi, plus rarement, s’approcher du plafond micro tout en étant encore franchise. Mélanger les deux chiffres dans une seule ligne de tableur est la première erreur.'],
+            ['type' => 'table', 'head' => 'Seuil 2026', 'headMid' => 'Vente / hébergement', 'headRight' => 'Services / libéral', 'rows' => [
+                ['k' => 'Plafond micro (2026–2028)', 'mid' => '203 100 €', 'v' => '83 600 €', 'c' => 'teal'],
+                ['k' => 'Franchise TVA — seuil de base', 'mid' => '85 000 €', 'v' => '37 500 €', 'c' => 'orange'],
+                ['k' => 'Franchise TVA — seuil majoré', 'mid' => '93 500 €', 'v' => '41 250 €', 'c' => 'orange'],
+            ]],
+            ['type' => 'p', 'text' => 'Les plafonds micro ont été revalorisés au 1er janvier 2026 (ils étaient à 188 700 € et 77 700 €). Les seuils de TVA, eux, n’ont pas bougé. Un prestataire à 4 000 € par mois (48 000 € l’an) est encore largement sous le plafond micro, et déjà au-dessus de la franchise TVA.'],
+            ['type' => 'widget', 'id' => 'plafonds'],
+            ['type' => 'h', 'text' => 'Ce que le circuit doit prévoir'],
+            ['type' => 'list', 'items' => [
+                'Un dépassement de franchise : dès le mois du seuil majoré, les factures portent de la TVA. Le CA « net câblable » n’est plus le brut encaissé.',
+                'Un dépassement micro une année : vous restez micro l’année suivante. Deux années de suite : sortie au 1er janvier suivant.',
+                'La première année, les plafonds sont proratisés au nombre de jours d’activité.',
+            ]],
+            ['type' => 'callout', 'title' => 'Activité mixte', 'text' => 'Vente + services : le CA global ne doit pas dépasser 203 100 €, dont 83 600 € au plus pour la part services. Les deux compteurs tournent en parallèle.'],
+            ['type' => 'links', 'title' => 'Sources officielles', 'items' => [
+                ['label' => 'Service-Public Entreprendre — Nouveaux seuils de la micro-entreprise', 'href' => 'https://entreprendre.service-public.gouv.fr/actualites/A18813'],
+                ['label' => 'Urssaf — L’essentiel du statut', 'href' => 'https://www.autoentrepreneur.urssaf.fr/portail/accueil/sinformer-sur-le-statut/lessentiel-du-statut.html'],
+            ]],
+        ];
+    }
+
+    private static function liberatoire(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Deux façons de payer l’impôt, un seul net mensuel'],
+            ['type' => 'p', 'text' => 'Sans versement libératoire, l’Urssaf ne prélève que les cotisations sociales (et la CFP). L’impôt sur le revenu arrive plus tard, sur le CA abattu : 71 % d’abattement en vente, 50 % en services BIC, 34 % en BNC. Avec le libératoire, un pourcentage s’ajoute chaque mois au prélèvement Urssaf, et l’impôt de l’activité est soldé.'],
+            ['type' => 'table', 'head' => 'Activité', 'headMid' => 'Taux VL', 'headRight' => 'Abattement micro', 'rows' => [
+                ['k' => 'Vente de marchandises', 'mid' => '1,0 %', 'v' => '71 %', 'c' => 'blue'],
+                ['k' => 'Services BIC', 'mid' => '1,7 %', 'v' => '50 %', 'c' => 'teal'],
+                ['k' => 'BNC et CIPAV', 'mid' => '2,2 %', 'v' => '34 %', 'c' => 'orange'],
+            ]],
+            ['type' => 'p', 'text' => 'L’option n’est ouverte que si le revenu fiscal de référence du foyer, année N-2, ne dépasse pas la limite supérieure de la deuxième tranche de l’IR. Pour une option en 2026, c’est le RFR 2024 : 29 315 € par part de quotient familial.'],
+            ['type' => 'widget', 'id' => 'liberatoire'],
+            ['type' => 'h', 'text' => 'Comment le câbler'],
+            ['type' => 'list', 'items' => [
+                'Avec libératoire : un seul bloc « Cotisations + IR », au taux social + CFP + VL. Le compte pro verse ensuite tout le reste au perso.',
+                'Sans libératoire : le bloc Urssaf reste au taux social + CFP. Un second bloc « Provision IR » reçoit un pourcentage du CA, calé sur votre TMI × (1 − abattement).',
+                'Si le TMI du foyer est à 0 %, le libératoire fait payer un impôt que vous ne deviez pas. Le simulateur le montre tout de suite.',
+            ]],
+            ['type' => 'callout', 'title' => 'Ce que le simulateur ne décide pas', 'text' => 'Le TMI réel dépend de tous les revenus du foyer, pas seulement du CA. Ici, on compare deux provisions mensuelles à TMI constant. Ce n’est pas une liasse fiscale.'],
+            ['type' => 'links', 'title' => 'Sources officielles', 'items' => [
+                ['label' => 'Urssaf — Versement libératoire de l’impôt sur le revenu', 'href' => 'https://www.autoentrepreneur.urssaf.fr/portail/accueil/sinformer-sur-le-statut/lessentiel-du-statut.html'],
+            ]],
+        ];
+    }
+
+    private static function irregulier(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le dernier mois n’est pas le mois type'],
+            ['type' => 'p', 'text' => 'Un graphiste encaisse 0 € en août, 7 200 € en novembre. S’il provisionne 21,2 % du mois en cours, novembre se vide, août n’a rien mis de côté, et la facture trimestrielle tombe au plus mauvais moment. Le circuit, lui, ne connaît qu’une moyenne — c’est précisément ce qu’il faut lui donner.'],
+            ['type' => 'p', 'text' => 'La moyenne utile se calcule sur les douze derniers mois encaissés, y compris les zéros. Pas sur « un mois normal ». Un mois normal n’existe pas quand la moitié de l’année est à zéro.'],
+            ['type' => 'widget', 'id' => 'irregulier'],
+            ['type' => 'h', 'text' => 'Trois câblages qui tiennent'],
+            ['type' => 'list', 'items' => [
+                'Le revenu AE est la moyenne annuelle, pas le dernier encaissement.',
+                'La provision Urssaf est un pourcentage de cette moyenne — elle sort même les mois à 0 €, depuis un matelas posé sur le compte pro.',
+                'Le matelas pro vaut au moins une échéance trimestrielle + un mois de charges perso alimentées par l’AE.',
+            ]],
+            ['type' => 'quote', 'text' => 'On a arrêté de « se verser tout » les mois chargés. Le compte pro garde la moyenne. Le perso ne voit plus le yoyo.', 'by' => 'Note de terrain, auto-entreprise saisonnière'],
+            ['type' => 'callout', 'title' => 'Deux scénarios plutôt qu’une moyenne trop lisse', 'text' => 'Si l’écart entre mois bas et mois haut dépasse vraiment le confort, dupliquez le circuit : un mois bas, un mois haut. La moyenne reste le mois type ; les deux variantes disent ce qui s’arrête.'],
+        ];
+    }
+
+    private static function lepElig(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Le meilleur taux du moteur a une porte'],
+            ['type' => 'p', 'text' => 'À 2,50 % net, le LEP reste le livret réglementé le mieux rémunéré. Il n’est ouvert que si le revenu fiscal de référence du foyer reste sous un plafond, révisé chaque année. En 2026, en métropole : 23 028 € pour une part, 35 326 € pour deux, 47 624 € pour trois. La banque lit le RFR 2024 (avis 2025) ou le RFR 2025 dès qu’il est disponible.'],
+            ['type' => 'table', 'head' => 'Parts fiscales', 'headRight' => 'RFR max. 2026', 'rows' => [
+                ['k' => '1 part — personne seule', 'v' => '23 028 €', 'c' => 'teal'],
+                ['k' => '1,5 part', 'v' => '29 177 €', 'c' => 'teal'],
+                ['k' => '2 parts — couple', 'v' => '35 326 €', 'c' => 'blue'],
+                ['k' => '2,5 parts', 'v' => '41 475 €', 'c' => 'blue'],
+                ['k' => '3 parts — couple, 2 enfants', 'v' => '47 624 €', 'c' => 'navy'],
+                ['k' => 'Demi-part supplémentaire', 'v' => '+ 6 149 €', 'c' => 'navy'],
+            ]],
+            ['type' => 'widget', 'id' => 'lep'],
+            ['type' => 'h', 'text' => 'Ce que ça change dans le circuit'],
+            ['type' => 'list', 'items' => [
+                'Éligible : le LEP se sature en premier, puis le LDDS, puis le Livret A. C’est l’ordre du guide des livrets.',
+                'Plus éligible : décochez le LEP. L’ordre devient LDDS puis Livret A. Le stock déjà posé peut rester un an si un seul RFR dépasse ; deux années de suite, le livret se clôture.',
+                'Le plafond de versement reste 10 000 €. Les intérêts peuvent le dépasser ; les versements, non.',
+            ]],
+            ['type' => 'links', 'title' => 'Sources officielles', 'items' => [
+                ['label' => 'Service-Public — Plafonds de revenus du LEP 2026', 'href' => 'https://www.service-public.gouv.fr/particuliers/actualites/A18261'],
+                ['label' => 'Service-Public — Fiche LEP (F2367)', 'href' => 'https://www.service-public.gouv.fr/particuliers/vosdroits/F2367'],
+            ]],
+        ];
+    }
+
+    private static function matelas(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Trois mois de quoi, exactement ?'],
+            ['type' => 'p', 'text' => '« Trois mois de réserve » ne veut rien dire tant qu’on n’a pas nommé le dénominateur. Trois mois de revenus gonflent la cible dès qu’un bonus arrive. Trois mois de charges — loyer, énergie, assurances, courses, crédits — donnent un chiffre que le foyer peut encore payer si tout s’arrête.'],
+            ['type' => 'p', 'text' => 'Dans un circuit, ce matelas est un livret (souvent le Livret A ou le LDDS) avec une cible. Tant que le solde est sous la cible, un fil fixe l’alimente. Une fois la cible touchée, le fil bascule vers l’objectif suivant — apport, projet, ou simplement « tout le reste ».'],
+            ['type' => 'widget', 'id' => 'matelas'],
+            ['type' => 'h', 'text' => 'Où le poser'],
+            ['type' => 'list', 'items' => [
+                'Sur un livret disponible tout de suite, pas sur un support à horizon long.',
+                'Alimenté après les factures, avant l’épargne-projet. Le matelas a priorité tant qu’il n’est pas plein.',
+                'Pour une auto-entreprise, un second matelas plus petit reste sur le compte pro : une échéance Urssaf, pas trois mois de foyer.',
+            ]],
+            ['type' => 'callout', 'title' => 'Quatre à six mois si le revenu est variable', 'text' => 'Un salaire unique tient souvent à trois mois. Dès qu’une part du foyer dépend d’un CA, allongez. Le simulateur le montre : la même charge, un mois de plus, déplace la date de plusieurs trimestres si le versement est petit.'],
+        ];
+    }
+
+    private static function mixte(): array
+    {
+        return [
+            ['type' => 'h', 'text' => 'Deux natures de revenu, un seul mois à tenir'],
+            ['type' => 'p', 'text' => 'Le salaire arrive le 28, presque toujours le même. L’auto-entreprise arrive quand le client paie. Si les deux nourrissent les mêmes factures, un mois sans CA fait sauter le loyer. Le câblage qui tient : le salaire sert les fixes, l’AE sert l’épargne et, seulement s’il reste, le quotidien.'],
+            ['type' => 'p', 'text' => 'C’est le contraire de ce que beaucoup de tableurs font par habitude : tout additionner, puis tout répartir. L’addition est juste. La répartition, elle, mélange un flux certain et un flux optionnel.'],
+            ['type' => 'widget', 'id' => 'mixte'],
+            ['type' => 'h', 'text' => 'La règle des deux colonnes'],
+            ['type' => 'list', 'items' => [
+                'Colonne salaire : factures, loyer, minimum vital. Si ce seul flux les couvre, le mois bas est déjà sauvé.',
+                'Colonne AE : provision Urssaf d’abord, puis épargne, puis complément du quotidien.',
+                'Si le salaire ne couvre pas les factures, l’AE doit verser un fixe — et le mois sans CA a besoin d’un matelas déjà là.',
+            ]],
+            ['type' => 'quote', 'text' => 'Tant que le salaire tenait le loyer, on a arrêté de regarder le compte pro tous les soirs.', 'by' => 'Lecture d’un circuit salaire + AE'],
         ];
     }
 }

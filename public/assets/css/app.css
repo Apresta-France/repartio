@@ -343,7 +343,9 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .builder-workspace { display: flex; flex: 1; min-height: 0; min-width: 0; }
 .builder-side, .builder-props { width: 296px; flex: none; display: flex; flex-direction: column; gap: 22px; padding: 18px; background: var(--paper); overflow: auto; }
 .builder-side { border-right: 1px solid var(--line); }
-.builder-props { border-left: 1px solid var(--line); }
+.builder-props { border-left: 1px solid var(--line); min-width: 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+.builder-props::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.builder-props > * { min-width: 0; max-width: 100%; }
 .builder-side-toggle, .builder-props-toggle { display: none; }
 .builder-back { width: 100%; justify-content: flex-start; padding: 8px 12px; min-height: 40px; font-size: 13.5px; }
 .builder-back:hover { background: var(--navy-soft); }
@@ -711,7 +713,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .edge-pill i { font-style: normal; font-family: var(--sans); font-size: 9.5px; font-weight: 600; color: var(--muted); }
 .edge-pill.is-zero { color: var(--muted); font-weight: 500; }
 .builder-props-empty p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--muted); }
-.prop-block { display: flex; flex-direction: column; gap: 14px; }
+.prop-block { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .prop-head { display: flex; align-items: center; gap: 10px; }
 .prop-head .dot { width: 10px; height: 10px; }
 .prop-kind { font-size: 15px; font-weight: 700; letter-spacing: -.02em; }
@@ -726,10 +728,10 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .prop-stats { display: flex; flex-direction: column; }
 .prop-stat { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; color: var(--muted); }
-.prop-interest { display: flex; flex-direction: column; gap: 8px; }
+.prop-interest { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .prop-interest-lead { margin: 0; }
 .prop-interest-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.prop-interest-kpis > div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line-soft); }
+.prop-interest-kpis > div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line-soft); min-width: 0; }
 .prop-interest-kpis span { font-size: 11px; font-weight: 600; color: var(--muted); }
 .prop-interest-kpis b { font-size: 14px; font-weight: 650; color: var(--ink); }
 .prop-interest-kpis b.is-proj { color: var(--teal-ink); }
@@ -737,12 +739,14 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .prop-interest-mix i { display: block; height: 100%; }
 .prop-interest-mix .is-put { background: oklch(0.78 0.03 255); }
 .prop-interest-mix .is-yield { background: var(--teal); }
-.prop-interest-mix-legend { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--muted); }
-.prop-interest-years { display: flex; flex-direction: column; max-height: 280px; overflow: auto; }
-.prop-interest-year { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line-soft); }
-.prop-interest-year-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--muted); }
+.prop-interest-mix-legend { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--muted); min-width: 0; }
+.prop-interest-years { display: flex; flex-direction: column; max-height: 280px; overflow-x: hidden; overflow-y: auto; padding-inline: 8px; margin-inline: 0; scrollbar-width: none; -ms-overflow-style: none; }
+.prop-interest-years::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.prop-interest-year { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line-soft); min-width: 0; }
+.prop-interest-year-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--muted); min-width: 0; }
 .prop-interest-year-top b { font-weight: 650; color: var(--ink); }
-.prop-interest-year-sub { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--muted); }
+.prop-interest-year-sub { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); min-width: 0; }
+.prop-interest-year-top span, .prop-interest-year-top b, .prop-interest-year-sub span, .prop-interest-mix-legend span { min-width: 0; }
 .prop-interest-year-sub span:first-child { color: var(--teal-ink); font-weight: 550; }
 .prop-interest-year.is-now { background: oklch(0.96 0.03 195); margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 8px; border-top-color: transparent; }
 .prop-interest-year.is-now + .prop-interest-year { border-top-color: transparent; }
@@ -1346,6 +1350,12 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .article-table i { width: 8px; height: 8px; border-radius: 3px; flex: none; }
 .article-table span { flex: 1; font-size: 13.5px; }
 .article-table strong { font-size: 13px; font-weight: 500; }
+.article-table.is-3 em { width: 110px; text-align: right; flex: none; font-size: 13px; color: var(--muted); }
+.article-table.is-3 .article-table-head span:nth-child(2),
+.article-table.is-3 strong { width: 110px; }
+.article-links { padding: 16px 18px; border-radius: 12px; background: oklch(0.975 0.008 250); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.article-links strong { font-size: 13.5px; }
+.article-links a { font-size: 13.5px; line-height: 1.45; }
 .article-callout { padding: 16px 18px; border-radius: 12px; background: oklch(0.975 0.008 250); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
 .article-callout strong { font-size: 13.5px; }
 .article-callout p { font-size: 13.5px; line-height: 1.55; color: var(--muted); }
@@ -1421,7 +1431,12 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
 .lab-compare .lab-meter { height: 12px; }
 .lab-compare .lab-meter > i { background: var(--teal); }
 .lab-compare > div:last-child .lab-meter > i { background: var(--blue); }
-.lab-livrets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lab-opts { display: flex; flex-wrap: wrap; gap: 14px 18px; }
+.lab-chip-hint { display: block; font-size: 10px; font-weight: 500; color: var(--faint); letter-spacing: 0; text-transform: none; font-family: var(--mono); }
+.chip.active .lab-chip-hint { color: oklch(0.97 0.01 250 / 0.7); }
+.lab-year { display: flex; align-items: flex-end; gap: 4px; height: 88px; padding: 6px 2px 0; }
+.lab-year > i { flex: 1; border-radius: 3px 3px 0 0; background: var(--teal); min-height: 2px; opacity: .88; }
+.lab-livrets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .lab-livret { text-align: left; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px; background: var(--paper); cursor: pointer; display: flex; flex-direction: column; gap: 3px; }
 .lab-livret.is-on { border-color: var(--orange); background: oklch(0.98 0.02 38); box-shadow: 0 0 0 3px oklch(0.68 0.18 38 / 0.14); }
 .lab-livret strong { font-size: 13.5px; }
@@ -1453,7 +1468,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
   .article-toc .eyebrow { width: 100%; padding: 0 0 4px; }
   .article-toc a { padding: 6px 8px; }
   .article-body { padding: 28px 20px 56px; }
-  .lab-kpis, .lab-split, .lab-compare, .lab-livrets { grid-template-columns: 1fr; }
+  .lab-kpis, .lab-split, .lab-compare, .lab-livrets { grid-template-columns: 1fr 1fr; }
   .lab-flow-row { grid-template-columns: 1fr 72px; }
   .lab-flow-row i { grid-column: 1 / -1; }
 }
@@ -1462,7 +1477,7 @@ form.card-action { display: flex; flex-direction: column; margin: 0; color: inhe
   .ressources-count { margin-left: 0; width: 100%; }
   .article-topics { margin-left: 0; }
   .lab { padding: 18px 16px 16px; }
-  .lab-kpis-2 { grid-template-columns: 1fr; }
+  .lab-kpis, .lab-kpis-2, .lab-livrets { grid-template-columns: 1fr; }
 }
 
 .admin-badge { align-self: flex-start; background: var(--navy); color: #fff; border-color: var(--navy); }

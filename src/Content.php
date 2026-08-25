@@ -31,7 +31,7 @@ class Content
             ['Le moteur', 'Peut-on modéliser un revenu irrégulier ?', 'Oui, en moyenne lissée. Pour de fortes variations, créez deux scénarios : un mois bas et un mois haut.', '', ''],
             ['Le moteur', 'L’inflation est-elle prise en compte ?', 'Non par défaut : nous n’imposons aucune hypothèse macroéconomique.', '', ''],
             ['Situations', 'Peut-on modéliser un couple avec des comptes séparés ?', 'C’est le cas le plus courant : deux colonnes de comptes personnels, un ou plusieurs comptes joints, et des répartiteurs distincts.', 'Voir un circuit rempli', '/circuit-rempli'],
-            ['Situations', 'Comment provisionner l’URSSAF en auto-entreprise ?', 'Avec un bloc dépense dédié, alimenté depuis le compte professionnel.', '', ''],
+            ['Situations', 'Comment provisionner l’URSSAF en auto-entreprise ?', 'Avec un bloc dépense dédié, alimenté depuis le compte professionnel, au taux 2026 de votre régime (21,2 % en services BIC, 25,6 % en BNC).', 'Guide URSSAF 2026', '/ressources/urssaf-auto-entrepreneur'],
             ['Situations', 'Et les livrets des enfants ?', 'Un bloc livret par enfant, avec son solde de départ, son taux et son plafond.', '', ''],
             ['Situations', 'Peut-on câbler le premier argent d’un ado ?', 'Oui. Le scénario « Seize ans » part d’un argent de poche et d’un job, verse une part à l’épargne avant les sorties, et vise un Livret Jeune plus une enveloppe (permis, voyage).', 'Circuits types', '/circuits-types'],
             ['Situations', 'Peut-on suivre un objectif chiffré, comme un apport ?', 'Oui : vous posez la cible sur le bloc de destination, et repartio affiche le mois d’atteinte.', '', ''],

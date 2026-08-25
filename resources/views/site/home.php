@@ -254,8 +254,8 @@ $C = [
   </div>
   <div class="split cols-3">
     <?php foreach ([
-      ['Budget', '6 min', 'Pourquoi votre budget ne tient pas dans un tableur', 'Un tableur décrit des totaux ; un circuit décrit des chemins. Ajoutez des comptes, voyez ce qui casse.', 'budget-tableur'],
-      ['Épargne', '4 min', 'Ordre de remplissage des livrets réglementés', 'LEP, LDDS, Livret A : réglez l’épargne mensuelle, lisez les dates de saturation.', 'ordre-livrets'],
+      ['Activité', '14 min', 'Auto-entrepreneur : provisionner l’URSSAF 2026', 'BNC à 25,6 %, CFP, ACRE, libératoire. Posez le vrai net chaque mois, pas la facture de mars.', 'urssaf-auto-entrepreneur'],
+      ['Épargne', '5 min', 'Taux et plafonds au 1er août 2026', 'Livret A et LDDS à 1,70 %, LEP à 2,50 %. En combien de mois un versement sature-t-il ?', 'taux-plafonds-2026'],
       ['Foyer', '12 min', 'Un couple, 6 280 € par mois, zéro euro non affecté', 'Le circuit complet d’une famille de quatre. Baissez l’auto-entreprise : voyez ce qui s’arrête.', 'couple-12338'],
     ] as $p): ?>
       <a href="<?= e(url('/ressources/' . $p[4])) ?>" style="padding:24px 26px;color:inherit;display:flex;flex-direction:column;gap:10px;">

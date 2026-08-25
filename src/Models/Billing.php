@@ -297,9 +297,6 @@ class Billing
         if (!ReInvent::enabled()) {
             throw new RuntimeException('Le paiement n’est pas encore configuré.');
         }
-        if (!self::profileReady((int) $user['id'], $user)) {
-            throw new RuntimeException('Renseignez votre adresse de facturation avant de payer.');
-        }
 
         $session = ReInvent::checkout(
             $plan,

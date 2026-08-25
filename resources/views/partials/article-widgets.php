@@ -104,26 +104,41 @@ $widget = $widget ?? '';
 <?php elseif ($widget === 'urssaf'): ?>
   <div class="lab" data-lab="urssaf">
     <div class="lab-head">
-      <span class="eyebrow">Simulateur</span>
+      <span class="eyebrow">Simulateur · barème 2026</span>
       <strong>La provision mensuelle, pas la facture de mars</strong>
-      <p>Choisissez le régime, réglez le CA moyen. Le circuit pose ce montant comme une dépense chaque mois.</p>
+      <p>Régime, CFP, ACRE, versement libératoire. Le circuit pose ce total comme une dépense chaque mois.</p>
     </div>
     <div class="chips lab-regimes">
-      <button type="button" class="chip active" data-rate="21.2">Services BIC · 21,2 %</button>
-      <button type="button" class="chip" data-rate="24.6">Services BNC · 24,6 %</button>
-      <button type="button" class="chip" data-rate="12.3">Vente · 12,3 %</button>
+      <button type="button" class="chip active" data-regime="bic">Services BIC · 21,2 %</button>
+      <button type="button" class="chip" data-regime="bnc">BNC · 25,6 %</button>
+      <button type="button" class="chip" data-regime="cipav">CIPAV · 23,2 %</button>
+      <button type="button" class="chip" data-regime="vente">Vente · 12,3 %</button>
     </div>
     <div class="lab-field">
       <div class="lab-field-top"><span>CA mensuel moyen</span><b data-out="ca">5 000 €</b></div>
       <input type="range" min="500" max="12000" step="100" value="5000" data-in="ca">
     </div>
-    <div class="lab-bar is-tall"><i data-out="tax-bar"></i><em data-out="net-bar"></em></div>
-    <div class="lab-kpis">
-      <div><span>Provision / mois</span><strong data-out="month">1 060 €</strong></div>
-      <div><span>Facture / trimestre</span><strong data-out="quarter">3 180 €</strong></div>
-      <div><span>Net câblable</span><strong class="is-teal" data-out="net">3 940 €</strong></div>
+    <div class="chips">
+      <button type="button" class="chip active" data-acre="0">Sans ACRE</button>
+      <button type="button" class="chip" data-acre="50">ACRE 50 % <span class="lab-chip-hint">avant juil. 2026</span></button>
+      <button type="button" class="chip" data-acre="25">ACRE 25 % <span class="lab-chip-hint">depuis juil. 2026</span></button>
     </div>
-    <p class="lab-foot">Hors CFP et versement libératoire. Servez ce fixe depuis le compte pro, puis « tout le reste » vers le perso.</p>
+    <div class="lab-opts">
+      <label class="lab-check"><input type="checkbox" data-in="cfp" checked><span>Inclure la CFP</span></label>
+      <label class="lab-check"><input type="checkbox" data-in="artisan"><span>Artisan (CFP 0,3 %)</span></label>
+      <label class="lab-check"><input type="checkbox" data-in="vl"><span>Versement libératoire</span></label>
+    </div>
+    <div class="lab-bar is-tall"><i data-out="tax-bar"></i><em></em></div>
+    <div class="lab-kpis">
+      <div><span>Taux global</span><strong data-out="rate">—</strong></div>
+      <div><span>Provision / mois</span><strong data-out="month">—</strong></div>
+      <div><span>Net câblable</span><strong class="is-teal" data-out="net">—</strong></div>
+    </div>
+    <div class="lab-split">
+      <div class="lab-col" data-out="break"></div>
+      <div class="lab-col" data-out="year"></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
   </div>
 
 <?php elseif ($widget === 'plafond'): ?>
@@ -344,5 +359,168 @@ $widget = $widget ?? '';
       <button type="button" class="chip" data-log="Barème">Barème</button>
     </div>
     <div class="lab-log" data-out="list"></div>
+  </div>
+
+<?php elseif ($widget === 'plafonds'): ?>
+  <div class="lab" data-lab="plafonds">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Où se situe votre CA annuel ?</strong>
+      <p>Deux barres, deux bascules. La TVA arrive bien avant la sortie du régime micro.</p>
+    </div>
+    <div class="chips">
+      <button type="button" class="chip active" data-act="services">Services / libéral</button>
+      <button type="button" class="chip" data-act="vente">Vente / hébergement</button>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>CA mensuel moyen</span><b data-out="month">3 500 €</b></div>
+      <input type="range" min="500" max="18000" step="100" value="3500" data-in="month">
+    </div>
+    <div class="lab-stack" data-out="stack"></div>
+    <div class="lab-kpis">
+      <div><span>CA annuel</span><strong data-out="year">—</strong></div>
+      <div><span>Franchise TVA</span><strong data-out="tva">—</strong></div>
+      <div><span>Régime micro</span><strong data-out="micro">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'liberatoire'): ?>
+  <div class="lab" data-lab="liberatoire">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Libératoire chaque mois, ou IR plus tard ?</strong>
+      <p>Même CA, deux provisions. Le TMI est celui de la dernière tranche du foyer — une hypothèse, pas votre avis d’impôt.</p>
+    </div>
+    <div class="chips">
+      <button type="button" class="chip active" data-regime="bic">Services BIC</button>
+      <button type="button" class="chip" data-regime="bnc">BNC</button>
+      <button type="button" class="chip" data-regime="vente">Vente</button>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>CA mensuel</span><b data-out="ca">3 000 €</b></div>
+      <input type="range" min="500" max="8000" step="100" value="3000" data-in="ca">
+    </div>
+    <div class="chips">
+      <button type="button" class="chip" data-tmi="0">TMI 0 %</button>
+      <button type="button" class="chip active" data-tmi="11">TMI 11 %</button>
+      <button type="button" class="chip" data-tmi="30">TMI 30 %</button>
+    </div>
+    <div class="lab-split">
+      <div class="lab-col" data-out="with"></div>
+      <div class="lab-col" data-out="without"></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'irregulier'): ?>
+  <div class="lab" data-lab="irregulier">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Douze mois, une moyenne, une provision</strong>
+      <p>Choisissez le rythme. Le circuit, lui, ne voit que la moyenne — c’est celle qu’il faut lui donner.</p>
+    </div>
+    <div class="chips">
+      <button type="button" class="chip active" data-pattern="flat">Régulier</button>
+      <button type="button" class="chip" data-pattern="season">Saisonnier · 6 mois</button>
+      <button type="button" class="chip" data-pattern="saw">Dents de scie</button>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>CA d’un mois chargé</span><b data-out="peak">4 000 €</b></div>
+      <input type="range" min="800" max="10000" step="100" value="4000" data-in="peak">
+    </div>
+    <div class="lab-year" data-out="year" role="img" aria-label="Chiffre d’affaires sur 12 mois"></div>
+    <div class="lab-kpis">
+      <div><span>CA annuel</span><strong data-out="total">—</strong></div>
+      <div><span>Moyenne / mois</span><strong data-out="avg">—</strong></div>
+      <div><span>Provision / mois</span><strong data-out="prov">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'lep'): ?>
+  <div class="lab" data-lab="lep">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Votre RFR, le plafond 2026</strong>
+      <p>Métropole. La banque lit le RFR 2024 ou 2025, selon la date de la demande.</p>
+    </div>
+    <div class="chips">
+      <button type="button" class="chip active" data-parts="1">1 part</button>
+      <button type="button" class="chip" data-parts="1.5">1,5</button>
+      <button type="button" class="chip" data-parts="2">2 parts</button>
+      <button type="button" class="chip" data-parts="2.5">2,5</button>
+      <button type="button" class="chip" data-parts="3">3 parts</button>
+      <button type="button" class="chip" data-parts="4">4 parts</button>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Revenu fiscal de référence</span><b data-out="rfr">22 000 €</b></div>
+      <input type="range" min="8000" max="90000" step="250" value="22000" data-in="rfr">
+    </div>
+    <div class="lab-kpis lab-kpis-2">
+      <div><span>Plafond 2026</span><strong data-out="cap">—</strong></div>
+      <div><span>Éligibilité</span><strong data-out="ok">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'matelas'): ?>
+  <div class="lab" data-lab="matelas">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Combien de mois tenez-vous ?</strong>
+      <p>La cible est un multiple des charges, pas des revenus. Le fil s’arrête une fois le livret saturé à cette cible.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Charges mensuelles</span><b data-out="bills">2 400 €</b></div>
+      <input type="range" min="800" max="6000" step="50" value="2400" data-in="bills">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Mois de réserve visés</span><b data-out="horizon">3 mois</b></div>
+      <input type="range" min="1" max="8" step="1" value="3" data-in="horizon">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Déjà de côté</span><b data-out="have">1 200 €</b></div>
+      <input type="range" min="0" max="30000" step="100" value="1200" data-in="have">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Versement mensuel</span><b data-out="pay">250 €</b></div>
+      <input type="range" min="50" max="1500" step="25" value="250" data-in="pay">
+    </div>
+    <div class="lab-bar is-tall"><i data-out="fill"></i><em></em></div>
+    <div class="lab-kpis">
+      <div><span>Cible</span><strong data-out="target">—</strong></div>
+      <div><span>Il manque</span><strong data-out="gap">—</strong></div>
+      <div><span>Cible atteinte</span><strong data-out="when">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
+  </div>
+
+<?php elseif ($widget === 'mixte'): ?>
+  <div class="lab" data-lab="mixte">
+    <div class="lab-head">
+      <span class="eyebrow">Simulateur</span>
+      <strong>Le salaire tient-il les factures ?</strong>
+      <p>Baissez l’auto-entreprise. Si les fixes tiennent encore, le mois bas est déjà sauvé.</p>
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Salaire net</span><b data-out="salary">2 200 €</b></div>
+      <input type="range" min="800" max="4500" step="50" value="2200" data-in="salary">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>CA auto-entreprise</span><b data-out="ae">1 800 €</b></div>
+      <input type="range" min="0" max="6000" step="50" value="1800" data-in="ae">
+    </div>
+    <div class="lab-field">
+      <div class="lab-field-top"><span>Factures du foyer</span><b data-out="bills">1 900 €</b></div>
+      <input type="range" min="600" max="4000" step="50" value="1900" data-in="bills">
+    </div>
+    <div class="lab-flow" data-out="flow"></div>
+    <div class="lab-kpis">
+      <div><span>Net AE après URSSAF</span><strong data-out="net">—</strong></div>
+      <div><span>Épargne possible</span><strong data-out="save">—</strong></div>
+      <div><span>Mois sans AE</span><strong data-out="cut">—</strong></div>
+    </div>
+    <p class="lab-foot" data-out="note"></p>
   </div>
 <?php endif; ?>
