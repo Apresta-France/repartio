@@ -2058,24 +2058,42 @@
     return { x: Math.round(bounds.x + bounds.w + gap), y: Math.round(bounds.y) };
   }
 
+  function clickDropOrigin() {
+    const r = canvas.getBoundingClientRect();
+    const pad = 64;
+    return screenToWorld(r.left + pad, r.top + pad);
+  }
+
+  function findPackedSpot(kind) {
+    const size = kindSize(kind);
+    const origin = clickDropOrigin();
+    const gap = 32;
+    const stepX = size.w + gap;
+    const stepY = size.h + gap;
+    for (let row = 0; row < 16; row += 1) {
+      for (let col = 0; col < 10; col += 1) {
+        const x = origin.x + col * stepX;
+        const y = origin.y + row * stepY;
+        if (isSpotFree({ x, y, w: size.w, h: size.h })) {
+          return { x: Math.round(x), y: Math.round(y) };
+        }
+      }
+    }
+    return findClearSpot(kind, origin.x, origin.y);
+  }
+
   function dropPosition(clientX, clientY, kind) {
     const size = kindSize(kind);
     const ox = size.w / 2;
     const oy = 40;
-    let x;
-    let y;
     if (clientX != null && clientY != null) {
       const w = screenToWorld(clientX, clientY);
-      x = Math.round(w.x - ox);
-      y = Math.round(w.y - oy);
-    } else {
-      const r = canvas.getBoundingClientRect();
-      const w = screenToWorld(r.left + r.width / 2, r.top + r.height / 2);
-      x = Math.round(w.x - ox + (Math.random() * 40 - 20));
-      y = Math.round(w.y - oy + (Math.random() * 40 - 20));
+      const x = Math.round(w.x - ox);
+      const y = Math.round(w.y - oy);
+      if (isAnnotation(kind)) return findClearSpot(kind, x, y);
+      return { x, y };
     }
-    if (isAnnotation(kind)) return findClearSpot(kind, x, y);
-    return { x, y };
+    return findPackedSpot(kind);
   }
 
   function openPresetModal(kind, x, y) {
