@@ -13,6 +13,18 @@
   <?= $content ?>
   <?php require BASE_PATH . '/resources/views/partials/footer.php'; ?>
 </div>
+<?php if (!empty($demo_video)): ?>
+<div class="demo-modal" data-demo-modal hidden>
+  <div class="demo-modal-backdrop" data-demo-dismiss></div>
+  <div class="demo-modal-card" id="demo-modal" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
+    <h2 id="demo-modal-title" class="visually-hidden">Démo repartio</h2>
+    <button type="button" class="demo-modal-close" data-demo-dismiss aria-label="Fermer">×</button>
+    <video class="demo-modal-video" data-demo-video controls playsinline preload="none">
+      <source data-src="<?= e(url('/repartio.mp4')) ?>" type="video/mp4">
+    </video>
+  </div>
+</div>
+<?php endif; ?>
 <?php require BASE_PATH . '/resources/views/partials/flash.php'; ?>
 <?php require BASE_PATH . '/resources/views/partials/tracking.php'; ?>
 <script src="<?= e(asset('js/app.js')) ?>" defer></script>

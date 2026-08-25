@@ -23,7 +23,8 @@ $C = [
       <div><strong><?= e(money($heroStats['unassigned'] ?? 0)) ?></strong><span>euro non affecté</span></div>
     </div>
   </div>
-  <div class="hero-canvas" data-hero-demo aria-hidden="true">
+  <div class="hero-canvas" data-hero-demo>
+    <div class="hero-demo" aria-hidden="true">
     <div class="dots"></div>
     <div class="hero-canvas-bar">
       <span class="chip">mon-circuit · 60 mois</span>
@@ -117,6 +118,13 @@ $C = [
     </div>
     <div class="hero-zoom-chip"><span data-hero-zoom>100 %</span></div>
     <div class="hero-fade"></div>
+    </div>
+    <button type="button" class="hero-play" data-demo-open aria-haspopup="dialog" aria-controls="demo-modal">
+      <span class="hero-play-disc" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28"><path d="M8.2 5.4v13.2L19.4 12Z" fill="currentColor"/></svg>
+      </span>
+      <span class="hero-play-label">Voir la démo</span>
+    </button>
   </div>
 </section>
 

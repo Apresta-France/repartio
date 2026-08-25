@@ -11,12 +11,15 @@ if (str_contains($path, "\0") || str_contains($path, '..')) {
 $public = realpath(__DIR__ . DIRECTORY_SEPARATOR . 'public');
 $requested = realpath(__DIR__ . $path);
 $publicPrefix = $public ? $public . DIRECTORY_SEPARATOR : '';
+$rootPrefix = realpath(__DIR__) . DIRECTORY_SEPARATOR;
 if (
     $path !== '/'
-    && $public
     && $requested
     && is_file($requested)
-    && str_starts_with($requested, $publicPrefix)
+    && (
+        ($public && str_starts_with($requested, $publicPrefix))
+        || (str_ends_with(strtolower($path), '.mp4') && str_starts_with($requested, $rootPrefix))
+    )
 ) {
     return false;
 }

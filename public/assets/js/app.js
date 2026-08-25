@@ -1061,6 +1061,55 @@ document.querySelectorAll('[data-flash]').forEach((el) => {
   });
 })();
 
+(() => {
+  const modal = document.querySelector('[data-demo-modal]');
+  if (!modal) return;
+
+  const video = modal.querySelector('[data-demo-video]');
+  const source = video?.querySelector('source');
+  const closeBtn = modal.querySelector('.demo-modal-close');
+  let lastFocus = null;
+
+  const loadSrc = () => {
+    if (!video || !source || source.src) return;
+    const src = source.getAttribute('data-src');
+    if (!src) return;
+    source.src = src;
+    video.load();
+  };
+
+  const open = () => {
+    lastFocus = document.activeElement;
+    loadSrc();
+    modal.hidden = false;
+    document.body.classList.add('is-locked');
+    closeBtn?.focus();
+    video?.play()?.catch(() => {});
+  };
+
+  const close = () => {
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+    modal.hidden = true;
+    document.body.classList.remove('is-locked');
+    if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+  };
+
+  document.querySelectorAll('[data-demo-open]').forEach((btn) => {
+    btn.addEventListener('click', open);
+  });
+
+  modal.addEventListener('click', (event) => {
+    if (event.target.closest('[data-demo-dismiss]')) close();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.hidden) close();
+  });
+})();
+
 document.querySelectorAll('[data-access-row]').forEach((row) => {
   const check = row.querySelector('[data-access-circuit]');
   const select = row.querySelector('select');

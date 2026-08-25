@@ -15,6 +15,7 @@ class SiteController
         $this->page('/', 'site/home', [
             'nav' => '',
             'featured' => Content::featuredTemplates(),
+            'demo_video' => true,
         ]);
     }
 
