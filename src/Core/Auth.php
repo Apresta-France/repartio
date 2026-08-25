@@ -82,6 +82,12 @@ class Auth
     {
         $user = self::user();
         if (!$user) {
+            if (wants_json()) {
+                http_response_code(401);
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false, 'error' => 'auth']);
+                exit;
+            }
             Session::flashSet('error', 'Connectez-vous pour continuer.');
             redirect('/connexion');
         }

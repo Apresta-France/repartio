@@ -3,7 +3,7 @@ $canEdit = !empty($canEdit);
 $canManage = !empty($canManage);
 $readonly = !$canEdit;
 ?>
-<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= (int) $project['id'] ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= (int) $project['id'] ?>" data-user-id="<?= (int) $user['id'] ?>" data-revision="<?= (int) ($revision ?? 1) ?>" data-live-url="<?= e(url('/app/circuits/' . $project['id'] . '/live')) ?>" data-versions-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions')) ?>" data-restore-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions/restaurer')) ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
   <div class="builder-workspace">
   <aside class="builder-side">
     <a href="<?= e(url('/app/circuits')) ?>" class="btn btn-navy builder-back">← Mes circuits</a>
@@ -116,6 +116,14 @@ $readonly = !$canEdit;
         </button>
         <button class="btn btn-orange builder-save" type="submit" data-save-btn>Enregistrer</button>
         <?php endif; ?>
+        <div class="collab-peers" data-collab-peers hidden></div>
+        <button type="button" class="btn btn-ghost btn-icon" data-history-open title="Historique" aria-label="Historique des versions">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+            <circle cx="12" cy="13" r="7.2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 9.6v3.6l2.3 1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.2 5.2 12 3.6 14.8 5.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <?php if ($canManage): ?>
         <button type="button" class="btn btn-ghost btn-icon" data-share-open title="Partager" aria-label="Partager">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
@@ -131,6 +139,8 @@ $readonly = !$canEdit;
     </header>
     <div class="canvas-wrap" data-canvas>
       <div class="dots"></div>
+      <div class="collab-cursors" data-collab-cursors></div>
+      <div class="collab-toast" data-collab-toast hidden role="status" aria-live="polite"></div>
       <div data-layer class="builder-layer">
         <svg data-edges width="6000" height="4200" class="builder-edges"></svg>
         <div data-labels class="builder-labels"></div>
@@ -396,6 +406,23 @@ foreach ($scenarios as $key => $t) {
 <script type="application/json" data-scenarios><?= json_encode($scenarioCatalog, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
 
 <?php require BASE_PATH . '/resources/views/partials/builder-report-modal.php'; ?>
+
+<div class="builder-modal" data-history-modal hidden>
+  <div class="builder-modal-backdrop" data-history-dismiss></div>
+  <div class="builder-modal-card history-modal-card" role="dialog" aria-modal="true" aria-labelledby="history-title">
+    <div class="builder-modal-head">
+      <div>
+        <div class="eyebrow">50 dernières versions</div>
+        <h2 id="history-title">Historique du circuit</h2>
+      </div>
+      <button type="button" class="btn btn-ghost builder-modal-close" data-history-dismiss aria-label="Fermer">×</button>
+    </div>
+    <p class="builder-hint">Chaque enregistrement conserve qui a modifié, et à quelle heure. Restaurer remplace le circuit actuel ; l’état d’aujourd’hui est d’abord conservé.</p>
+    <div class="version-list" data-history-list>
+      <p class="builder-hint">Chargement…</p>
+    </div>
+  </div>
+</div>
 
 <?php if ($canManage): ?>
 <div class="builder-modal" data-share-modal hidden>

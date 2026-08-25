@@ -178,6 +178,17 @@
   let horizonUnit = 'mois';
   let savedSnap = null;
   let saving = false;
+  const collabCursors = root.querySelector('[data-collab-cursors]');
+  const collabPeers = root.querySelector('[data-collab-peers]');
+  const collabToast = root.querySelector('[data-collab-toast]');
+  const historyModal = document.querySelector('[data-history-modal]');
+  const historyList = historyModal?.querySelector('[data-history-list]');
+  let collabPointer = null;
+  let collabPeersState = [];
+  let appliedRevision = parseInt(root.getAttribute('data-revision') || '0', 10) || 0;
+  let lastPostedRevision = appliedRevision;
+  let lastPushedSnap = null;
+  let applyingRemote = false;
   let SCENARIOS = {};
   try {
     SCENARIOS = JSON.parse(document.querySelector('[data-scenarios]')?.textContent || '{}');
@@ -428,6 +439,7 @@
     layer.style.transform = `translate(${state.tx}px, ${state.ty}px) scale(${state.scale})`;
     const zoom = root.querySelector('[data-zoom]');
     if (zoom) zoom.textContent = Math.round(state.scale * 100) + '%';
+    paintCollabCursors();
   }
 
   function screenToWorld(cx, cy) {
@@ -1813,6 +1825,10 @@
       });
     }
     syncSaveButton();
+    if (!applyingRemote && isDirty()) {
+      scheduleLivePush();
+      scheduleAutoPersist();
+    }
   }
 
   function escapeHtml(s) {
@@ -2664,6 +2680,7 @@
   });
 
   document.addEventListener('mousemove', (e) => {
+    noteCollabPointer(e.clientX, e.clientY);
     if (drag || pan || state.connectFrom) {
       e.preventDefault();
       window.getSelection()?.removeAllRanges();
@@ -2706,6 +2723,7 @@
       });
       lastCompute = lastCompute || compute();
       redrawWires();
+      scheduleLivePush(160);
     } else if (pan) {
       state.tx = pan.ox + (e.clientX - pan.sx);
       state.ty = pan.oy + (e.clientY - pan.sy);
@@ -2963,7 +2981,7 @@
     event.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     if (readonly) {
       e.preventDefault();
       return;
@@ -2973,19 +2991,34 @@
       e.preventDefault();
       return;
     }
+    if (root.getAttribute('data-live-url')) {
+      e.preventDefault();
+      if (saving) return;
+      saving = true;
+      try {
+        await persistCircuit();
+      } finally {
+        saving = false;
+      }
+      return;
+    }
     saving = true;
   });
 
-  async function persistCircuit() {
+  async function persistCircuit(opts = {}) {
     if (!form) return false;
     syncPayload();
     const data = new FormData(form);
+    if (opts.autosave) data.set('autosave', '1');
     const res = await fetch(form.action, {
       method: 'POST',
       body: data,
       headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
     });
     if (!res.ok) return false;
+    let body = {};
+    try { body = await res.json(); } catch (err) { body = {}; }
+    if (body.revision) rememberCollabRevision(body.revision);
     markSaved();
     return true;
   }
@@ -3333,8 +3366,13 @@
         body: data,
         redirect: 'manual',
         headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-      }).then((res) => {
-        if (res.ok) markSaved();
+      }).then(async (res) => {
+        if (!res.ok) return;
+        markSaved();
+        try {
+          const body = await res.json();
+          if (body.revision) rememberCollabRevision(body.revision);
+        } catch (err) {}
       }).catch(() => {});
     }
     closeSetupModal();
@@ -3408,6 +3446,7 @@
       if (setupOpen()) { closeSetupModal(); return; }
       if (scenarioOpen()) { closeScenarioModal(); return; }
       if (reportOpen()) { closeReportModal(); return; }
+      if (historyOpen()) { closeHistoryModal(); return; }
       if (modal && !modal.hidden) { closePresetModal(); return; }
       if (state.connectFrom) { cancelLink(); return; }
       if (dismissLinkCoach()) return;
@@ -3530,7 +3569,305 @@
   } else {
     markSaved();
   }
+  lastPushedSnap = savedSnap;
   requestAnimationFrame((t) => { lastTick = t; requestAnimationFrame(tick); });
+
+  const liveUrl = root.getAttribute('data-live-url') || '';
+  const versionsUrl = root.getAttribute('data-versions-url') || '';
+  const restoreUrl = root.getAttribute('data-restore-url') || '';
+  const myUserId = parseInt(root.getAttribute('data-user-id') || '0', 10) || 0;
+  let liveTimer = 0;
+  let livePushTimer = 0;
+  let autoPersistTimer = 0;
+  let liveBusy = false;
+  let toastTimer = 0;
+  let collabEnabled = Boolean(liveUrl && form);
+
+  function csrfToken() {
+    return form?.querySelector('[name="_token"]')?.value || '';
+  }
+
+  function collabClientId() {
+    const key = 'repartio-client';
+    try {
+      let id = sessionStorage.getItem(key);
+      if (!id) {
+        id = (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : String(Date.now() + Math.random())).slice(0, 16);
+        sessionStorage.setItem(key, id);
+      }
+      return id;
+    } catch (err) {
+      return 'tab';
+    }
+  }
+
+  function noteCollabPointer(cx, cy) {
+    if (!canvas) return;
+    const r = canvas.getBoundingClientRect();
+    if (cx < r.left || cy < r.top || cx > r.right || cy > r.bottom) return;
+    collabPointer = screenToWorld(cx, cy);
+  }
+
+  function rememberCollabRevision(revision) {
+    const n = parseInt(revision, 10);
+    if (!Number.isFinite(n) || n < 1) return;
+    appliedRevision = n;
+    lastPostedRevision = n;
+    lastPushedSnap = circuitSnap();
+  }
+
+  function isCollabBusy() {
+    return Boolean(drag || pan || state.connectFrom || saving);
+  }
+
+  function isRemoteBlocked() {
+    return isCollabBusy() || Boolean(document.activeElement?.closest('[data-props-form], .builder-name-input, [data-horizon]'));
+  }
+
+  function scheduleLivePush(delay = 420) {
+    if (!collabEnabled || readonly) return;
+    clearTimeout(livePushTimer);
+    livePushTimer = window.setTimeout(() => { liveTick(true); }, delay);
+  }
+
+  function scheduleAutoPersist() {
+    if (!collabEnabled || readonly) return;
+    clearTimeout(autoPersistTimer);
+    autoPersistTimer = window.setTimeout(async () => {
+      if (readonly || saving || !isDirty()) return;
+      if (isCollabBusy()) {
+        scheduleAutoPersist();
+        return;
+      }
+      saving = true;
+      try {
+        await persistCircuit({ autosave: true });
+      } catch (err) {}
+      saving = false;
+    }, 2800);
+  }
+
+  function initialsOf(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    const letters = parts.slice(0, 2).map((p) => p.slice(0, 1).toUpperCase()).join('');
+    return letters || '?';
+  }
+
+  function showCollabToast(text) {
+    if (!collabToast) return;
+    collabToast.textContent = text;
+    collabToast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => { collabToast.hidden = true; }, 2600);
+  }
+
+  function paintCollabCursors() {
+    if (!collabCursors) return;
+    const keep = new Set();
+    const byId = new Map();
+    collabCursors.querySelectorAll('[data-peer]').forEach((el) => byId.set(el.getAttribute('data-peer'), el));
+    collabPeersState.forEach((peer) => {
+      const key = String(peer.client_id || peer.user_id);
+      keep.add(key);
+      let el = byId.get(key);
+      if (!el) {
+        el = document.createElement('div');
+        el.className = 'collab-cursor';
+        el.setAttribute('data-peer', key);
+        el.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5.2 2.8 19 13.6l-6.6.6-2.6 6.8Z" fill="${escapeAttr(peer.color)}" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="collab-cursor-name" style="background:${escapeAttr(peer.color)}">${escapeHtml(peer.first_name)}</span>`;
+        collabCursors.appendChild(el);
+      }
+      el.style.transform = `translate(${Math.round(peer.x * state.scale + state.tx)}px, ${Math.round(peer.y * state.scale + state.ty)}px)`;
+    });
+    byId.forEach((el, key) => { if (!keep.has(key)) el.remove(); });
+  }
+
+  function paintCollabPeers() {
+    if (!collabPeers) return;
+    const seen = new Map();
+    collabPeersState.forEach((peer) => {
+      if (!seen.has(peer.user_id)) seen.set(peer.user_id, peer);
+    });
+    const people = [...seen.values()];
+    collabPeers.hidden = people.length === 0;
+    collabPeers.innerHTML = people.map((peer) => (
+      `<span class="collab-peer" title="${escapeAttr(peer.first_name)}" style="background:${escapeAttr(peer.color)}">${escapeHtml(initialsOf(peer.first_name))}</span>`
+    )).join('');
+  }
+
+  function applyRemoteCircuit(data, silent) {
+    const payload = data.payload;
+    if (!payload || typeof payload !== 'object') return;
+    applyingRemote = true;
+    try {
+      const selected = state.selected;
+      state.nodes = (payload.nodes || []).map(normalizeNode);
+      state.edges = (payload.edges || []).map(normalizeEdge);
+      state.horizon = clampHorizon(payload.horizon || state.horizon);
+      if (selected && !state.nodes.some((n) => n.id === selected)) {
+        markSelected(null);
+      } else {
+        state.selected = selected;
+      }
+      if (typeof data.name === 'string' && nameInput) {
+        nameInput.value = data.name;
+        document.title = data.name + ' — repartio.fr';
+      }
+      syncHorizonInput();
+      render();
+      markSaved();
+      rememberCollabRevision(data.revision);
+    } finally {
+      applyingRemote = false;
+    }
+    if (!silent && data.author_id && data.author_id !== myUserId && data.author_name) {
+      showCollabToast(data.author_name + ' vient de modifier le circuit');
+    }
+  }
+
+  async function liveTick(forcePayload) {
+    if (!collabEnabled || liveBusy || document.hidden) return;
+    liveBusy = true;
+    const snap = circuitSnap();
+    const sendPayload = !readonly && (forcePayload || isDirty()) && snap !== lastPushedSnap;
+    const data = new FormData();
+    data.set('_token', csrfToken());
+    data.set('client_id', collabClientId());
+    data.set('since', String(appliedRevision));
+    data.set('has_cursor', collabPointer ? '1' : '0');
+    data.set('cursor_x', String(collabPointer ? Math.round(collabPointer.x) : 0));
+    data.set('cursor_y', String(collabPointer ? Math.round(collabPointer.y) : 0));
+    if (sendPayload) {
+      data.set('name', (nameInput?.value || '').trim());
+      data.set('payload', payloadInput?.value || JSON.stringify({
+        horizon: state.horizon,
+        nodes: state.nodes.map(({ _w, _h, ...n }) => n),
+        edges: state.edges.map(({ _amt, ...e }) => e),
+      }));
+    }
+    try {
+      const res = await fetch(liveUrl, {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 419 || res.status === 403) collabEnabled = false;
+        return;
+      }
+      const body = await res.json();
+      if (!body || body.ok === false) return;
+      collabPeersState = Array.isArray(body.peers) ? body.peers : [];
+      paintCollabPeers();
+      paintCollabCursors();
+      const revision = parseInt(body.revision, 10) || 0;
+      if (sendPayload) {
+        lastPushedSnap = snap;
+        lastPostedRevision = revision;
+        appliedRevision = Math.max(appliedRevision, revision);
+        return;
+      }
+      if (revision > appliedRevision && body.payload && !isRemoteBlocked() && (!isDirty() || lastPushedSnap === circuitSnap())) {
+        applyRemoteCircuit(body, revision === lastPostedRevision);
+      } else if (revision > 0 && revision <= appliedRevision) {
+        appliedRevision = Math.max(appliedRevision, revision);
+      }
+    } catch (err) {
+    } finally {
+      liveBusy = false;
+    }
+  }
+
+  function startCollab() {
+    if (!collabEnabled) return;
+    const loop = () => {
+      liveTick(false);
+      liveTimer = window.setTimeout(loop, document.hidden ? 4000 : 900);
+    };
+    loop();
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) liveTick(false);
+    });
+  }
+
+  function historyOpen() {
+    return Boolean(historyModal && !historyModal.hidden);
+  }
+
+  function closeHistoryModal() {
+    if (!historyModal) return;
+    historyModal.hidden = true;
+    if (!setupModal || setupModal.hidden) {
+      if (!scenarioModal || scenarioModal.hidden) document.body.classList.remove('is-locked');
+    }
+  }
+
+  async function openHistoryModal() {
+    if (!historyModal || !versionsUrl) return;
+    historyModal.hidden = false;
+    document.body.classList.add('is-locked');
+    if (historyList) historyList.innerHTML = '<p class="builder-hint">Chargement…</p>';
+    try {
+      const res = await fetch(versionsUrl, {
+        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const body = await res.json();
+      if (!body.ok) throw new Error('history');
+      if (!body.versions.length) {
+        if (historyList) historyList.innerHTML = '<p class="builder-hint">Aucun enregistrement pour l’instant. Chaque sauvegarde crée une version, avec le nom de l’auteur et l’heure.</p>';
+        return;
+      }
+      if (historyList) {
+        historyList.innerHTML = body.versions.map((v) => `
+          <div class="version-row">
+            <div class="version-row-main">
+              <strong>${escapeHtml(v.author)}</strong>
+              <span>${escapeHtml(v.when)} · ${escapeHtml(v.ago)}</span>
+            </div>
+            ${body.can_restore ? `<button type="button" class="btn btn-ghost" data-restore-version="${v.id}">Restaurer</button>` : ''}
+          </div>
+        `).join('');
+      }
+    } catch (err) {
+      if (historyList) historyList.innerHTML = '<p class="builder-hint">Impossible de charger l’historique pour le moment.</p>';
+    }
+  }
+
+  async function restoreVersion(versionId) {
+    if (!restoreUrl || readonly) return;
+    if (!window.confirm('Revenir à cette version ? L’état actuel sera conservé dans l’historique.')) return;
+    const data = new FormData();
+    data.set('_token', csrfToken());
+    data.set('version_id', String(versionId));
+    const res = await fetch(restoreUrl, {
+      method: 'POST',
+      body: data,
+      headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    });
+    const body = await res.json();
+    if (!res.ok || !body.ok) {
+      window.alert('Impossible de restaurer cette version.');
+      return;
+    }
+    applyRemoteCircuit(body, true);
+    closeHistoryModal();
+    showCollabToast('Version restaurée');
+  }
+
+  document.querySelector('[data-history-open]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openHistoryModal();
+  });
+  historyModal?.addEventListener('click', (e) => {
+    if (e.target.closest('[data-history-dismiss]')) {
+      closeHistoryModal();
+      return;
+    }
+    const restore = e.target.closest('[data-restore-version]');
+    if (restore) restoreVersion(restore.getAttribute('data-restore-version'));
+  });
+
+  startCollab();
 
   root.repartioTour = {
     highlight(ids) {

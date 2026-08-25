@@ -9,6 +9,8 @@ use App\Core\Auth;
 use App\Core\Session;
 use App\Core\View;
 use App\Models\Access;
+use App\Models\CircuitLive;
+use App\Models\CircuitVersion;
 use App\Models\Plan;
 use App\Models\Project;
 use App\Models\Share;
@@ -98,6 +100,21 @@ class ProjectController
         $owner = User::find((int) $project['user_id']) ?? $user;
         $payload = json_decode((string) $project['payload'], true) ?: Project::emptyPayload(Plan::defaultHorizon($owner));
         $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
+        $live = CircuitLive::find((int) $project['id']);
+        if ($live) {
+            $livePayload = json_decode((string) $live['payload'], true);
+            if (is_array($livePayload)) {
+                $payload = $livePayload;
+                $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
+                $liveName = trim((string) $live['name']);
+                if ($liveName !== '') {
+                    $project['name'] = $liveName;
+                }
+            }
+            $revision = (int) $live['revision'];
+        } else {
+            $revision = CircuitLive::ensure((int) $project['id'], (int) $project['user_id'], (string) $project['name'], $payload);
+        }
         View::render('app/builder', [
             'title' => $project['name'],
             'nav' => 'projets',
@@ -116,6 +133,7 @@ class ProjectController
             'suggestedTitle' => $share['title'] ?? $project['name'],
             'canEdit' => $canEdit,
             'canManage' => $canManage,
+            'revision' => $revision,
         ], 'layouts/app');
     }
 
@@ -154,12 +172,28 @@ class ProjectController
                 redirect('/app/circuits/' . $id);
             }
         }
+        $owner = User::find((int) $project['user_id']) ?? $user;
+        $payload['horizon'] = Project::clampHorizonForUser($payload['horizon'] ?? null, $owner);
+        $previous = json_decode((string) $project['payload'], true);
+        if (!is_array($previous)) {
+            $previous = Project::emptyPayload();
+        }
+        if (!CircuitVersion::same((string) $project['name'], $previous, $name, $payload)) {
+            if (($_POST['autosave'] ?? '') === '1') {
+                CircuitVersion::snapshotIfDue((int) $id, (int) $user['id'], (string) $project['name'], $previous);
+            } else {
+                CircuitVersion::snapshot((int) $id, (int) $user['id'], (string) $project['name'], $previous);
+            }
+        }
         Project::updateById((int) $id, $name, $payload);
-        Project::log((int) $user['id'], 'Circuit enregistré', (int) $id);
+        $revision = CircuitLive::publish((int) $id, (int) $user['id'], $name, $payload);
+        if (($_POST['autosave'] ?? '') !== '1') {
+            Project::log((int) $user['id'], 'Circuit enregistré', (int) $id);
+        }
 
         if (wants_json()) {
             header('Content-Type: application/json');
-            echo json_encode(['ok' => true]);
+            echo json_encode(['ok' => true, 'revision' => $revision]);
             return;
         }
         Session::flashSet('success', 'Circuit enregistré.');

@@ -9,6 +9,7 @@ use App\Controllers\AdminController;
 use App\Controllers\AppController;
 use App\Controllers\AuthController;
 use App\Controllers\BillingController;
+use App\Controllers\CollabController;
 use App\Controllers\ContactController;
 use App\Controllers\InstallController;
 use App\Controllers\ProjectController;
@@ -103,6 +104,9 @@ class App
         $router->get('/app/circuits/nouveau', [ProjectController::class, 'createPage']);
         $router->get('/app/circuits/{id}', [ProjectController::class, 'show']);
         $router->post('/app/circuits/{id}', [ProjectController::class, 'update']);
+        $router->post('/app/circuits/{id}/live', [CollabController::class, 'live']);
+        $router->get('/app/circuits/{id}/versions', [CollabController::class, 'versions']);
+        $router->post('/app/circuits/{id}/versions/restaurer', [CollabController::class, 'restore']);
         $router->get('/app/circuits/{id}/partage', [ShareController::class, 'show']);
         $router->post('/app/circuits/{id}/partage', [ShareController::class, 'store']);
         $router->post('/app/circuits/{id}/partage/revoquer', [ShareController::class, 'revoke']);
