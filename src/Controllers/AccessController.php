@@ -40,32 +40,28 @@ class AccessController
         $assignments = Access::parseAssignments($_POST, $ownerId);
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            Session::flashSet('error', 'Indiquez une adresse e-mail valide.');
-            redirect('/app/acces');
+            $this->bounceInvite('Indiquez une adresse e-mail valide.');
         }
         if ($email === mb_strtolower((string) $user['email'])) {
-            Session::flashSet('error', 'Vous êtes déjà propriétaire de ce compte.');
-            redirect('/app/acces');
+            $this->bounceInvite('Vous êtes déjà propriétaire de ce compte.');
         }
         if ($assignments === []) {
-            Session::flashSet('error', 'Choisissez au moins un circuit, avec un niveau de droit.');
-            redirect('/app/acces');
+            $this->bounceInvite('Choisissez au moins un circuit.');
         }
         $existing = Access::findByOwnerEmail($ownerId, $email);
-        if ($existing) {
-            $expired = $existing['status'] === 'pending'
-                && !empty($existing['expires_at'])
-                && strtotime((string) $existing['expires_at']) < time();
-            if ($expired) {
-                Access::revoke((int) $existing['id'], $ownerId);
-            } else {
-                Session::flashSet('error', 'Cette personne a déjà un accès. Modifiez ses droits ci-dessous.');
-                redirect('/app/acces');
-            }
+        $expiredExisting = $existing && Access::isPendingExpired($existing);
+        if ($existing && !$expiredExisting) {
+            $this->bounceInvite('Cette personne a déjà un accès. Modifiez ses droits ci-dessous.');
         }
         $memberLimit = Access::memberLimitFor($user);
         if ($memberLimit <= 0 || Access::countForOwner($ownerId) >= $memberLimit) {
+            if ($expiredExisting) {
+                $this->bounceInvite('Limite de personnes atteinte. Retirez un accès, ou changez de forfait, avant de renvoyer cette invitation.');
+            }
             redirect(Project::planChangePath('invitations'));
+        }
+        if ($expiredExisting) {
+            Access::revoke((int) $existing['id'], $ownerId);
         }
 
         $created = Access::invite($ownerId, $email, $assignments);
@@ -86,7 +82,7 @@ class AccessController
             redirect('/app/acces');
         }
         $assignments = Access::parseAssignments($_POST, (int) $user['id']);
-        if ($assignments === []) {
+        if ($assignments === [] && !Access::hasArchivedAssignments((int) $member['id'])) {
             Session::flashSet('error', 'Laissez au moins un circuit, ou retirez complètement l’accès.');
             redirect('/app/acces');
         }
@@ -106,6 +102,11 @@ class AccessController
         $member = Access::findForOwner((int) $id, (int) $user['id']);
         if (!$member || $member['status'] !== 'pending') {
             Session::flashSet('error', 'Cette invitation ne peut plus être renvoyée.');
+            redirect('/app/acces');
+        }
+        if (Access::isPendingExpired($member)
+            && Access::countForOwner((int) $user['id']) >= Access::memberLimitFor($user)) {
+            Session::flashSet('error', 'Limite de personnes atteinte. Retirez un accès, ou changez de forfait, avant de renvoyer cette invitation.');
             redirect('/app/acces');
         }
         $token = Access::refreshToken((int) $member['id']);
@@ -157,8 +158,10 @@ class AccessController
             redirect('/app/acces');
         }
 
-        if (!$user) {
+        if ((int) ($user['id'] ?? 0) !== (int) $invite['owner_id']) {
             Session::set('invite_token', $token);
+        }
+        if (!$user) {
             Session::flashSet('_old', ['email' => $invite['email']]);
         }
 
@@ -218,6 +221,17 @@ class AccessController
         Project::log((int) $user['id'], 'Invitation acceptée');
         Session::flashSet('success', 'Accès accepté. Les circuits partagés apparaissent dans votre liste.');
         redirect('/app/circuits');
+    }
+
+    private function bounceInvite(string $message): void
+    {
+        Session::flashSet('error', $message);
+        Session::flashSet('_old', [
+            'email' => $_POST['email'] ?? '',
+            'circuit_ids' => $_POST['circuit_ids'] ?? [],
+            'permission' => $_POST['permission'] ?? 'lecture',
+        ]);
+        redirect('/app/acces');
     }
 
     private function sendInviteMail(array $owner, string $email, string $token, int $memberId): bool

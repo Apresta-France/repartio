@@ -1,5 +1,10 @@
 <?php
 $canInvite = $memberCount < $memberLimit && $circuits !== [];
+$oldCircuitIds = array_map('strval', (array) old('circuit_ids', count($circuits) === 1 ? [(string) $circuits[0]['id']] : []));
+$oldPermission = (string) old('permission', 'lecture');
+if (!isset(\App\Models\Access::PERMISSIONS[$oldPermission])) {
+    $oldPermission = 'lecture';
+}
 ?>
 <header class="app-top">
   <div>
@@ -21,8 +26,13 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
       <p class="lede access-invite-copy">Le plan Libre ne permet pas d’inviter quelqu’un à gérer un circuit. Le plan Complet ouvre une invitation.</p>
       <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
     <?php elseif ($circuits === []): ?>
-      <p class="lede access-invite-copy">Créez d’abord un circuit pour pouvoir y donner accès.</p>
-      <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
+      <?php if (\App\Models\Project::atPlanLimit($user)): ?>
+        <p class="lede access-invite-copy">Votre forfait n’a plus d’emplacement pour un circuit à vous. Changez de forfait, ou libérez un emplacement, avant d’inviter.</p>
+        <a class="btn btn-orange" href="<?= e(url(\App\Models\Project::planChangePath('circuits'))) ?>">Changer de forfait</a>
+      <?php else: ?>
+        <p class="lede access-invite-copy">Créez d’abord un circuit pour pouvoir y donner accès.</p>
+        <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
+      <?php endif; ?>
     <?php elseif ($memberCount >= $memberLimit): ?>
       <p class="lede access-invite-copy">Limite de <?= (int) $memberLimit ?> personne<?= (int) $memberLimit > 1 ? 's' : '' ?> atteinte. Changez de forfait pour en inviter davantage, ou retirez un accès.</p>
       <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
@@ -39,7 +49,7 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
           <div class="access-grid">
             <?php foreach ($circuits as $circuit): ?>
               <label class="access-row access-row-pick">
-                <input type="checkbox" name="circuit_ids[]" value="<?= (int) $circuit['id'] ?>" <?= count($circuits) === 1 ? 'checked' : '' ?>>
+                <input type="checkbox" name="circuit_ids[]" value="<?= (int) $circuit['id'] ?>" <?= in_array((string) $circuit['id'], $oldCircuitIds, true) ? 'checked' : '' ?>>
                 <span><?= e($circuit['name']) ?></span>
               </label>
             <?php endforeach; ?>
@@ -48,10 +58,10 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
         <fieldset class="access-step">
           <legend>Droit sur ces circuits</legend>
           <div class="access-perm">
-            <div class="access-perm-options" role="radiogroup">
+            <div class="access-perm-options">
               <?php foreach (\App\Models\Access::PERMISSIONS as $key => $label): ?>
                 <label>
-                  <input type="radio" name="permission" value="<?= e($key) ?>" <?= $key === 'lecture' ? 'checked' : '' ?>>
+                  <input type="radio" name="permission" value="<?= e($key) ?>" <?= $key === $oldPermission ? 'checked' : '' ?>>
                   <?= e($label) ?>
                 </label>
               <?php endforeach; ?>
@@ -83,6 +93,7 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
     <div class="access-list">
       <?php foreach ($members as $member):
           $name = $member['member_name'] ?: $member['email'];
+          $expired = \App\Models\Access::isPendingExpired($member);
           $assigned = [];
           foreach ($member['circuits'] as $c) {
               $assigned[(int) $c['project_id']] = $c['permission'];
@@ -95,7 +106,7 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
               <strong><?= e($member['member_name'] ?: explode('@', (string) $member['email'])[0]) ?></strong>
               <span class="mono access-email"><?= e($member['email']) ?></span>
             </div>
-            <span class="access-status is-<?= e($member['status']) ?>"><?= $member['status'] === 'active' ? 'Actif' : 'En attente' ?></span>
+            <span class="access-status is-<?= $member['status'] === 'active' ? 'active' : ($expired ? 'expired' : 'pending') ?>"><?= $member['status'] === 'active' ? 'Actif' : ($expired ? 'Expiré' : 'En attente') ?></span>
           </div>
 
           <?php if ($member['circuits']): ?>
@@ -116,16 +127,17 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
               <?php foreach ($circuits as $circuit):
                   $checked = isset($assigned[(int) $circuit['id']]);
                   $perm = $assigned[(int) $circuit['id']] ?? 'lecture';
+                  $boxId = 'access-c-' . (int) $member['id'] . '-' . (int) $circuit['id'];
                   ?>
-                <label class="access-row" data-access-row>
-                  <input type="checkbox" name="circuit_ids[]" value="<?= (int) $circuit['id'] ?>" <?= $checked ? 'checked' : '' ?> data-access-circuit>
-                  <span><?= e($circuit['name']) ?></span>
+                <div class="access-row" data-access-row>
+                  <input id="<?= e($boxId) ?>" type="checkbox" name="circuit_ids[]" value="<?= (int) $circuit['id'] ?>" <?= $checked ? 'checked' : '' ?> data-access-circuit>
+                  <label for="<?= e($boxId) ?>"><?= e($circuit['name']) ?></label>
                   <select name="rights[<?= (int) $circuit['id'] ?>]" <?= $checked ? '' : 'disabled' ?>>
                     <?php foreach (\App\Models\Access::PERMISSIONS as $key => $label): ?>
                       <option value="<?= e($key) ?>" <?= $perm === $key ? 'selected' : '' ?>><?= e($label) ?></option>
                     <?php endforeach; ?>
                   </select>
-                </label>
+                </div>
               <?php endforeach; ?>
             </div>
             <div class="access-actions">

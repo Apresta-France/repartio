@@ -97,7 +97,7 @@ class ProjectController
         $projectId = (int) $project['id'];
         $archived = ($project['status'] ?? '') === 'archive';
         $canEdit = !$archived && Access::can((int) $user['id'], $projectId, 'edition');
-        $canManage = Access::can((int) $user['id'], $projectId, 'gestion');
+        $canManage = !$archived && Access::can((int) $user['id'], $projectId, 'gestion');
         $share = $canManage ? Share::findForProject((int) $project['id'], (int) $project['user_id']) : null;
         $owner = User::find((int) $project['user_id']) ?? $user;
         $working = CircuitLive::workingCopy($project, $owner);
@@ -231,6 +231,12 @@ class ProjectController
                 $owner = User::find((int) $project['user_id']);
                 if ($owner && Project::atPlanLimit($owner)) {
                     Session::flashSet('error', Project::planLimitMessage($owner));
+                    redirect('/app/circuits');
+                }
+                $blocked = Access::membersOverLimitIfActivated($projectId);
+                if ($blocked !== []) {
+                    $names = implode(', ', $blocked);
+                    Session::flashSet('error', 'Réactivation impossible : ' . $names . ' n’a plus d’emplacement sur son forfait. Retirez cet accès, ou demandez un changement de forfait.');
                     redirect('/app/circuits');
                 }
             }

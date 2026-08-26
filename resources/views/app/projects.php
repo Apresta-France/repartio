@@ -56,9 +56,11 @@ $statuses = [
         <div class="project-card-foot">
           <span class="mono"><?= e(time_ago($p['updated_at'])) ?> · <?= $blocks ?> bloc<?= $blocks > 1 ? 's' : '' ?></span>
           <div class="project-actions">
-            <?php if ($canManage && $status !== 'archive'): ?>
-              <a href="<?= e(url(\App\Models\Project::path($p, 'partage'))) ?>">Partager</a>
-              <form method="post" action="<?= e(url(\App\Models\Project::path($p, 'dupliquer'))) ?>"><?= csrf_field() ?><button type="submit">Dupliquer</button></form>
+            <?php if ($canManage): ?>
+              <?php if ($status !== 'archive'): ?>
+                <a href="<?= e(url(\App\Models\Project::path($p, 'partage'))) ?>">Partager</a>
+                <form method="post" action="<?= e(url(\App\Models\Project::path($p, 'dupliquer'))) ?>"><?= csrf_field() ?><button type="submit">Dupliquer</button></form>
+              <?php endif; ?>
               <form method="post" action="<?= e(url(\App\Models\Project::path($p, 'archiver'))) ?>"><?= csrf_field() ?><button type="submit"><?= $status === 'archive' ? 'Réactiver' : 'Archiver' ?></button></form>
             <?php endif; ?>
             <?php if ($isOwner): ?>

@@ -19,12 +19,11 @@ class Share
     public static function findPublic(string $slug): ?array
     {
         return Database::fetch(
-            'SELECT s.*, COALESCE(l.payload, p.payload) AS payload, p.horizon, COALESCE(l.name, p.name) AS project_name, p.status AS project_status,
+            'SELECT s.*, p.payload, p.horizon, p.name AS project_name, p.status AS project_status,
                     u.first_name AS owner_name
              FROM circuit_shares s
              INNER JOIN projects p ON p.id = s.project_id
              INNER JOIN users u ON u.id = s.user_id
-             LEFT JOIN circuit_live l ON l.project_id = p.id
              WHERE s.slug = ? AND s.enabled = 1 AND p.status != "archive"
              LIMIT 1',
             [$slug]

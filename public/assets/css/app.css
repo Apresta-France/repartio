@@ -1553,6 +1553,7 @@ form.dash-card .card-action-hit { padding: 0; }
 .access-status { margin-left: auto; flex: none; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; border-radius: 6px; padding: 3px 7px; }
 .access-status.is-active { background: oklch(0.95 0.03 192); color: var(--teal-ink); }
 .access-status.is-pending { background: oklch(0.96 0.03 38); color: var(--orange-ink); }
+.access-status.is-expired { background: oklch(0.95 0.008 265); color: var(--faint); }
 .access-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .access-list { display: flex; flex-direction: column; gap: 14px; }
 .access-form { display: flex; flex-direction: column; gap: 16px; }
@@ -1571,10 +1572,11 @@ form.dash-card .card-action-hit { padding: 0; }
 .access-grid { display: flex; flex-direction: column; gap: 6px; }
 .access-grid-head { display: grid; grid-template-columns: 28px 1fr 150px; gap: 10px; padding: 0 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
 .access-grid-head span:last-child { text-align: right; }
-.access-row { display: grid; grid-template-columns: 28px 1fr 150px; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); cursor: pointer; }
-.access-row-pick { grid-template-columns: 28px 1fr; }
+.access-row { display: grid; grid-template-columns: 28px 1fr 150px; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+.access-row-pick { grid-template-columns: 28px 1fr; cursor: pointer; }
 .access-row input[type="checkbox"] { accent-color: var(--orange); width: 16px; height: 16px; }
-.access-row span { font-size: 14px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.access-row label, .access-row span { font-size: 14px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.access-row label { cursor: pointer; }
 .access-row select { padding: 8px 10px; border-radius: 8px; border: 1px solid oklch(0.89 0.014 255); background: var(--paper); font-size: 13.5px; color: var(--navy); }
 .access-row select:disabled { opacity: .45; }
 .access-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

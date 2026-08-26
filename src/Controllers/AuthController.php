@@ -207,6 +207,10 @@ class AuthController
     public function logout(): void
     {
         Auth::logout();
+        $token = trim((string) Session::get('invite_token', ''));
+        if ($token !== '' && preg_match('/^[a-f0-9]{32}$/', $token)) {
+            redirect('/invitation/' . $token);
+        }
         redirect('/');
     }
 

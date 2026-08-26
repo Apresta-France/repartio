@@ -71,6 +71,48 @@ class Access
         return Database::fetch($sql, [hash('sha256', $raw)]);
     }
 
+    public static function isPendingExpired(array $member): bool
+    {
+        return ($member['status'] ?? '') === 'pending'
+            && !empty($member['expires_at'])
+            && strtotime((string) $member['expires_at']) < time();
+    }
+
+    public static function hasArchivedAssignments(int $memberRowId): bool
+    {
+        $row = Database::fetch(
+            'SELECT amc.id
+             FROM account_member_circuits amc
+             INNER JOIN projects p ON p.id = amc.project_id
+             WHERE amc.member_row_id = ? AND p.status = "archive"
+             LIMIT 1',
+            [$memberRowId]
+        );
+        return $row !== null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function membersOverLimitIfActivated(int $projectId): array
+    {
+        $rows = Database::fetchAll(
+            'SELECT u.id, u.first_name, u.email, u.plan
+             FROM account_member_circuits amc
+             INNER JOIN account_members am ON am.id = amc.member_row_id
+             INNER JOIN users u ON u.id = am.member_id
+             WHERE amc.project_id = ? AND am.status = "active"',
+            [$projectId]
+        );
+        $blocked = [];
+        foreach ($rows as $row) {
+            if (!Project::canFit($row, 1)) {
+                $blocked[] = (string) ($row['first_name'] ?: $row['email']);
+            }
+        }
+        return $blocked;
+    }
+
     public static function countForOwner(int $ownerId): int
     {
         $row = Database::fetch(
@@ -265,6 +307,20 @@ class Access
      */
     public static function syncCircuits(int $memberRowId, int $ownerId, array $assignments): void
     {
+        $kept = Database::fetchAll(
+            'SELECT amc.project_id, amc.permission
+             FROM account_member_circuits amc
+             INNER JOIN projects p ON p.id = amc.project_id
+             WHERE amc.member_row_id = ? AND p.status = "archive"',
+            [$memberRowId]
+        );
+        foreach ($kept as $row) {
+            $projectId = (int) $row['project_id'];
+            if (!isset($assignments[$projectId])) {
+                $assignments[$projectId] = (string) $row['permission'];
+            }
+        }
+
         Database::query('DELETE FROM account_member_circuits WHERE member_row_id = ?', [$memberRowId]);
         foreach ($assignments as $projectId => $permission) {
             $projectId = (int) $projectId;
