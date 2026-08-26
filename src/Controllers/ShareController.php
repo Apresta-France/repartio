@@ -90,7 +90,7 @@ class ShareController
             Session::flashSet('success', 'Lien d’aperçu public enregistré.');
         }
 
-        $this->backTo((int) $project['id']);
+        $this->backTo($project);
     }
 
     public function revoke(string $id): void
@@ -101,7 +101,7 @@ class ShareController
             Project::log((int) $user['id'], 'Lien de partage révoqué', (int) $project['id']);
             Session::flashSet('success', 'Le lien public n’est plus accessible.');
         }
-        $this->backTo((int) $project['id']);
+        $this->backTo($project);
     }
 
     public function restore(string $id): void
@@ -112,7 +112,7 @@ class ShareController
             Project::log((int) $user['id'], 'Lien de partage réactivé', (int) $project['id']);
             Session::flashSet('success', 'Le lien public est de nouveau actif.');
         }
-        $this->backTo((int) $project['id']);
+        $this->backTo($project);
     }
 
     public function preview(string $slug): void
@@ -141,8 +141,8 @@ class ShareController
     private function context(string $id): array
     {
         $user = Auth::requireUser();
-        $project = Project::findById((int) $id);
-        if (!$project || !Access::can((int) $user['id'], (int) $id, 'gestion')) {
+        $project = Project::resolve($id);
+        if (!$project || !Access::can((int) $user['id'], (int) $project['id'], 'gestion')) {
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
@@ -150,17 +150,21 @@ class ShareController
             Session::flashSet('error', 'Réactivez le circuit avant de gérer le lien public.');
             redirect('/app/circuits');
         }
+        if (!Project::isUid($id) && ($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
+            $qs = (string) ($_SERVER['QUERY_STRING'] ?? '');
+            redirect(Project::path($project, 'partage') . ($qs !== '' ? '?' . $qs : ''), 301);
+        }
         $share = Share::findForProject((int) $project['id'], (int) $project['user_id']);
         $sends = $share ? Share::sendsForShare((int) $share['id']) : [];
         return [$user, $project, $share, $sends];
     }
 
-    private function backTo(int $projectId): void
+    private function backTo(array $project): void
     {
         $target = (string) ($_POST['return_to'] ?? '');
         if ($target === 'builder') {
-            redirect('/app/circuits/' . $projectId);
+            redirect(Project::path($project));
         }
-        redirect('/app/circuits/' . $projectId . '/partage');
+        redirect(Project::path($project, 'partage'));
     }
 }

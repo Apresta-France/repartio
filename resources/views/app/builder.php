@@ -2,8 +2,9 @@
 $canEdit = !empty($canEdit);
 $canManage = !empty($canManage);
 $readonly = !$canEdit;
+$circuitPath = \App\Models\Project::path($project);
 ?>
-<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= (int) $project['id'] ?>" data-user-id="<?= (int) $user['id'] ?>" data-revision="<?= (int) ($revision ?? 1) ?>"<?= !empty($liveAhead) ? ' data-live-ahead' : '' ?> data-live-url="<?= e(url('/app/circuits/' . $project['id'] . '/live')) ?>" data-versions-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions')) ?>" data-restore-url="<?= e(url('/app/circuits/' . $project['id'] . '/versions/restaurer')) ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
+<div class="builder<?= $readonly ? ' is-readonly' : '' ?>" data-builder<?= $readonly ? ' data-readonly' : '' ?> data-project-id="<?= e((string) $project['uid']) ?>" data-user-id="<?= (int) $user['id'] ?>" data-revision="<?= (int) ($revision ?? 1) ?>"<?= !empty($liveAhead) ? ' data-live-ahead' : '' ?> data-live-url="<?= e(url($circuitPath . '/live')) ?>" data-versions-url="<?= e(url($circuitPath . '/versions')) ?>" data-restore-url="<?= e(url($circuitPath . '/versions/restaurer')) ?>" data-horizon-max="<?= (int) ($horizonMax ?? 24) ?>" data-horizon-default="<?= (int) ($horizonDefault ?? 24) ?>" data-payload='<?= e(json_encode($payload, JSON_UNESCAPED_UNICODE)) ?>'>
   <div class="builder-workspace">
   <aside class="builder-side">
     <a href="<?= e(url('/app/circuits')) ?>" class="btn btn-navy builder-back">← Mes circuits</a>
@@ -86,7 +87,7 @@ $readonly = !$canEdit;
 
   <main class="builder-main">
     <header class="app-top">
-      <form method="post" action="<?= e(url('/app/circuits/' . $project['id'])) ?>" data-save-form class="builder-toolbar">
+      <form method="post" action="<?= e(url($circuitPath)) ?>" data-save-form class="builder-toolbar">
         <?= csrf_field() ?>
         <button type="button" class="btn btn-ghost builder-side-toggle" data-builder-side-toggle aria-expanded="false">Blocs &amp; chiffres</button>
         <input name="name" data-name value="<?= e($project['name']) ?>" class="builder-name-input"<?= $readonly ? ' readonly' : '' ?>>

@@ -16,7 +16,7 @@ class CollabController
     public function live(string $id): void
     {
         $user = Auth::requireUser();
-        $project = $this->readable((int) $id, (int) $user['id']);
+        $project = $this->readable($id, (int) $user['id']);
         if (!$project) {
             $this->json(['ok' => false], 403);
             return;
@@ -88,7 +88,7 @@ class CollabController
     public function versions(string $id): void
     {
         $user = Auth::requireUser();
-        $project = $this->readable((int) $id, (int) $user['id']);
+        $project = $this->readable($id, (int) $user['id']);
         if (!$project) {
             $this->json(['ok' => false], 403);
             return;
@@ -119,7 +119,7 @@ class CollabController
     public function restore(string $id): void
     {
         $user = Auth::requireUser();
-        $project = $this->readable((int) $id, (int) $user['id']);
+        $project = $this->readable($id, (int) $user['id']);
         $projectId = (int) ($project['id'] ?? 0);
         $userId = (int) $user['id'];
         if (
@@ -169,12 +169,13 @@ class CollabController
         ]);
     }
 
-    private function readable(int $id, int $userId): ?array
+    private function readable(string $key, int $userId): ?array
     {
-        if ($id <= 0 || !Access::can($userId, $id, 'lecture')) {
+        $project = Project::resolve($key);
+        if (!$project || !Access::can($userId, (int) $project['id'], 'lecture')) {
             return null;
         }
-        return Project::findById($id);
+        return $project;
     }
 
     private function clientId(): string

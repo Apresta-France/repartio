@@ -1,6 +1,6 @@
 <header class="app-top">
   <div>
-    <a href="<?= e(url('/app/circuits/' . $project['id'])) ?>" class="eyebrow">← Retour au circuit</a>
+    <a href="<?= e(url(\App\Models\Project::path($project))) ?>" class="eyebrow">← Retour au circuit</a>
     <h1>Partager « <?= e($project['name']) ?> »</h1>
   </div>
 </header>

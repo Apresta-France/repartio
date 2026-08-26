@@ -198,12 +198,12 @@ class Access
     public static function recentsForUser(int $userId, int $limit = 3): array
     {
         return Database::fetchAll(
-            'SELECT id, name, status FROM (
-                SELECT p.id, p.name, p.status, p.updated_at
+            'SELECT id, uid, name, status FROM (
+                SELECT p.id, p.uid, p.name, p.status, p.updated_at
                 FROM projects p
                 WHERE p.user_id = ? AND p.status != "archive"
                 UNION
-                SELECT p.id, p.name, p.status, p.updated_at
+                SELECT p.id, p.uid, p.name, p.status, p.updated_at
                 FROM projects p
                 INNER JOIN account_member_circuits amc ON amc.project_id = p.id
                 INNER JOIN account_members am ON am.id = amc.member_row_id

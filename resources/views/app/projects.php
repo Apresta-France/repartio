@@ -25,7 +25,7 @@ $statuses = [
       $canManage = $isOwner || $role === 'gestion';
       ?>
     <article class="card project-card<?= $status === 'archive' ? ' is-archive' : '' ?>">
-      <a class="project-card-preview" href="<?= e(url('/app/circuits/' . $p['id'])) ?>">
+      <a class="project-card-preview" href="<?= e(url(\App\Models\Project::path($p))) ?>">
         <?php $wires = $thumb['wires']; $dots = $thumb['dots']; require BASE_PATH . '/resources/views/partials/circuit-thumb.php'; ?>
         <?php if ($blocks === 0): ?>
           <span class="project-card-empty">Aucun bloc</span>
@@ -33,7 +33,7 @@ $statuses = [
       </a>
       <div class="project-card-body">
         <div class="project-card-head">
-          <a class="project-card-title" href="<?= e(url('/app/circuits/' . $p['id'])) ?>"><?= e($p['name']) ?></a>
+          <a class="project-card-title" href="<?= e(url(\App\Models\Project::path($p))) ?>"><?= e($p['name']) ?></a>
           <?php if (!$isOwner): ?>
             <span class="project-status is-shared"><?= e(\App\Models\Access::LABELS[$role] ?? $role) ?><?= !empty($p['owner_name']) ? ' · ' . e($p['owner_name']) : '' ?></span>
           <?php endif; ?>
@@ -57,14 +57,14 @@ $statuses = [
           <span class="mono"><?= e(time_ago($p['updated_at'])) ?> · <?= $blocks ?> bloc<?= $blocks > 1 ? 's' : '' ?></span>
           <div class="project-actions">
             <?php if ($canManage && $status !== 'archive'): ?>
-              <a href="<?= e(url('/app/circuits/' . $p['id'] . '/partage')) ?>">Partager</a>
-              <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/dupliquer')) ?>"><?= csrf_field() ?><button type="submit">Dupliquer</button></form>
-              <form method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/archiver')) ?>"><?= csrf_field() ?><button type="submit"><?= $status === 'archive' ? 'Réactiver' : 'Archiver' ?></button></form>
+              <a href="<?= e(url(\App\Models\Project::path($p, 'partage'))) ?>">Partager</a>
+              <form method="post" action="<?= e(url(\App\Models\Project::path($p, 'dupliquer'))) ?>"><?= csrf_field() ?><button type="submit">Dupliquer</button></form>
+              <form method="post" action="<?= e(url(\App\Models\Project::path($p, 'archiver'))) ?>"><?= csrf_field() ?><button type="submit"><?= $status === 'archive' ? 'Réactiver' : 'Archiver' ?></button></form>
             <?php endif; ?>
             <?php if ($isOwner): ?>
-              <form class="is-danger" method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/supprimer')) ?>" data-confirm-delete data-confirm-name="<?= e($p['name']) ?>"><?= csrf_field() ?><button type="submit">Supprimer</button></form>
+              <form class="is-danger" method="post" action="<?= e(url(\App\Models\Project::path($p, 'supprimer'))) ?>" data-confirm-delete data-confirm-name="<?= e($p['name']) ?>"><?= csrf_field() ?><button type="submit">Supprimer</button></form>
             <?php else: ?>
-              <form class="is-danger" method="post" action="<?= e(url('/app/circuits/' . $p['id'] . '/quitter')) ?>" onsubmit="return confirm('Retirer ce circuit partagé de votre compte ? L’emplacement sera libéré.');"><?= csrf_field() ?><button type="submit">Quitter</button></form>
+              <form class="is-danger" method="post" action="<?= e(url(\App\Models\Project::path($p, 'quitter'))) ?>" onsubmit="return confirm('Retirer ce circuit partagé de votre compte ? L’emplacement sera libéré.');"><?= csrf_field() ?><button type="submit">Quitter</button></form>
             <?php endif; ?>
           </div>
         </div>

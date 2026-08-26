@@ -6,7 +6,7 @@ $returnTo = $returnTo ?? 'page';
 $publicUrl = $share ? url('/p/' . $share['slug']) : '';
 $enabled = $share && (int) $share['enabled'] === 1;
 ?>
-<form method="post" action="<?= e(url('/app/circuits/' . $project['id'] . '/partage')) ?>" class="share-form" data-share-form>
+<form method="post" action="<?= e(url(\App\Models\Project::path($project, 'partage'))) ?>" class="share-form" data-share-form>
   <?= csrf_field() ?>
   <input type="hidden" name="return_to" value="<?= e($returnTo) ?>">
 
@@ -49,13 +49,13 @@ $enabled = $share && (int) $share['enabled'] === 1;
 <?php if ($share): ?>
   <div class="share-tools">
     <?php if ($enabled): ?>
-      <form method="post" action="<?= e(url('/app/circuits/' . $project['id'] . '/partage/revoquer')) ?>" onsubmit="return confirm('Révoquer le lien public ? Les destinataires ne pourront plus l’ouvrir.');">
+      <form method="post" action="<?= e(url(\App\Models\Project::path($project, 'partage/revoquer'))) ?>" onsubmit="return confirm('Révoquer le lien public ? Les destinataires ne pourront plus l’ouvrir.');">
         <?= csrf_field() ?>
         <input type="hidden" name="return_to" value="<?= e($returnTo) ?>">
         <button class="btn btn-ghost" type="submit">Révoquer le lien</button>
       </form>
     <?php else: ?>
-      <form method="post" action="<?= e(url('/app/circuits/' . $project['id'] . '/partage/reactiver')) ?>">
+      <form method="post" action="<?= e(url(\App\Models\Project::path($project, 'partage/reactiver'))) ?>">
         <?= csrf_field() ?>
         <input type="hidden" name="return_to" value="<?= e($returnTo) ?>">
         <button class="btn btn-navy" type="submit">Réactiver le lien</button>

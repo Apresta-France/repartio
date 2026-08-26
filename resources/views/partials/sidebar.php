@@ -35,7 +35,7 @@ if (\App\Core\Auth::isAdmin($user)) {
   <div>
     <span class="eyebrow" style="padding:4px 12px 8px;display:block;">Circuits récents</span>
     <?php foreach (($recents ?? []) as $r): ?>
-      <a href="<?= e(url('/app/circuits/' . $r['id'])) ?>" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;font-size:13px;color:oklch(0.42 0.05 265);">
+      <a href="<?= e(url(\App\Models\Project::path($r))) ?>" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;font-size:13px;color:oklch(0.42 0.05 265);">
         <span class="dot" style="border-radius:50%;background:var(--teal)"></span>
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= e($r['name']) ?></span>
       </a>

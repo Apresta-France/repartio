@@ -88,9 +88,59 @@ class Project
             . '. Archivez-en un, quittez un partage' . $upgrade . ' pour libérer de la place.';
     }
 
+    public static function isUid(string $key): bool
+    {
+        return (bool) preg_match('/^[a-f0-9]{32}$/', $key);
+    }
+
+    public static function uniqueUid(): string
+    {
+        do {
+            $uid = bin2hex(random_bytes(16));
+        } while (self::uidTaken($uid));
+
+        return $uid;
+    }
+
+    public static function uidTaken(string $uid): bool
+    {
+        $row = Database::fetch('SELECT id FROM projects WHERE uid = ? LIMIT 1', [$uid]);
+        return $row !== null;
+    }
+
     public static function findById(int $id): ?array
     {
         return Database::fetch('SELECT * FROM projects WHERE id = ? LIMIT 1', [$id]);
+    }
+
+    public static function findByUid(string $uid): ?array
+    {
+        if (!self::isUid($uid)) {
+            return null;
+        }
+        return Database::fetch('SELECT * FROM projects WHERE uid = ? LIMIT 1', [$uid]);
+    }
+
+    public static function resolve(string $key): ?array
+    {
+        $key = trim($key);
+        if (self::isUid($key)) {
+            return self::findByUid($key);
+        }
+        if (ctype_digit($key) && (int) $key > 0) {
+            return self::findById((int) $key);
+        }
+        return null;
+    }
+
+    public static function path(array $project, string $suffix = ''): string
+    {
+        $token = (string) ($project['uid'] ?? '');
+        if ($token === '') {
+            $token = (string) ($project['id'] ?? '');
+        }
+        $base = '/app/circuits/' . $token;
+        return $suffix === '' ? $base : $base . '/' . ltrim($suffix, '/');
     }
 
     public static function findForUser(int $id, int $userId): ?array
@@ -115,7 +165,7 @@ class Project
     public static function recents(int $userId, int $limit = 3): array
     {
         return Database::fetchAll(
-            'SELECT id, name, status FROM projects WHERE user_id = ? AND status != "archive" ORDER BY updated_at DESC LIMIT ' . (int) $limit,
+            'SELECT id, uid, name, status FROM projects WHERE user_id = ? AND status != "archive" ORDER BY updated_at DESC LIMIT ' . (int) $limit,
             [$userId]
         );
     }
@@ -146,9 +196,10 @@ class Project
         $payload['horizon'] = self::clampHorizonForUser($payload['horizon'] ?? null, $owner);
         $totals = self::summarize($payload);
         Database::query(
-            'INSERT INTO projects (user_id, name, slug, status, horizon, payload, monthly_in, monthly_out, monthly_saved, unassigned, projection, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
+            'INSERT INTO projects (uid, user_id, name, slug, status, horizon, payload, monthly_in, monthly_out, monthly_saved, unassigned, projection, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
             [
+                self::uniqueUid(),
                 $userId,
                 $name,
                 slugify($name) . '-' . bin2hex(random_bytes(3)),

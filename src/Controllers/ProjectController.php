@@ -44,7 +44,7 @@ class ProjectController
         $this->guardLimit($user);
         $project = Project::create((int) $user['id'], 'Nouveau circuit', Project::emptyPayload());
         Project::log((int) $user['id'], 'Circuit créé', (int) $project['id']);
-        redirect('/app/circuits/' . $project['id'] . '?nouveau=1');
+        redirect(Project::path($project) . '?nouveau=1');
     }
 
     public function store(): void
@@ -60,7 +60,7 @@ class ProjectController
         $name = $name !== '' ? $name : 'Nouveau circuit';
         $project = Project::create((int) $user['id'], $name, Project::emptyPayload());
         Project::log((int) $user['id'], 'Circuit créé', (int) $project['id']);
-        redirect('/app/circuits/' . $project['id']);
+        redirect(Project::path($project));
     }
 
     public function resumePendingTemplate(): void
@@ -88,14 +88,16 @@ class ProjectController
     public function show(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findById((int) $id);
-        if (!$project || !Access::can((int) $user['id'], (int) $id, 'lecture')) {
+        $project = $this->loadReadable($id, $user);
+        if (!$project) {
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
+        $this->canonicalize($id, $project);
+        $projectId = (int) $project['id'];
         $archived = ($project['status'] ?? '') === 'archive';
-        $canEdit = !$archived && Access::can((int) $user['id'], (int) $id, 'edition');
-        $canManage = Access::can((int) $user['id'], (int) $id, 'gestion');
+        $canEdit = !$archived && Access::can((int) $user['id'], $projectId, 'edition');
+        $canManage = Access::can((int) $user['id'], $projectId, 'gestion');
         $share = $canManage ? Share::findForProject((int) $project['id'], (int) $project['user_id']) : null;
         $owner = User::find((int) $project['user_id']) ?? $user;
         $working = CircuitLive::workingCopy($project, $owner);
@@ -128,8 +130,9 @@ class ProjectController
     public function update(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findById((int) $id);
-        if (!$project || ($project['status'] ?? '') === 'archive' || !Access::can((int) $user['id'], (int) $id, 'edition')) {
+        $project = Project::resolve($id);
+        $projectId = (int) ($project['id'] ?? 0);
+        if (!$project || ($project['status'] ?? '') === 'archive' || !Access::can((int) $user['id'], $projectId, 'edition')) {
             if (wants_json()) {
                 http_response_code(403);
                 header('Content-Type: application/json');
@@ -142,7 +145,7 @@ class ProjectController
         $name = mb_substr(trim((string) ($_POST['name'] ?? $project['name'])) ?: $project['name'], 0, 180);
         $raw = $_POST['payload'] ?? null;
         if ($raw === null || $raw === '') {
-            $live = CircuitLive::find((int) $id);
+            $live = CircuitLive::find($projectId);
             $from = $live
                 ? json_decode((string) $live['payload'], true)
                 : json_decode((string) $project['payload'], true);
@@ -164,7 +167,7 @@ class ProjectController
                     return;
                 }
                 Session::flashSet('error', 'Impossible d’enregistrer un circuit vide ou illisible.');
-                redirect('/app/circuits/' . $id);
+                redirect(Project::path($project));
             }
         }
         $owner = User::find((int) $project['user_id']) ?? $user;
@@ -175,22 +178,22 @@ class ProjectController
         }
         if (!CircuitVersion::same((string) $project['name'], $previous, $name, $payload)) {
             if (($_POST['autosave'] ?? '') === '1') {
-                CircuitVersion::snapshotIfDue((int) $id, (int) $user['id'], (string) $project['name'], $previous);
+                CircuitVersion::snapshotIfDue($projectId, (int) $user['id'], (string) $project['name'], $previous);
             } else {
-                CircuitVersion::snapshot((int) $id, (int) $user['id'], (string) $project['name'], $previous);
+                CircuitVersion::snapshot($projectId, (int) $user['id'], (string) $project['name'], $previous);
             }
         }
-        $live = CircuitLive::find((int) $id);
+        $live = CircuitLive::find($projectId);
         if ($live) {
             $livePayload = json_decode((string) $live['payload'], true);
             if (is_array($livePayload) && !CircuitVersion::same((string) $live['name'], $livePayload, $name, $payload)) {
-                CircuitVersion::snapshot((int) $id, (int) $user['id'], (string) $live['name'], $livePayload);
+                CircuitVersion::snapshot($projectId, (int) $user['id'], (string) $live['name'], $livePayload);
             }
         }
-        Project::updateById((int) $id, $name, $payload);
-        $revision = CircuitLive::publish((int) $id, (int) $user['id'], $name, $payload);
+        Project::updateById($projectId, $name, $payload);
+        $revision = CircuitLive::publish($projectId, (int) $user['id'], $name, $payload);
         if (($_POST['autosave'] ?? '') !== '1') {
-            Project::log((int) $user['id'], 'Circuit enregistré', (int) $id);
+            Project::log((int) $user['id'], 'Circuit enregistré', $projectId);
         }
 
         if (wants_json()) {
@@ -199,29 +202,30 @@ class ProjectController
             return;
         }
         Session::flashSet('success', 'Circuit enregistré.');
-        redirect('/app/circuits/' . $id);
+        redirect(Project::path($project));
     }
 
     public function duplicate(string $id): void
     {
         $user = Auth::requireUser();
         $this->guardLimit($user);
-        $project = Project::findById((int) $id);
-        if (!$project || !Access::can((int) $user['id'], (int) $id, 'gestion')) {
+        $project = Project::resolve($id);
+        if (!$project || !Access::can((int) $user['id'], (int) $project['id'], 'gestion')) {
             redirect('/app/circuits');
         }
         $owner = User::find((int) $project['user_id']) ?? $user;
         $working = CircuitLive::workingCopy($project, $owner);
         $copy = Project::create((int) $user['id'], $working['name'] . ' — copie', $working['payload']);
         Project::log((int) $user['id'], 'Circuit dupliqué', (int) $copy['id']);
-        redirect('/app/circuits/' . $copy['id']);
+        redirect(Project::path($copy));
     }
 
     public function archive(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findById((int) $id);
-        if ($project && Access::can((int) $user['id'], (int) $id, 'gestion')) {
+        $project = Project::resolve($id);
+        $projectId = (int) ($project['id'] ?? 0);
+        if ($project && Access::can((int) $user['id'], $projectId, 'gestion')) {
             $next = $project['status'] === 'archive' ? 'actif' : 'archive';
             if ($next === 'actif') {
                 $owner = User::find((int) $project['user_id']);
@@ -230,14 +234,14 @@ class ProjectController
                     redirect('/app/circuits');
                 }
             }
-            Project::setStatusById((int) $id, $next);
+            Project::setStatusById($projectId, $next);
             if ($next === 'archive') {
-                $share = Share::findForProject((int) $id, (int) $project['user_id']);
+                $share = Share::findForProject($projectId, (int) $project['user_id']);
                 if ($share) {
                     Share::setEnabled((int) $share['id'], (int) $project['user_id'], false);
                 }
             }
-            Project::log((int) $user['id'], $next === 'archive' ? 'Circuit archivé' : 'Circuit réactivé', (int) $id);
+            Project::log((int) $user['id'], $next === 'archive' ? 'Circuit archivé' : 'Circuit réactivé', $projectId);
         }
         redirect('/app/circuits');
     }
@@ -245,20 +249,21 @@ class ProjectController
     public function leave(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findById((int) $id);
+        $project = Project::resolve($id);
         if (!$project) {
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
-        if (Access::permission((int) $user['id'], (int) $id) === 'proprietaire') {
+        $projectId = (int) $project['id'];
+        if (Access::permission((int) $user['id'], $projectId) === 'proprietaire') {
             Session::flashSet('error', 'Vous êtes propriétaire de ce circuit.');
             redirect('/app/circuits');
         }
-        if (!Access::leaveProject((int) $user['id'], (int) $id)) {
+        if (!Access::leaveProject((int) $user['id'], $projectId)) {
             Session::flashSet('error', 'Impossible de quitter ce circuit.');
             redirect('/app/circuits');
         }
-        Project::log((int) $user['id'], 'Accès partagé quitté', (int) $id);
+        Project::log((int) $user['id'], 'Accès partagé quitté', $projectId);
         Session::flashSet('success', 'Le circuit partagé a été retiré de votre compte. L’emplacement est libéré.');
         redirect('/app/circuits');
     }
@@ -266,16 +271,17 @@ class ProjectController
     public function destroy(string $id): void
     {
         $user = Auth::requireUser();
-        $project = Project::findById((int) $id);
+        $project = Project::resolve($id);
         if (!$project) {
             Session::flashSet('error', 'Circuit introuvable.');
             redirect('/app/circuits');
         }
-        if (!Access::can((int) $user['id'], (int) $id, 'proprietaire')) {
+        $projectId = (int) $project['id'];
+        if (!Access::can((int) $user['id'], $projectId, 'proprietaire')) {
             Session::flashSet('error', 'Seul le propriétaire peut supprimer un circuit.');
             redirect('/app/circuits');
         }
-        Project::delete((int) $id, (int) $user['id']);
+        Project::delete($projectId, (int) $user['id']);
         Project::log((int) $user['id'], 'Circuit supprimé');
         Session::flashSet('success', 'Circuit supprimé.');
         redirect('/app/circuits');
@@ -316,7 +322,25 @@ class ProjectController
         $payload = $pack['payload'] ?? Project::emptyPayload();
         $project = Project::create((int) $user['id'], $name, $payload);
         Project::log((int) $user['id'], 'Circuit créé depuis un modèle', (int) $project['id']);
-        redirect('/app/circuits/' . $project['id']);
+        redirect(Project::path($project));
+    }
+
+    private function loadReadable(string $key, array $user): ?array
+    {
+        $project = Project::resolve($key);
+        if (!$project || !Access::can((int) $user['id'], (int) $project['id'], 'lecture')) {
+            return null;
+        }
+        return $project;
+    }
+
+    private function canonicalize(string $key, array $project): void
+    {
+        if (Project::isUid($key)) {
+            return;
+        }
+        $qs = (string) ($_SERVER['QUERY_STRING'] ?? '');
+        redirect(Project::path($project) . ($qs !== '' ? '?' . $qs : ''), 301);
     }
 
     private function guardLimit(array $user): void
