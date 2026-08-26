@@ -8,8 +8,65 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
   </div>
 </header>
 <section class="access-page">
-  <p class="lede access-intro">Invitez des personnes à agir sur vos circuits. Chaque personne n’accède qu’aux circuits cochés, avec le droit que vous lui donnez. Un circuit partagé occupe un emplacement sur le forfait de la personne invitée : elle ne pourra accepter que s’il lui reste de la place.</p>
+  <p class="lede access-intro">Invitez une personne, cochez les circuits auxquels elle a accès, puis choisissez son droit. Un circuit partagé occupe un emplacement sur son forfait : elle ne pourra accepter que s’il lui reste de la place.</p>
 
+  <div class="card access-card access-invite">
+    <div>
+      <span class="eyebrow">Inviter</span>
+      <h2>Ajouter une personne</h2>
+      <p class="lede access-invite-copy">Elle reçoit un e-mail. Sans compte, elle en crée un avec la même adresse, puis accepte.</p>
+    </div>
+
+    <?php if ($memberLimit <= 0): ?>
+      <p class="lede access-invite-copy">Le plan Libre ne permet pas d’inviter quelqu’un à gérer un circuit. Le plan Complet ouvre une invitation.</p>
+      <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
+    <?php elseif ($circuits === []): ?>
+      <p class="lede access-invite-copy">Créez d’abord un circuit pour pouvoir y donner accès.</p>
+      <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
+    <?php elseif ($memberCount >= $memberLimit): ?>
+      <p class="lede access-invite-copy">Limite de <?= (int) $memberLimit ?> personne<?= (int) $memberLimit > 1 ? 's' : '' ?> atteinte. Changez de forfait pour en inviter davantage, ou retirez un accès.</p>
+      <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
+    <?php else: ?>
+      <form method="post" action="<?= e(url('/app/acces')) ?>" class="access-form">
+        <?= csrf_field() ?>
+        <label class="field">
+          <span>Adresse e-mail</span>
+          <input type="email" name="email" required placeholder="marie@exemple.fr" value="<?= e((string) old('email')) ?>">
+        </label>
+        <fieldset class="access-step">
+          <legend>Circuits</legend>
+          <p class="field-hint">Cochez ceux qu’elle pourra ouvrir.</p>
+          <div class="access-grid">
+            <?php foreach ($circuits as $circuit): ?>
+              <label class="access-row access-row-pick">
+                <input type="checkbox" name="circuit_ids[]" value="<?= (int) $circuit['id'] ?>" <?= count($circuits) === 1 ? 'checked' : '' ?>>
+                <span><?= e($circuit['name']) ?></span>
+              </label>
+            <?php endforeach; ?>
+          </div>
+        </fieldset>
+        <fieldset class="access-step">
+          <legend>Droit sur ces circuits</legend>
+          <div class="access-perm">
+            <div class="access-perm-options" role="radiogroup">
+              <?php foreach (\App\Models\Access::PERMISSIONS as $key => $label): ?>
+                <label>
+                  <input type="radio" name="permission" value="<?= e($key) ?>" <?= $key === 'lecture' ? 'checked' : '' ?>>
+                  <?= e($label) ?>
+                </label>
+              <?php endforeach; ?>
+            </div>
+            <?php foreach (\App\Models\Access::PERMISSIONS as $key => $label): ?>
+              <p class="access-perm-hint" data-perm="<?= e($key) ?>"><?= e(\App\Models\Access::HINTS[$key]) ?></p>
+            <?php endforeach; ?>
+          </div>
+        </fieldset>
+        <button class="btn btn-orange" type="submit" <?= $canInvite ? '' : 'disabled' ?>>Envoyer l’invitation</button>
+      </form>
+    <?php endif; ?>
+  </div>
+
+  <p class="access-people">Personnes qui ont accès</p>
   <div class="card access-card access-owner">
     <div class="access-person-head">
       <span class="access-avatar"><?= e(initials($user['first_name'])) ?></span>
@@ -89,59 +146,6 @@ $canInvite = $memberCount < $memberLimit && $circuits !== [];
       <form id="revoke-<?= (int) $member['id'] ?>" method="post" action="<?= e(url('/app/acces/' . $member['id'] . '/retirer')) ?>" hidden data-confirm-delete data-confirm-title="Retirer <?= e($member['email']) ?> ?" data-confirm-text="Cette personne ne pourra plus ouvrir les circuits qui lui étaient attribués."><?= csrf_field() ?></form>
     <?php endforeach; ?>
   <?php endif; ?>
-
-  <div class="card access-card access-invite">
-    <div>
-      <span class="eyebrow">Inviter</span>
-      <h2>Ajouter une personne</h2>
-      <p class="lede" style="font-size:14.5px;">Elle reçoit un e-mail. Sans compte, elle en crée un avec la même adresse, puis accepte.</p>
-    </div>
-
-    <?php if ($memberLimit <= 0): ?>
-      <p class="lede" style="font-size:14.5px;">Le plan Libre ne permet pas d’inviter quelqu’un à gérer un circuit. Le plan Complet ouvre une invitation.</p>
-      <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
-    <?php elseif ($circuits === []): ?>
-      <p class="lede" style="font-size:14.5px;">Créez d’abord un circuit pour pouvoir y donner accès.</p>
-      <form method="post" action="<?= e(url('/app/circuits/nouveau')) ?>"><?= csrf_field() ?><button class="btn btn-orange" type="submit">Nouveau circuit</button></form>
-    <?php elseif ($memberCount >= $memberLimit): ?>
-      <p class="lede" style="font-size:14.5px;">Limite de <?= (int) $memberLimit ?> personne<?= (int) $memberLimit > 1 ? 's' : '' ?> atteinte. Changez de forfait pour en inviter davantage, ou retirez un accès.</p>
-      <a class="btn btn-orange" href="<?= e(url('/app/forfait?raison=invitations')) ?>">Changer de forfait</a>
-    <?php else: ?>
-      <form method="post" action="<?= e(url('/app/acces')) ?>" class="access-form">
-        <?= csrf_field() ?>
-        <label class="field">
-          <span>Adresse e-mail</span>
-          <input type="email" name="email" required placeholder="marie@exemple.fr" value="<?= e((string) old('email')) ?>">
-        </label>
-        <div class="access-rights">
-          <?php foreach (\App\Models\Access::PERMISSIONS as $key => $label): ?>
-            <div>
-              <strong><?= e($label) ?></strong>
-              <span><?= e(\App\Models\Access::HINTS[$key]) ?></span>
-            </div>
-          <?php endforeach; ?>
-        </div>
-        <div class="access-grid">
-          <div class="access-grid-head">
-            <span>Circuit</span>
-            <span>Droit</span>
-          </div>
-          <?php foreach ($circuits as $circuit): ?>
-            <label class="access-row" data-access-row>
-              <input type="checkbox" name="circuit_ids[]" value="<?= (int) $circuit['id'] ?>" data-access-circuit>
-              <span><?= e($circuit['name']) ?></span>
-              <select name="rights[<?= (int) $circuit['id'] ?>]" disabled>
-                <?php foreach (\App\Models\Access::PERMISSIONS as $key => $label): ?>
-                  <option value="<?= e($key) ?>" <?= $key === 'lecture' ? 'selected' : '' ?>><?= e($label) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </label>
-          <?php endforeach; ?>
-        </div>
-        <button class="btn btn-orange" type="submit" <?= $canInvite ? '' : 'disabled' ?>>Envoyer l’invitation</button>
-      </form>
-    <?php endif; ?>
-  </div>
 </section>
 
 <div class="builder-modal" data-confirm-modal hidden>

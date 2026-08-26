@@ -222,6 +222,10 @@ class Access
     {
         $ids = array_map('intval', (array) ($post['circuit_ids'] ?? []));
         $rights = (array) ($post['rights'] ?? []);
+        $default = (string) ($post['permission'] ?? 'lecture');
+        if (!isset(self::PERMISSIONS[$default])) {
+            $default = 'lecture';
+        }
         $assignments = [];
         foreach ($ids as $id) {
             if ($id <= 0) {
@@ -230,9 +234,9 @@ class Access
             if (!Project::findForUser($id, $ownerId)) {
                 continue;
             }
-            $perm = (string) ($rights[$id] ?? 'lecture');
+            $perm = (string) ($rights[$id] ?? $default);
             if (!isset(self::PERMISSIONS[$perm])) {
-                $perm = 'lecture';
+                $perm = $default;
             }
             $assignments[$id] = $perm;
         }
