@@ -123,6 +123,61 @@
     custom: { title: 'Livret', rate: 0, cap: 0 },
   };
 
+  const DEPENSE_CATALOG = [
+    { group: 'Logement', items: [
+      { title: 'Loyer', aliases: ['loyer', 'location', 'bail', 'loc'] },
+      { title: 'Crédit immobilier', aliases: ['credit', 'pret', 'mensualite', 'immo'] },
+      { title: 'Charges de copropriété', aliases: ['charges', 'copro', 'copropriete', 'syndic'] },
+      { title: 'Assurance habitation', aliases: ['habitation', 'mrh', 'assurance maison'] },
+      { title: 'Taxe foncière', aliases: ['fonciere', 'taxe'] },
+      { title: 'Eau', aliases: ['eau', 'veolia', 'suez'] },
+      { title: 'Électricité', aliases: ['edf', 'elec', 'electricite', 'energie'] },
+      { title: 'Gaz', aliases: ['gaz', 'engie', 'grdf', 'totalenergies'] },
+      { title: 'Chauffage', aliases: ['chauffage', 'fioul', 'bois', 'pellet'] },
+      { title: 'Internet', aliases: ['internet', 'box', 'fibre', 'orange', 'sfr', 'free', 'bouygues'] },
+      { title: 'Téléphone', aliases: ['telephone', 'mobile', 'forfait'] },
+    ]},
+    { group: 'Quotidien', items: [
+      { title: 'Courses', aliases: ['courses', 'carrefour', 'leclerc', 'auchan', 'lidl', 'intermarche', 'super u', 'alimentaire'] },
+      { title: 'Cantine', aliases: ['cantine', 'self'] },
+      { title: 'Restaurants', aliases: ['resto', 'restaurant', 'livraison', 'uber eats', 'deliveroo'] },
+      { title: 'Boulangerie', aliases: ['pain', 'boulangerie'] },
+      { title: 'Tabac', aliases: ['tabac', 'cigarette'] },
+      { title: 'Vêtements', aliases: ['vetements', 'habillement'] },
+    ]},
+    { group: 'Transport', items: [
+      { title: 'Essence', aliases: ['essence', 'carburant', 'gasoil', 'sp95', 'total'] },
+      { title: 'Transports en commun', aliases: ['navigo', 'ratp', 'tcl', 'metro', 'bus', 'tram', 'abonnement'] },
+      { title: 'Train', aliases: ['train', 'sncf', 'ter', 'tgv', 'ouigo'] },
+      { title: 'Péage', aliases: ['peage', 'autoroute'] },
+      { title: 'Parking', aliases: ['parking', 'stationnement'] },
+      { title: 'Assurance auto', aliases: ['auto', 'voiture', 'maif', 'macif', 'axa'] },
+      { title: 'Entretien auto', aliases: ['entretien', 'revision', 'garage'] },
+      { title: 'Crédit auto', aliases: ['credit auto', 'loa', 'lld'] },
+    ]},
+    { group: 'Santé & famille', items: [
+      { title: 'Mutuelle', aliases: ['mutuelle', 'sante', 'alan', 'harmonie'] },
+      { title: 'Pharmacie', aliases: ['pharmacie', 'medecin', 'medocs'] },
+      { title: 'Garde d’enfants', aliases: ['creche', 'nounou', 'garde', 'babysitter'] },
+      { title: 'Activités enfants', aliases: ['sport enfant', 'musique', 'activites'] },
+      { title: 'Pension alimentaire', aliases: ['pension'] },
+      { title: 'Animaux', aliases: ['chien', 'chat', 'veterinaire'] },
+    ]},
+    { group: 'Impôts & cotisations', items: [
+      { title: 'Impôt sur le revenu', aliases: ['impot', 'ir', 'prelevement'] },
+      { title: 'URSSAF', aliases: ['urssaf', 'cotisations', 'rsi'] },
+      { title: 'Frais bancaires', aliases: ['banque', 'agios'] },
+    ]},
+    { group: 'Loisirs & perso', items: [
+      { title: 'Streaming', aliases: ['netflix', 'spotify', 'disney', 'amazon', 'youtube'] },
+      { title: 'Salle de sport', aliases: ['sport', 'gym', 'basic fit'] },
+      { title: 'Sorties', aliases: ['sorties', 'loisirs', 'cinema'] },
+      { title: 'Coiffeur', aliases: ['coiffeur', 'esthetique'] },
+      { title: 'Cadeaux', aliases: ['cadeaux'] },
+      { title: 'Dons', aliases: ['dons'] },
+    ]},
+  ];
+
   const readonly = root.hasAttribute('data-readonly');
   const HORIZON_MAX = Math.max(1, parseInt(root.getAttribute('data-horizon-max') || '600', 10) || 600);
   const HORIZON_DEFAULT = Math.max(1, parseInt(root.getAttribute('data-horizon-default') || String(Math.min(60, HORIZON_MAX)), 10) || 24);
@@ -201,6 +256,10 @@
   let playPinnedToEnd = true;
   let timeBound = false;
   let pendingDrop = null;
+  let itemSuggest = null;
+  let itemSuggestFor = null;
+  let itemSuggestIndex = -1;
+  let itemsCatalogBound = false;
   const flow = { paths: {}, hits: {}, pills: {}, pellets: [] };
   let hoverEdgeId = null;
   const phase = {};
@@ -343,6 +402,64 @@
     return item;
   }
 
+  function foldText(s) {
+    return String(s || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  function usedDepenseTitles(n, exceptId) {
+    return (n.items || [])
+      .filter((item) => item.id !== exceptId && foldText(item.title))
+      .map((item) => foldText(item.title));
+  }
+
+  function matchDepenseCatalog(query, used) {
+    const q = foldText(query);
+    if (q.length < 1) return [];
+    const usedSet = new Set(used || []);
+    const hits = [];
+    DEPENSE_CATALOG.forEach((group) => {
+      group.items.forEach((item) => {
+        if (usedSet.has(foldText(item.title))) return;
+        const keys = [item.title, ...(item.aliases || [])].map(foldText);
+        let score = 0;
+        if (keys.some((k) => k === q)) score = 100;
+        else if (keys.some((k) => k.startsWith(q))) score = 80;
+        else if (keys.some((k) => k.split(' ').some((w) => w.startsWith(q)))) score = 60;
+        else if (keys.some((k) => k.includes(q))) score = 40;
+        if (score) hits.push({ title: item.title, group: group.group, score });
+      });
+    });
+    hits.sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'fr'));
+    return hits.slice(0, 6);
+  }
+
+  function addCatalogTitles(n, titles) {
+    if (!n || n.kind !== 'depense') return [];
+    if (!Array.isArray(n.items)) n.items = [];
+    const used = new Set(usedDepenseTitles(n));
+    const added = [];
+    titles.forEach((title) => {
+      const key = foldText(title);
+      if (!key || used.has(key)) return;
+      used.add(key);
+      const empty = n.items.find((item) => !foldText(item.title) && !item.amount);
+      if (empty) {
+        empty.title = title;
+        added.push(empty);
+      } else {
+        const item = addDepenseItem(n, title);
+        if (item) added.push(item);
+      }
+    });
+    syncDepenseItems(n);
+    return added;
+  }
+
   function lectureRows(n, C) {
     return nodeStats(n, C).rows.filter((row) => row[0] !== 'Déjà dessus');
   }
@@ -384,6 +501,7 @@
       preset: n.preset || '',
       note: typeof n.note === 'string' ? n.note : '',
       tint: TINTS[n.tint] ? n.tint : defaultTint(kind),
+      locked: Boolean(n.locked),
     };
     if (kind === 'depense') {
       if (Array.isArray(n.items)) {
@@ -1412,12 +1530,13 @@
       el.style.left = n.x + 'px';
       el.style.top = n.y + 'px';
       const selected = isSelected(n.id) ? ' is-selected' : '';
-      const kill = readonly ? '' : `<button type="button" class="node-kill" data-del="${escapeAttr(n.id)}" title="Supprimer">×</button>`;
+      const lockedCls = n.locked ? ' is-locked' : '';
+      const kill = readonly || n.locked ? '' : `<button type="button" class="node-kill" data-del="${escapeAttr(n.id)}" title="Supprimer">×</button>`;
       if (!readonly) el.setAttribute('data-drag', n.id);
 
       if (n.kind === 'groupe') {
         const tint = tintOf(n);
-        el.className = 'node is-group' + selected;
+        el.className = 'node is-group' + selected + lockedCls;
         el.style.width = (n.w || 560) + 'px';
         el.style.height = (n.h || 340) + 'px';
         el.style.background = tint.fill;
@@ -1432,7 +1551,7 @@
         `;
       } else if (n.kind === 'note') {
         const tint = tintOf(n);
-        el.className = 'node is-note' + selected;
+        el.className = 'node is-note' + selected + lockedCls;
         el.style.width = (n.w || 200) + 'px';
         el.style.background = tint.fill;
         el.style.borderColor = tint.stroke;
@@ -1451,7 +1570,7 @@
         const color = accentColorOf(n, C);
         const full = isLivretFullNow(n, C);
         const pending = needsAmount(n);
-        el.className = 'node' + selected + (full ? ' is-full' : '') + (pending ? ' is-pending' : '');
+        el.className = 'node' + selected + (full ? ' is-full' : '') + (pending ? ' is-pending' : '') + lockedCls;
         el.innerHTML = `
           <div class="node-inner">
             <div class="node-bar" style="background:${color}"></div>
@@ -1574,6 +1693,7 @@
   }
 
   function renderProps() {
+    closeItemSuggest();
     const picked = selectedNodes();
     if (picked.length > 1) {
       renderMultiProps(picked);
@@ -1638,7 +1758,7 @@
         <div class="prop-field">
           <span>Nom du bloc</span>
           <div class="prop-name-row">
-            <input data-prop="title" value="${escapeAttr(n.title)}">
+            <input data-prop="title" value="${escapeAttr(n.title)}"${n.locked ? ' disabled' : ''}>
             ${tintControl(n, 'block')}
           </div>
         </div>
@@ -1648,28 +1768,36 @@
               <span>Montant par mois</span>
               ${amountTip ? `<em class="prop-field-tip" id="prop-amount-tip" data-amount-tip${needsAmount(n) ? '' : ' hidden'}>Renseignez une valeur ici</em>` : ''}
             </span>
-            <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}"${amountTip && needsAmount(n) ? ' aria-describedby="prop-amount-tip"' : ''}>
+            <input data-prop="amount" type="number" min="0" step="1" value="${n.amount}"${n.locked ? ' disabled' : ''}${amountTip && needsAmount(n) ? ' aria-describedby="prop-amount-tip"' : ''}>
           </label>` : ''}
         ${n.kind === 'depense' ? `
           <div data-items-block>
             <div class="prop-items-head">
               <div class="eyebrow">Postes du mois</div>
-              <button type="button" class="btn btn-ghost" data-item-add style="min-height:0;padding:4px 8px;font-size:12px;">Ajouter</button>
+              ${n.locked ? '' : `<div class="prop-items-actions">
+                <button type="button" class="btn btn-ghost" data-item-add style="min-height:0;padding:4px 8px;font-size:12px;">Ajouter</button>
+                <button type="button" class="btn btn-ghost prop-items-catalog" data-item-catalog title="Choisir dans la liste" aria-label="Choisir dans la liste" aria-haspopup="dialog">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true">
+                    <path d="M8 7h11M8 12h11M8 17h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M4.2 7h.01M4.2 12h.01M4.2 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>`}
             </div>
             <div class="prop-items">
               ${(n.items || []).length ? (n.items || []).map((item) => `
                 <div class="prop-item" data-item-edit="${escapeAttr(item.id)}">
-                  <input data-item-title="${escapeAttr(item.id)}" type="text" placeholder="Essence, loyer, EDF…" value="${escapeAttr(item.title)}" aria-label="Titre du poste">
-                  <input data-item-amount="${escapeAttr(item.id)}" type="number" min="0" step="1" value="${item.amount}" aria-label="Montant du poste">
-                  <button type="button" class="btn btn-ghost" data-item-del="${escapeAttr(item.id)}" style="min-height:0;padding:4px 8px;font-size:12px;" title="Retirer ce poste" aria-label="Retirer ce poste">×</button>
-                </div>`).join('') : '<p class="builder-hint">Ajoutez loyer, EDF, essence… Le total alimente le bloc.</p>'}
+                  <input data-item-title="${escapeAttr(item.id)}" type="text" placeholder="Essence, loyer, EDF…" value="${escapeAttr(item.title)}" aria-label="Titre du poste" autocomplete="off" aria-autocomplete="list"${n.locked ? ' disabled' : ''}>
+                  <input data-item-amount="${escapeAttr(item.id)}" type="number" min="0" step="1" value="${item.amount}" aria-label="Montant du poste"${n.locked ? ' disabled' : ''}>
+                  <button type="button" class="btn btn-ghost" data-item-del="${escapeAttr(item.id)}" style="min-height:0;padding:4px 8px;font-size:12px;" title="Retirer ce poste" aria-label="Retirer ce poste"${n.locked ? ' disabled' : ''}>×</button>
+                </div>`).join('') : '<p class="builder-hint">Ajoutez loyer, EDF, essence… ou ouvrez la liste.</p>'}
             </div>
             ${(n.items || []).length ? `<div class="prop-items-total" data-items-total>${euro(n.amount)} / mois</div>` : ''}
           </div>` : ''}
         ${n.kind === 'livret' ? `
           <label class="prop-field">
             <span>Type de livret</span>
-            <select data-prop="preset">
+            <select data-prop="preset"${n.locked ? ' disabled' : ''}>
               <option value="livret-a"${n.preset === 'livret-a' ? ' selected' : ''}>Livret A — 1,70 % · 22 950 €</option>
               <option value="ldds"${n.preset === 'ldds' ? ' selected' : ''}>LDDS — 1,70 % · 12 000 €</option>
               <option value="lep"${n.preset === 'lep' ? ' selected' : ''}>LEP — 2,50 % · 10 000 €</option>
@@ -1679,16 +1807,16 @@
           </label>
           <label class="prop-field">
             <span>Déjà dessus</span>
-            <input data-prop="start" type="number" min="0" step="1" value="${n.start}">
+            <input data-prop="start" type="number" min="0" step="1" value="${n.start}"${n.locked ? ' disabled' : ''}>
           </label>
           <div class="prop-grid">
             <label class="prop-field">
               <span>Taux (%)</span>
-              <input data-prop="rate" type="number" min="0" step="0.01" value="${n.rate}">
+              <input data-prop="rate" type="number" min="0" step="0.01" value="${n.rate}"${n.locked ? ' disabled' : ''}>
             </label>
             <label class="prop-field">
               <span>Plafond</span>
-              <input data-prop="cap" type="number" min="0" step="1" value="${n.cap}">
+              <input data-prop="cap" type="number" min="0" step="1" value="${n.cap}"${n.locked ? ' disabled' : ''}>
             </label>
           </div>` : ''}
         <div>
@@ -1750,7 +1878,7 @@
               }).join('') : '<p class="builder-hint">Aucun lien. Restez cliqué sur un point, puis glissez jusqu’au point opposé d’un autre bloc.</p>'}
             </div>
           </div>` : ''}
-        <button type="button" class="btn btn-ghost" data-del-selected>Supprimer le bloc</button>
+        ${n.locked ? '<p class="builder-hint">Ce bloc fait partie du scénario : montant et nom sont fixes.</p>' : '<button type="button" class="btn btn-ghost" data-del-selected>Supprimer le bloc</button>'}
       </div>
     `;
   }
@@ -2030,6 +2158,8 @@
   }
 
   function removeNode(id) {
+    const node = nodeById(id);
+    if (node?.locked) return;
     state.nodes = state.nodes.filter((n) => n.id !== id);
     state.edges = state.edges.filter((e) => e.from !== id && e.to !== id);
     state.selection = state.selection.filter((x) => x !== id);
@@ -2312,6 +2442,290 @@
     flushCoaches();
   }
 
+  function ensureItemSuggest() {
+    if (itemSuggest) return itemSuggest;
+    itemSuggest = document.createElement('div');
+    itemSuggest.className = 'prop-item-suggest';
+    itemSuggest.hidden = true;
+    itemSuggest.setAttribute('role', 'listbox');
+    document.body.appendChild(itemSuggest);
+    itemSuggest.addEventListener('mousedown', (e) => {
+      const opt = e.target.closest('[data-suggest-title]');
+      if (!opt) return;
+      e.preventDefault();
+      applyItemSuggest(opt.getAttribute('data-suggest-title'));
+    });
+    return itemSuggest;
+  }
+
+  function itemSuggestOpen() {
+    return !!(itemSuggest && !itemSuggest.hidden);
+  }
+
+  function closeItemSuggest() {
+    if (itemSuggest) itemSuggest.hidden = true;
+    if (itemSuggestFor) itemSuggestFor.setAttribute('aria-expanded', 'false');
+    itemSuggestFor = null;
+    itemSuggestIndex = -1;
+  }
+
+  function placeItemSuggest(input) {
+    const box = ensureItemSuggest();
+    const r = input.getBoundingClientRect();
+    const maxH = 240;
+    const spaceBelow = window.innerHeight - r.bottom - 8;
+    const spaceAbove = r.top - 8;
+    const openUp = spaceBelow < 140 && spaceAbove > spaceBelow;
+    box.style.left = Math.max(8, Math.round(r.left)) + 'px';
+    box.style.width = Math.round(Math.max(r.width, 200)) + 'px';
+    box.style.maxHeight = Math.round(Math.min(maxH, Math.max(120, openUp ? spaceAbove : spaceBelow))) + 'px';
+    if (openUp) {
+      box.style.top = 'auto';
+      box.style.bottom = Math.round(window.innerHeight - r.top + 4) + 'px';
+    } else {
+      box.style.bottom = 'auto';
+      box.style.top = Math.round(r.bottom + 4) + 'px';
+    }
+  }
+
+  function paintSuggestActive() {
+    if (!itemSuggest) return;
+    const options = [...itemSuggest.querySelectorAll('[data-suggest-title]')];
+    options.forEach((el, i) => el.classList.toggle('is-active', i === itemSuggestIndex));
+    options[itemSuggestIndex]?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function updateItemSuggest(input) {
+    const n = nodeById(state.selected);
+    if (!n || n.kind !== 'depense' || n.locked || !input) {
+      closeItemSuggest();
+      return;
+    }
+    const hits = matchDepenseCatalog(input.value, usedDepenseTitles(n, input.getAttribute('data-item-title')));
+    if (!hits.length) {
+      closeItemSuggest();
+      return;
+    }
+    const box = ensureItemSuggest();
+    itemSuggestFor = input;
+    itemSuggestIndex = 0;
+    input.setAttribute('aria-expanded', 'true');
+    box.innerHTML = hits.map((hit) => `
+      <button type="button" role="option" data-suggest-title="${escapeAttr(hit.title)}">
+        <strong>${escapeHtml(hit.title)}</strong>
+        <em>${escapeHtml(hit.group)}</em>
+      </button>
+    `).join('');
+    box.hidden = false;
+    placeItemSuggest(input);
+    paintSuggestActive();
+  }
+
+  function applyItemSuggest(title) {
+    const input = itemSuggestFor;
+    const n = nodeById(state.selected);
+    if (!input || !n || n.kind !== 'depense') return;
+    const id = input.getAttribute('data-item-title');
+    const item = (n.items || []).find((x) => x.id === id);
+    if (item) item.title = title;
+    input.value = title;
+    closeItemSuggest();
+    lastCompute = compute();
+    renderCanvas();
+    renderSide();
+    syncPayload();
+    const amount = propsForm?.querySelector(`[data-item-amount="${CSS.escape(id)}"]`);
+    if (amount) {
+      amount.focus();
+      amount.select();
+    }
+  }
+
+  function ensureItemsCatalogModal() {
+    let el = document.querySelector('[data-items-catalog-modal]');
+    if (el) return el;
+    el = document.createElement('div');
+    el.className = 'builder-modal';
+    el.setAttribute('data-items-catalog-modal', '');
+    el.hidden = true;
+    el.innerHTML = `
+      <div class="builder-modal-backdrop" data-items-catalog-dismiss></div>
+      <div class="builder-modal-card items-catalog-card" role="dialog" aria-modal="true" aria-labelledby="items-catalog-title">
+        <div class="builder-modal-head">
+          <div>
+            <div class="eyebrow">Postes du mois</div>
+            <h2 id="items-catalog-title">Ajouter plusieurs postes</h2>
+          </div>
+          <button type="button" class="btn btn-ghost builder-modal-close" data-items-catalog-dismiss aria-label="Fermer">×</button>
+        </div>
+        <p class="builder-hint">Cochez les dépenses habituelles. Les montants se saisissent ensuite.</p>
+        <label class="field items-catalog-search">
+          <span class="visually-hidden">Filtrer les postes</span>
+          <input type="search" data-items-catalog-search placeholder="Filtrer… EDF, loyer, train" autocomplete="off">
+        </label>
+        <div class="items-catalog-list" data-items-catalog-list></div>
+        <div class="items-catalog-foot">
+          <span class="mono" data-items-catalog-count>0 sélectionné</span>
+          <button type="button" class="btn btn-orange" data-items-catalog-apply disabled>Ajouter</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function itemsCatalogOpen() {
+    const el = document.querySelector('[data-items-catalog-modal]');
+    return !!(el && !el.hidden);
+  }
+
+  function selectedCatalogTitles() {
+    const el = document.querySelector('[data-items-catalog-modal]');
+    if (!el) return [];
+    return [...el.querySelectorAll('[data-catalog-pick]:checked:not(:disabled)')]
+      .map((box) => box.getAttribute('data-catalog-pick'))
+      .filter(Boolean);
+  }
+
+  function syncCatalogApply() {
+    const el = document.querySelector('[data-items-catalog-modal]');
+    if (!el) return;
+    const titles = selectedCatalogTitles();
+    const count = el.querySelector('[data-items-catalog-count]');
+    const apply = el.querySelector('[data-items-catalog-apply]');
+    if (count) count.textContent = titles.length
+      ? (titles.length + ' sélectionné' + (titles.length > 1 ? 's' : ''))
+      : '0 sélectionné';
+    if (apply) {
+      apply.disabled = !titles.length;
+      apply.textContent = titles.length > 1 ? 'Ajouter ' + titles.length + ' postes' : 'Ajouter';
+    }
+  }
+
+  function filterItemsCatalog(query) {
+    const el = document.querySelector('[data-items-catalog-modal]');
+    if (!el) return;
+    const q = foldText(query);
+    el.querySelectorAll('[data-catalog-group]').forEach((group) => {
+      let visible = 0;
+      group.querySelectorAll('[data-catalog-item]').forEach((chip) => {
+        const hay = chip.getAttribute('data-catalog-text') || '';
+        const show = !q || foldText(hay).includes(q);
+        chip.hidden = !show;
+        if (show) visible += 1;
+      });
+      group.hidden = visible === 0;
+    });
+  }
+
+  function renderItemsCatalog(n) {
+    const el = ensureItemsCatalogModal();
+    const list = el.querySelector('[data-items-catalog-list]');
+    const search = el.querySelector('[data-items-catalog-search]');
+    if (search) search.value = '';
+    const used = new Set(usedDepenseTitles(n));
+    list.innerHTML = DEPENSE_CATALOG.map((group) => `
+      <div class="items-catalog-group" data-catalog-group>
+        <div class="items-catalog-group-head">
+          <div class="preset-group-label">${escapeHtml(group.group)}</div>
+          <button type="button" class="btn btn-ghost items-catalog-all" data-catalog-group-all>Tout</button>
+        </div>
+        <div class="items-catalog-grid">
+          ${group.items.map((item) => {
+            const taken = used.has(foldText(item.title));
+            const text = [item.title, ...(item.aliases || [])].join(' ');
+            return `<label class="items-catalog-chip${taken ? ' is-used' : ''}" data-catalog-item data-catalog-text="${escapeAttr(text)}">
+              <input type="checkbox" data-catalog-pick="${escapeAttr(item.title)}"${taken ? ' checked disabled' : ''}>
+              <span>${escapeHtml(item.title)}</span>
+            </label>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
+    syncCatalogApply();
+  }
+
+  function openItemsCatalog() {
+    const n = nodeById(state.selected);
+    if (!n || n.kind !== 'depense' || n.locked) return;
+    closeItemSuggest();
+    const el = ensureItemsCatalogModal();
+    bindItemsCatalogModal(el);
+    renderItemsCatalog(n);
+    el.hidden = false;
+    document.body.classList.add('is-locked');
+    requestAnimationFrame(() => el.querySelector('[data-items-catalog-search]')?.focus());
+  }
+
+  function closeItemsCatalog() {
+    const el = document.querySelector('[data-items-catalog-modal]');
+    if (el) el.hidden = true;
+    document.body.classList.remove('is-locked');
+    flushCoaches();
+  }
+
+  function applyItemsCatalog() {
+    const n = nodeById(state.selected);
+    if (!n || n.kind !== 'depense' || n.locked) return;
+    const added = addCatalogTitles(n, selectedCatalogTitles());
+    closeItemsCatalog();
+    if (!added.length) return;
+    render();
+    if ((n.items || []).length >= 2) dismissItemsCoach();
+    const first = added[0];
+    requestAnimationFrame(() => {
+      const field = propsForm?.querySelector(`[data-item-amount="${CSS.escape(first.id)}"]`);
+      if (!field) {
+        revealDepenseItem(first.id);
+        return;
+      }
+      const panel = root.querySelector('[data-props]');
+      const box = field.closest('.prop-item') || field;
+      if (panel) {
+        const panelRect = panel.getBoundingClientRect();
+        const boxRect = box.getBoundingClientRect();
+        if (boxRect.top < panelRect.top || boxRect.bottom > panelRect.bottom) {
+          box.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+      }
+      field.focus();
+      field.select();
+    });
+  }
+
+  function bindItemsCatalogModal(el) {
+    if (itemsCatalogBound || !el) return;
+    itemsCatalogBound = true;
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('[data-items-catalog-dismiss]')) {
+        closeItemsCatalog();
+        return;
+      }
+      if (e.target.closest('[data-items-catalog-apply]')) {
+        applyItemsCatalog();
+        return;
+      }
+      const all = e.target.closest('[data-catalog-group-all]');
+      if (all) {
+        const group = all.closest('[data-catalog-group]');
+        const boxes = [...(group?.querySelectorAll('[data-catalog-pick]:not(:disabled)') || [])]
+          .filter((box) => !box.closest('[data-catalog-item]')?.hidden);
+        const next = boxes.some((box) => !box.checked);
+        boxes.forEach((box) => { box.checked = next; });
+        syncCatalogApply();
+      }
+    });
+    el.addEventListener('change', (e) => {
+      if (e.target.closest('[data-catalog-pick]')) syncCatalogApply();
+    });
+    el.addEventListener('input', (e) => {
+      if (e.target.closest('[data-items-catalog-search]')) {
+        filterItemsCatalog(e.target.value);
+        syncCatalogApply();
+      }
+    });
+  }
+
   const projectId = root.getAttribute('data-project-id') || '0';
   const LINK_COACH_KEY = `repartio.linkCoachSeen.${projectId}`;
   const SPLIT_COACH_KEY = `repartio.splitCoachSeen.${projectId}`;
@@ -2554,6 +2968,7 @@
   });
   itemsCoach?.addEventListener('mousedown', (e) => e.stopPropagation());
   itemsCoach?.addEventListener('wheel', (e) => e.stopPropagation());
+  bindItemsCatalogModal(ensureItemsCatalogModal());
   document.querySelectorAll('.builder-modal').forEach((el) => {
     new MutationObserver(() => {
       if (!overlayBlockingCoach()) flushCoaches();
@@ -3130,6 +3545,7 @@
     const n = nodeById(state.selected);
     if (!n) return;
     const prop = e.target.getAttribute('data-prop');
+    if (n.locked && (prop === 'title' || prop === 'amount' || prop === 'start' || prop === 'rate' || prop === 'cap' || prop === 'preset' || e.target.hasAttribute('data-item-title') || e.target.hasAttribute('data-item-amount'))) return;
     if (prop === 'title') n.title = e.target.value;
     if (prop === 'note') n.note = e.target.value;
     if (prop === 'amount') {
@@ -3148,6 +3564,9 @@
     if (itemTitle && n.kind === 'depense') {
       const item = (n.items || []).find((x) => x.id === itemTitle);
       if (item) item.title = e.target.value;
+      updateItemSuggest(e.target);
+    } else if (!e.target.closest('[data-items-catalog-search]')) {
+      closeItemSuggest();
     }
     if (itemAmount && n.kind === 'depense') {
       const item = (n.items || []).find((x) => x.id === itemAmount);
@@ -3224,9 +3643,17 @@
       }
       return;
     }
+    const catalogBtn = e.target.closest('[data-item-catalog]');
+    if (catalogBtn) {
+      const n = nodeById(state.selected);
+      if (n?.locked) return;
+      if (n && n.kind === 'depense') openItemsCatalog();
+      return;
+    }
     const addItem = e.target.closest('[data-item-add]');
     if (addItem) {
       const n = nodeById(state.selected);
+      if (n?.locked) return;
       if (n && n.kind === 'depense') {
         const item = addDepenseItem(n);
         render();
@@ -3238,6 +3665,7 @@
     const delItem = e.target.closest('[data-item-del]');
     if (delItem) {
       const n = nodeById(state.selected);
+      if (n?.locked) return;
       if (n && n.kind === 'depense') {
         const id = delItem.getAttribute('data-item-del');
         n.items = (n.items || []).filter((item) => item.id !== id);
@@ -3264,9 +3692,57 @@
     if (!e.target.closest('.prop-color')) closeTintMenus();
   });
 
+  propsForm?.addEventListener('keydown', (e) => {
+    const input = e.target.closest('[data-item-title]');
+    if (!input) return;
+    if (e.key === 'Escape' && itemSuggestOpen()) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeItemSuggest();
+      return;
+    }
+    if (!itemSuggestOpen()) {
+      if (e.key === 'ArrowDown' && foldText(input.value)) {
+        e.preventDefault();
+        updateItemSuggest(input);
+      }
+      return;
+    }
+    const options = [...(itemSuggest?.querySelectorAll('[data-suggest-title]') || [])];
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      itemSuggestIndex = Math.min(options.length - 1, itemSuggestIndex + 1);
+      paintSuggestActive();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      itemSuggestIndex = Math.max(0, itemSuggestIndex - 1);
+      paintSuggestActive();
+      return;
+    }
+    if (e.key === 'Enter' && itemSuggestIndex >= 0 && options[itemSuggestIndex]) {
+      e.preventDefault();
+      applyItemSuggest(options[itemSuggestIndex].getAttribute('data-suggest-title'));
+    }
+  });
+
+  propsForm?.addEventListener('focusin', (e) => {
+    const input = e.target.closest('[data-item-title]');
+    if (input && foldText(input.value)) updateItemSuggest(input);
+  });
+
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.prop-color')) closeTintMenus();
     if (!e.target.closest('[data-horizon-unit]')) closeHorizonUnitMenu();
+    if (!e.target.closest('[data-item-title]') && !e.target.closest('.prop-item-suggest')) closeItemSuggest();
+  });
+
+  root.querySelector('[data-props]')?.addEventListener('scroll', () => {
+    if (itemSuggestOpen() && itemSuggestFor) placeItemSuggest(itemSuggestFor);
+  }, { passive: true });
+  window.addEventListener('resize', () => {
+    if (itemSuggestOpen() && itemSuggestFor) placeItemSuggest(itemSuggestFor);
   });
 
   root.querySelector('[data-horizon]')?.addEventListener('input', () => {
@@ -3781,8 +4257,10 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (itemSuggestOpen()) { closeItemSuggest(); return; }
       if (horizonUnitOpen()) { closeHorizonUnitMenu(); return; }
       if (propsForm?.querySelector('.prop-color.is-open')) { closeTintMenus(); return; }
+      if (itemsCatalogOpen()) { closeItemsCatalog(); return; }
       if (setupOpen()) { closeSetupModal(); return; }
       if (scenarioOpen()) { closeScenarioModal(); return; }
       if (reportOpen()) { closeReportModal(); return; }

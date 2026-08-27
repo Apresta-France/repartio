@@ -305,6 +305,29 @@ $circuitPath = \App\Models\Project::path($project);
   </div>
 </div>
 
+<div class="builder-modal" data-items-catalog-modal hidden>
+  <div class="builder-modal-backdrop" data-items-catalog-dismiss></div>
+  <div class="builder-modal-card items-catalog-card" role="dialog" aria-modal="true" aria-labelledby="items-catalog-title">
+    <div class="builder-modal-head">
+      <div>
+        <div class="eyebrow">Postes du mois</div>
+        <h2 id="items-catalog-title">Ajouter plusieurs postes</h2>
+      </div>
+      <button type="button" class="btn btn-ghost builder-modal-close" data-items-catalog-dismiss aria-label="Fermer">×</button>
+    </div>
+    <p class="builder-hint">Cochez les dépenses habituelles. Les montants se saisissent ensuite.</p>
+    <label class="field items-catalog-search">
+      <span class="visually-hidden">Filtrer les postes</span>
+      <input type="search" data-items-catalog-search placeholder="Filtrer… EDF, loyer, train" autocomplete="off">
+    </label>
+    <div class="items-catalog-list" data-items-catalog-list></div>
+    <div class="items-catalog-foot">
+      <span class="mono" data-items-catalog-count>0 sélectionné</span>
+      <button type="button" class="btn btn-orange" data-items-catalog-apply disabled>Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <div class="builder-modal" data-setup-modal<?= empty($setup) ? ' hidden' : '' ?>>
   <div class="builder-modal-backdrop" data-setup-dismiss></div>
   <div class="builder-modal-card setup-modal-card" role="dialog" aria-modal="true" aria-labelledby="setup-title">
