@@ -281,6 +281,7 @@
   let itemsCatalogBound = false;
   const flow = { paths: {}, hits: {}, pills: {}, pellets: [] };
   let hoverEdgeId = null;
+  let hoverNodeId = null;
   const phase = {};
   let lastTick = 0;
   let flowPaused = false;
@@ -590,11 +591,13 @@
     const graph = state.nodes.filter((n) => !isAnnotation(n));
     const byId = {};
     const outs = {};
+    const ins = {};
     const indeg = {};
-    graph.forEach((n) => { byId[n.id] = n; outs[n.id] = []; indeg[n.id] = 0; });
+    graph.forEach((n) => { byId[n.id] = n; outs[n.id] = []; ins[n.id] = []; indeg[n.id] = 0; });
     state.edges.forEach((e) => {
       if (!byId[e.from] || !byId[e.to]) return;
       outs[e.from].push(e);
+      ins[e.to].push(e);
       indeg[e.to] += 1;
     });
 
@@ -736,7 +739,7 @@
       else if (n.kind === 'repartiteur') leftover += kept[n.id] || 0;
     });
 
-    return { byId, outs, inflow, kept, over, cycle, inn, out, saved, leftover, proj, fin, full, sat, series: { livrets, total, delta } };
+    return { byId, outs, ins, inflow, kept, over, cycle, inn, out, saved, leftover, proj, fin, full, sat, series: { livrets, total, delta } };
   }
 
   const CHART_COLORS = [
@@ -1344,10 +1347,47 @@
     }
   }
 
-  function portPoint(n, side) {
+  function portPoint(n, side, index, total) {
     const w = n._w || 244;
     const h = n._h || 102;
-    return side === 'out' ? { x: n.x + w, y: n.y + 51 } : { x: n.x, y: n.y + 51 };
+    const count = Math.max(1, total || 1);
+    const i = Math.max(0, Math.min(count - 1, index || 0));
+    const top = 28;
+    const bottom = Math.max(top + 16, h - 18);
+    const y = count <= 1
+      ? n.y + Math.min(51, Math.max(28, h * 0.42))
+      : n.y + top + ((bottom - top) * (i + 0.5)) / count;
+    return side === 'out' ? { x: n.x + w, y } : { x: n.x, y };
+  }
+
+  function sortedBundle(C, nodeId, side) {
+    const list = side === 'out'
+      ? ((C && C.outs && C.outs[nodeId]) || []).slice()
+      : ((C && C.ins && C.ins[nodeId]) || state.edges.filter((e) => e.to === nodeId)).slice();
+    list.sort((a, b) => {
+      const other = side === 'out' ? 'to' : 'from';
+      const na = (C && C.byId && C.byId[a[other]]) || nodeById(a[other]);
+      const nb = (C && C.byId && C.byId[b[other]]) || nodeById(b[other]);
+      const dy = ((na && na.y) || 0) - ((nb && nb.y) || 0);
+      return dy || String(a.id).localeCompare(String(b.id));
+    });
+    return list;
+  }
+
+  function edgeAnchors(e, C) {
+    const ctx = C || lastCompute;
+    const a = (ctx && ctx.byId && ctx.byId[e.from]) || nodeById(e.from);
+    const b = (ctx && ctx.byId && ctx.byId[e.to]) || nodeById(e.to);
+    if (!a || !b) return null;
+    const outs = sortedBundle(ctx, e.from, 'out');
+    const ins = sortedBundle(ctx, e.to, 'in');
+    const oi = Math.max(0, outs.findIndex((x) => x.id === e.id));
+    const ii = Math.max(0, ins.findIndex((x) => x.id === e.id));
+    return {
+      from: portPoint(a, 'out', oi, outs.length),
+      to: portPoint(b, 'in', ii, ins.length),
+      outIdx: oi,
+    };
   }
 
   function curve(a, b) {
@@ -1433,7 +1473,9 @@
       const a = nodeById(e.from);
       const b = nodeById(e.to);
       if (!path || !a || !b) return;
-      const d = curve(portPoint(a, 'out'), portPoint(b, 'in'));
+      const ends = edgeAnchors(e, C);
+      if (!ends) return;
+      const d = curve(ends.from, ends.to);
       path.setAttribute('d', d);
       flow.hits[e.id]?.setAttribute('d', d);
       const len = path.getTotalLength();
@@ -1442,9 +1484,7 @@
       });
       const pill = flow.pills[e.id] || labels?.querySelector(`[data-edge="${CSS.escape(e.id)}"]`);
       if (!pill) return;
-      const sibs = C.outs[e.from] || [];
-      const idx = Math.max(0, sibs.indexOf(e));
-      const mid = labelPoint(path, a, b, idx);
+      const mid = labelPoint(path, a, b, ends.outIdx);
       pill.style.left = mid.x + 'px';
       pill.style.top = mid.y + 'px';
     });
@@ -1541,7 +1581,6 @@
     flow.hits = {};
     flow.pills = {};
     flow.pellets = [];
-    hoverEdgeId = null;
 
     const ordered = [
       ...state.nodes.filter((n) => n.kind === 'groupe'),
@@ -1630,31 +1669,27 @@
       const a = C.byId[e.from];
       const b = C.byId[e.to];
       if (!a || !b) return;
-      const p1 = portPoint(a, 'out');
-      const p2 = portPoint(b, 'in');
+      const ends = edgeAnchors(e, C);
+      if (!ends) return;
       const color = accentColorOf(a, C);
       const hot = e._amt > 0.5;
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', curve(p1, p2));
+      path.setAttribute('d', curve(ends.from, ends.to));
       path.setAttribute('class', 'builder-wire' + (hot ? ' is-hot' : ''));
       path.setAttribute('stroke', hot ? color : 'oklch(0.82 0.02 255)');
       path.setAttribute('stroke-width', hot ? '2.5' : '1.5');
       svg.appendChild(path);
       flow.paths[e.id] = path;
 
-      if (!readonly) {
-        const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        hit.setAttribute('d', path.getAttribute('d'));
-        hit.setAttribute('class', 'builder-wire-hit');
-        hit.setAttribute('data-edge-hit', e.id);
-        svg.appendChild(hit);
-        flow.hits[e.id] = hit;
-      }
+      const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      hit.setAttribute('d', path.getAttribute('d'));
+      hit.setAttribute('class', 'builder-wire-hit');
+      hit.setAttribute('data-edge-hit', e.id);
+      svg.appendChild(hit);
+      flow.hits[e.id] = hit;
 
       if (labels) {
-        const sibs = C.outs[e.from] || [];
-        const idx = Math.max(0, sibs.indexOf(e));
-        const mid = labelPoint(path, a, b, idx);
+        const mid = labelPoint(path, a, b, ends.outIdx);
         const wrap = document.createElement('div');
         const tag = e.mode === 'pct' ? e.value + ' %' : (e.mode === 'fixe' ? 'fixe' : 'reste');
         wrap.className = 'edge-label' + (hot ? '' : ' is-zero') + (state.openEdge === e.id ? ' is-open' : '');
@@ -2221,22 +2256,23 @@
   }
 
   function applyHoverEdge(id) {
-    if (readonly || state.connectFrom) id = null;
+    if (state.connectFrom) id = null;
+    if (id && !state.edges.some((e) => e.id === id)) id = null;
     if (hoverEdgeId === id) return;
-    if (hoverEdgeId) {
-      flow.paths[hoverEdgeId]?.classList.remove('is-hover');
-      flow.hits[hoverEdgeId]?.classList.remove('is-hover');
-      flow.pills[hoverEdgeId]?.classList.remove('is-hover');
-    }
     hoverEdgeId = id;
-    if (id) {
-      flow.paths[id]?.classList.add('is-hover');
-      flow.hits[id]?.classList.add('is-hover');
-      flow.pills[id]?.classList.add('is-hover');
-    }
+    applyFlowFocus();
+  }
+
+  function applyHoverNode(id) {
+    if (state.connectFrom) id = null;
+    if (id && !nodeById(id)) id = null;
+    if (hoverNodeId === id) return;
+    hoverNodeId = id;
+    applyFlowFocus();
   }
 
   let hoverEdgeClear = 0;
+  let hoverNodeClear = 0;
   function setHoverEdge(id) {
     clearTimeout(hoverEdgeClear);
     if (id) {
@@ -2244,6 +2280,15 @@
       return;
     }
     hoverEdgeClear = setTimeout(() => applyHoverEdge(null), 160);
+  }
+
+  function setHoverNode(id) {
+    clearTimeout(hoverNodeClear);
+    if (id) {
+      applyHoverNode(id);
+      return;
+    }
+    hoverNodeClear = setTimeout(() => applyHoverNode(null), 160);
   }
 
   function syncDepenseAmount(n) {
@@ -3032,6 +3077,7 @@
   function startLink(id, side) {
     dismissLinkCoach();
     applyHoverEdge(null);
+    applyHoverNode(null);
     state.connectFrom = id;
     state.connectSide = side;
     canvas.classList.add('is-linking');
@@ -3532,17 +3578,33 @@
     openEdgeProps(hit.getAttribute('data-edge-hit'));
   });
 
+  function hoverFromEvent(el) {
+    const edgeId = edgeTargetId(el);
+    if (edgeId) return { edge: edgeId, node: null };
+    const node = el?.closest?.('[data-node]');
+    if (node && layer.contains(node)) return { edge: null, node: node.getAttribute('data-node') };
+    return { edge: null, node: null };
+  }
+
   layer.addEventListener('pointerover', (e) => {
-    if (readonly || state.connectFrom) return;
-    const id = edgeTargetId(e.target);
-    if (id) setHoverEdge(id);
+    if (state.connectFrom || pan || marquee) return;
+    const h = hoverFromEvent(e.target);
+    if (h.edge) {
+      setHoverNode(null);
+      setHoverEdge(h.edge);
+      return;
+    }
+    if (h.node) {
+      setHoverEdge(null);
+      setHoverNode(h.node);
+    }
   });
 
   layer.addEventListener('pointerout', (e) => {
-    const from = edgeTargetId(e.target);
-    if (!from) return;
-    const next = edgeTargetId(e.relatedTarget);
-    if (next !== from) setHoverEdge(null);
+    const from = hoverFromEvent(e.target);
+    const next = hoverFromEvent(e.relatedTarget);
+    if (from.edge && from.edge !== next.edge) setHoverEdge(null);
+    if (from.node && from.node !== next.node) setHoverNode(null);
   });
 
   canvas.addEventListener('click', (e) => {
@@ -4329,18 +4391,78 @@
 
   let tourFocus = [];
 
+  function focusSeedIds() {
+    if (hoverEdgeId) {
+      const e = state.edges.find((x) => x.id === hoverEdgeId);
+      return e ? [e.from, e.to] : [];
+    }
+    if (state.openEdge) {
+      const e = state.edges.find((x) => x.id === state.openEdge);
+      return e ? [e.from, e.to] : [];
+    }
+    if (!hoverNodeId) return [];
+    const n = nodeById(hoverNodeId);
+    if (!n || n.kind === 'note') return [];
+    if (n.kind === 'groupe') {
+      return [n.id, ...nodesInside(n).filter((x) => !isAnnotation(x)).map((x) => x.id)];
+    }
+    return isAnnotation(n) ? [] : [n.id];
+  }
+
   function applyTourFocus() {
-    const ids = new Set(tourFocus);
-    const on = ids.size > 0;
+    applyFlowFocus();
+  }
+
+  function applyFlowFocus() {
+    const tourIds = new Set(tourFocus);
+    const touring = tourIds.size > 0;
+    const seed = touring ? [...tourIds] : focusSeedIds();
+    const isolating = touring || seed.length > 0;
+    const seedSet = new Set(seed);
+    const focusNodes = new Set(seed);
+    const focusEdges = new Set();
+    if (isolating) {
+      state.edges.forEach((e) => {
+        const hit = seedSet.has(e.from) || seedSet.has(e.to);
+        if (hit) {
+          focusEdges.add(e.id);
+          focusNodes.add(e.from);
+          focusNodes.add(e.to);
+        }
+      });
+      if (hoverEdgeId) {
+        focusEdges.clear();
+        focusEdges.add(hoverEdgeId);
+      } else if (!touring && state.openEdge && !hoverNodeId) {
+        focusEdges.clear();
+        focusEdges.add(state.openEdge);
+      }
+    }
+
     layer?.querySelectorAll('.node').forEach((el) => {
-      el.classList.toggle('is-tour-on', on && ids.has(el.dataset.node));
-      el.classList.toggle('is-tour-dim', on && !ids.has(el.dataset.node));
+      const id = el.dataset.node;
+      const hit = !isolating || focusNodes.has(id);
+      el.classList.toggle('is-tour-on', touring && hit);
+      el.classList.toggle('is-tour-dim', touring && !hit);
+      el.classList.toggle('is-focus-on', !touring && isolating && hit);
+      el.classList.toggle('is-focus-dim', !touring && isolating && !hit);
     });
     state.edges.forEach((e) => {
-      const hit = !on || ids.has(e.from) || ids.has(e.to);
-      flow.paths[e.id]?.classList.toggle('is-tour-dim', on && !hit);
-      flow.paths[e.id]?.classList.toggle('is-tour-on', on && hit);
-      flow.pills[e.id]?.classList.toggle('is-tour-dim', on && !hit);
+      const hit = !isolating || focusEdges.has(e.id);
+      const hover = e.id === hoverEdgeId || e.id === state.openEdge;
+      flow.paths[e.id]?.classList.toggle('is-tour-dim', touring && !hit);
+      flow.paths[e.id]?.classList.toggle('is-tour-on', touring && hit);
+      flow.paths[e.id]?.classList.toggle('is-focus-dim', !touring && isolating && !hit);
+      flow.paths[e.id]?.classList.toggle('is-focus-on', !touring && isolating && hit);
+      flow.paths[e.id]?.classList.toggle('is-hover', hover);
+      flow.hits[e.id]?.classList.toggle('is-hover', hover);
+      flow.pills[e.id]?.classList.toggle('is-tour-dim', touring && !hit);
+      flow.pills[e.id]?.classList.toggle('is-focus-dim', !touring && isolating && !hit);
+      flow.pills[e.id]?.classList.toggle('is-focus-on', !touring && isolating && hit);
+      flow.pills[e.id]?.classList.toggle('is-hover', hover);
+    });
+    flow.pellets.forEach((p) => {
+      p.c.classList.toggle('is-focus-dim', isolating && !focusEdges.has(p.eid));
     });
   }
 
