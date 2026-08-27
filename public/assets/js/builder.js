@@ -55,6 +55,9 @@
         { id: 'ldds', title: 'LDDS', hint: 'Taux 1,70 % · plafond 12 000 €', values: { kind: 'livret', title: 'LDDS', rate: 1.7, cap: 12000, start: 0, preset: 'ldds' } },
         { id: 'lep', title: 'LEP', hint: 'Taux 2,50 % · plafond 10 000 €', values: { kind: 'livret', title: 'LEP', rate: 2.5, cap: 10000, start: 0, preset: 'lep' } },
       ]},
+      { group: 'Épargne financière', items: [
+        { id: 'pea', title: 'PEA', hint: 'Taux moyen à renseigner · plafond 150 000 €', values: { kind: 'livret', title: 'PEA', rate: 0, cap: 150000, start: 0, preset: 'pea' } },
+      ]},
       { group: 'Libre', items: [
         { id: 'blank', title: 'Partir vierge', hint: 'Un compte sans rôle particulier.', values: { title: 'Nouveau compte' }, blank: true },
       ]},
@@ -65,6 +68,9 @@
         { id: 'ldds', title: 'LDDS', hint: 'Taux 1,70 % · plafond 12 000 €', values: { title: 'LDDS', rate: 1.7, cap: 12000, start: 0, preset: 'ldds' } },
         { id: 'lep', title: 'LEP', hint: 'Taux 2,50 % · plafond 10 000 €', values: { title: 'LEP', rate: 2.5, cap: 10000, start: 0, preset: 'lep' } },
         { id: 'jeune', title: 'Livret Jeune', hint: 'Taux 1,70 % · plafond 1 600 €', values: { title: 'Livret Jeune', rate: 1.7, cap: 1600, start: 0, preset: 'jeune' } },
+      ]},
+      { group: 'Épargne financière', items: [
+        { id: 'pea', title: 'PEA', hint: 'Taux moyen à renseigner · plafond 150 000 €', values: { title: 'PEA', rate: 0, cap: 150000, start: 0, preset: 'pea' } },
       ]},
       { group: 'Libre', items: [
         { id: 'blank', title: 'Partir vierge', hint: 'Taux et plafond à saisir vous-même.', values: { title: 'Livret', rate: 0, cap: 0, start: 0 }, blank: true },
@@ -120,8 +126,21 @@
     ldds: { title: 'LDDS', rate: 1.7, cap: 12000 },
     lep: { title: 'LEP', rate: 2.5, cap: 10000 },
     jeune: { title: 'Livret Jeune', rate: 1.7, cap: 1600 },
+    pea: { title: 'PEA', rate: 0, cap: 150000, freeRate: true },
     custom: { title: 'Livret', rate: 0, cap: 0 },
   };
+
+  function livretHasFreeRate(preset) {
+    return !!LIVRET_PRESETS[preset]?.freeRate;
+  }
+
+  function livretRateFieldLabel(preset) {
+    return livretHasFreeRate(preset) ? 'Taux moyen (%)' : 'Taux (%)';
+  }
+
+  function livretRateStatLabel(preset) {
+    return livretHasFreeRate(preset) ? 'Taux moyen' : 'Taux';
+  }
 
   const DEPENSE_CATALOG = [
     { group: 'Logement', items: [
@@ -1480,7 +1499,12 @@
       const bal = livretAt(C, n.id, month);
       const start = Number(n.start) || 0;
       rows.push(['Déjà dessus', euro(start), start > 0 ? 'is-gain' : '']);
-      rows.push(['Taux', (n.rate || 0).toString().replace('.', ',') + ' %']);
+      rows.push([
+        livretRateStatLabel(n.preset),
+        (n.rate || 0) > 0 || !livretHasFreeRate(n.preset)
+          ? (n.rate || 0).toString().replace('.', ',') + ' %'
+          : 'à renseigner',
+      ]);
       rows.push([playLabel(month), euro(bal), bal > 0 ? 'is-gain' : '', 'proj']);
       if ((n.rate || 0) > 0) {
         rows.push(['Intérêts', euro(livretInterestAt(C, n.id, month)), 'is-proj', 'interest']);
@@ -1802,6 +1826,7 @@
               <option value="ldds"${n.preset === 'ldds' ? ' selected' : ''}>LDDS — 1,70 % · 12 000 €</option>
               <option value="lep"${n.preset === 'lep' ? ' selected' : ''}>LEP — 2,50 % · 10 000 €</option>
               <option value="jeune"${n.preset === 'jeune' ? ' selected' : ''}>Livret Jeune — 1,70 % · 1 600 €</option>
+              <option value="pea"${n.preset === 'pea' ? ' selected' : ''}>PEA — taux moyen · 150 000 €</option>
               <option value="custom"${!n.preset || n.preset === 'custom' ? ' selected' : ''}>Personnalisé</option>
             </select>
           </label>
@@ -1811,8 +1836,8 @@
           </label>
           <div class="prop-grid">
             <label class="prop-field">
-              <span>Taux (%)</span>
-              <input data-prop="rate" type="number" min="0" step="0.01" value="${n.rate}"${n.locked ? ' disabled' : ''}>
+              <span data-rate-label>${livretRateFieldLabel(n.preset)}</span>
+              <input data-prop="rate" type="number" min="0" step="0.01" value="${n.rate}" placeholder="${livretHasFreeRate(n.preset) ? 'ex. 5' : ''}"${n.locked ? ' disabled' : ''}>
             </label>
             <label class="prop-field">
               <span>Plafond</span>
@@ -3574,22 +3599,28 @@
       syncDepenseItems(n);
     }
     if (prop === 'start') n.start = Number(e.target.value) || 0;
-    if (prop === 'rate') { n.rate = Number(e.target.value) || 0; n.preset = 'custom'; }
+    if (prop === 'rate') {
+      n.rate = Number(e.target.value) || 0;
+      if (!livretHasFreeRate(n.preset)) n.preset = 'custom';
+    }
     if (prop === 'cap') { n.cap = Number(e.target.value) || 0; n.preset = 'custom'; }
     if (prop === 'preset') {
       n.preset = e.target.value;
       const pack = LIVRET_PRESETS[n.preset];
+      const rate = propsForm.querySelector('[data-prop="rate"]');
+      const rateLabel = propsForm.querySelector('[data-rate-label]');
       if (pack && n.preset !== 'custom') {
         if (!n.title || Object.values(LIVRET_PRESETS).some((p) => p.title === n.title)) n.title = pack.title;
         n.rate = pack.rate;
         n.cap = pack.cap;
-        const rate = propsForm.querySelector('[data-prop="rate"]');
         const cap = propsForm.querySelector('[data-prop="cap"]');
         const title = propsForm.querySelector('[data-prop="title"]');
         if (rate) rate.value = n.rate;
         if (cap) cap.value = n.cap;
         if (title) title.value = n.title;
       }
+      if (rate) rate.placeholder = livretHasFreeRate(n.preset) ? 'ex. 5' : '';
+      if (rateLabel) rateLabel.textContent = livretRateFieldLabel(n.preset);
     }
     const edgeMode = e.target.getAttribute('data-edge-mode');
     const edgeValue = e.target.getAttribute('data-edge-value');
