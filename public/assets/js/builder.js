@@ -2800,6 +2800,7 @@
   const LINK_COACH_KEY = `repartio.linkCoachSeen.${projectId}`;
   const SPLIT_COACH_KEY = `repartio.splitCoachSeen.${projectId}`;
   const ITEMS_COACH_KEY = `repartio.itemsCoachSeen.${projectId}`;
+  const PAN_HINT_KEY = 'repartio.panHintSeen';
   const linkCoach = document.querySelector('[data-link-coach]');
   const splitCoach = document.querySelector('[data-split-coach]');
   const itemsCoach = document.querySelector('[data-items-coach]');
@@ -3018,6 +3019,29 @@
     if (!splitCoach || splitCoach.hidden) return false;
     splitCoach.hidden = true;
     return true;
+  }
+
+  function panHintSeen() {
+    try {
+      return window.localStorage.getItem(PAN_HINT_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markPanHintSeen() {
+    try {
+      window.localStorage.setItem(PAN_HINT_KEY, '1');
+    } catch (e) {}
+  }
+
+  function offerPanHint() {
+    if (readonly || panHintSeen()) return;
+    try {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
+    } catch (e) {}
+    markPanHintSeen();
+    showCollabToast('Pour déplacer le plan : Espace + glisser, ou clic molette.', 4200);
   }
 
   linkCoach?.addEventListener('click', (e) => {
@@ -3478,6 +3502,10 @@
       const next = marquee.additive ? marquee.base.concat(hits) : hits;
       markSelection(next);
       paintSelection();
+      if (!marquee.hinted && !marquee.additive && !hits.length && pointerMoved(marquee, e.clientX, e.clientY, 48)) {
+        marquee.hinted = true;
+        offerPanHint();
+      }
     } else if (pan) {
       if (!pan.moved && pointerMoved(pan, e.clientX, e.clientY)) pan.moved = true;
       state.tx = pan.ox + (e.clientX - pan.sx);
@@ -3505,6 +3533,7 @@
         hideMarquee();
       }
     }
+    if (pan && pan.moved) markPanHintSeen();
     drag = null;
     pan = null;
     marquee = null;
@@ -4409,6 +4438,32 @@
     return isAnnotation(n) ? [] : [n.id];
   }
 
+  function incomingOf(id) {
+    const C = lastCompute;
+    if (C && C.ins && C.ins[id]) return C.ins[id];
+    return state.edges.filter((e) => e.to === id);
+  }
+
+  function collectUpstream(startIds) {
+    const focusEdges = new Set();
+    const focusNodes = new Set(startIds);
+    const queue = startIds.slice();
+    const seen = new Set(startIds);
+    while (queue.length) {
+      const id = queue.shift();
+      incomingOf(id).forEach((e) => {
+        focusEdges.add(e.id);
+        focusNodes.add(e.from);
+        focusNodes.add(e.to);
+        if (!seen.has(e.from)) {
+          seen.add(e.from);
+          queue.push(e.from);
+        }
+      });
+    }
+    return { focusEdges, focusNodes };
+  }
+
   function applyTourFocus() {
     applyFlowFocus();
   }
@@ -4419,23 +4474,38 @@
     const seed = touring ? [...tourIds] : focusSeedIds();
     const isolating = touring || seed.length > 0;
     const seedSet = new Set(seed);
-    const focusNodes = new Set(seed);
-    const focusEdges = new Set();
+    let focusNodes = new Set(seed);
+    let focusEdges = new Set();
     if (isolating) {
-      state.edges.forEach((e) => {
-        const hit = seedSet.has(e.from) || seedSet.has(e.to);
-        if (hit) {
+      const focusedEdge = hoverEdgeId || (!touring && !hoverNodeId ? state.openEdge : null);
+      if (touring) {
+        state.edges.forEach((e) => {
+          if (seedSet.has(e.from) || seedSet.has(e.to)) {
+            focusEdges.add(e.id);
+            focusNodes.add(e.from);
+            focusNodes.add(e.to);
+          }
+        });
+      } else if (focusedEdge) {
+        const e = state.edges.find((x) => x.id === focusedEdge);
+        if (e) {
+          const up = collectUpstream([e.from]);
+          focusEdges = up.focusEdges;
+          focusNodes = up.focusNodes;
           focusEdges.add(e.id);
-          focusNodes.add(e.from);
           focusNodes.add(e.to);
         }
-      });
-      if (hoverEdgeId) {
-        focusEdges.clear();
-        focusEdges.add(hoverEdgeId);
-      } else if (!touring && state.openEdge && !hoverNodeId) {
-        focusEdges.clear();
-        focusEdges.add(state.openEdge);
+      } else {
+        const up = collectUpstream(seed);
+        focusEdges = up.focusEdges;
+        focusNodes = up.focusNodes;
+        state.edges.forEach((e) => {
+          if (seedSet.has(e.from) || seedSet.has(e.to)) {
+            focusEdges.add(e.id);
+            focusNodes.add(e.from);
+            focusNodes.add(e.to);
+          }
+        });
       }
     }
 
@@ -4642,12 +4712,12 @@
     return letters || '?';
   }
 
-  function showCollabToast(text) {
+  function showCollabToast(text, ms) {
     if (!collabToast) return;
     collabToast.textContent = text;
     collabToast.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(() => { collabToast.hidden = true; }, 2600);
+    toastTimer = window.setTimeout(() => { collabToast.hidden = true; }, ms || 2600);
   }
 
   function paintCollabCursors() {
